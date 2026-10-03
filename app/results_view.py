@@ -4,7 +4,7 @@ import altair as alt
 import pandas as pd
 
 from p2.stats import bayes
-from ui import BAD, GOOD, GREY, NEUTRAL
+from ui import BAD, GOOD, GREY, NEUTRAL, check_card, chip
 
 ICON = {"Significant improvement": "✅", "Significant decline": "❌", "No significant difference": "➖", "Not significant": "➖",
         "Passed": "✅", "Inconclusive": "⚠️", "Failed": "❌", "Variant is the safer choice": "✅", "Control is the safer choice": "❌",
@@ -194,7 +194,7 @@ def bayes_table(rows: list[dict], outcomes: list, registry, design: list[dict]) 
             few = (r["n_control"] or 0) < 2 or (r["n_variant"] or 0) < 2
             row.update({"Chance variant wins": "", "Expected difference": "", "95% credible interval": "", "Risk: ship variant": "",
                         "Risk: keep control": "", "Chance of harm": "",
-                        "Verdict": "" if r["role"] == "secondary" else "Too few users yet" if few else "Run again to see Bayesian numbers"})
+                        "Verdict": "" if r["role"] == "secondary" else "Too few users yet" if few else "Refresh to see Bayesian numbers"})
         else:
             guard = r["role"] == "guardrail"
             row.update({"Chance variant wins": _chance(o.chance_to_win), "Expected difference": fmt_value(binary, o.difference, True),
@@ -335,7 +335,7 @@ def frequentist_reason(row: dict, final: bool, end) -> str:
 def bayes_reason(outcome, binary: bool, threshold: float | None, min_days: int) -> str:
     """Why the primary metric got its Bayesian verdict, in one plain line."""
     if outcome is None:
-        return "Run again to see the Bayesian numbers."
+        return "Refresh to see the Bayesian numbers."
     v = outcome.verdict or ""
     if v.startswith(bayes.VERDICT_WAIT):
         return f"Too early: the verdict comes after {min_days} days of data."
@@ -347,3 +347,45 @@ def bayes_reason(outcome, binary: bool, threshold: float | None, min_days: int) 
             bayes.VERDICT_EITHER: f"Both choices risk less than your {t} limit ({rv} and {rc}), so either is fine.",
             bayes.VERDICT_MORE: f"Both choices still risk more than your {t} limit (ship {rv}, keep {rc}); more data may settle it.",
             bayes.VERDICT_DONE: f"The test has ended and both choices still risk more than your {t} limit (ship {rv}, keep {rc})."}.get(v, "")
+
+
+# ---- the placebo check card -------------------------------------------------------------------------------------------------
+def placebo_summary(p: dict) -> tuple[str, str, str]:
+    """(chip text, chip tone, text) for the placebo card, from the dict saved with the primary metric's result row."""
+    reps, n, rate = p["reps"], p["n"], p["rate"]
+    how = f"In {reps} random splits of your control users into two identical groups of {n:,}"
+    if p["method"] == "bayesian":
+        if p["ok"]:
+            return ("Placebo passed", "green",
+                    f"**On identical groups, the rule rarely picks a winner.** {how}, it named a safer arm {rate:.1%} of the time.")
+        return ("High false calls", "yellow",
+                f"**The rule often picks a winner when nothing differs.** {how}, it named a safer arm {rate:.1%} of the time. Your risk threshold is "
+                f"loose compared with the noise in this metric; a smaller threshold makes the rule more cautious.")
+    seen = f"{how}, the test found a difference {rate:.1%} of the time (expected about {p['expected']:.0%}, normal range {p['low']:.1%} to {p['high']:.1%})."
+    if p["ok"]:
+        return "Placebo passed", "green", f"**The test behaves correctly on your data.** {seen}"
+    return ("Placebo failed", "red",
+            f"**The test finds differences that are not there.** {seen} Do not trust the p-values until this is explained, for example "
+            f"duplicated users or a very skewed metric.")
+
+
+def balance_status_card(srm) -> str:
+    """The balance check as a quiet card: Balanced or Not balanced. What the split was is in the hover tip."""
+    n0, n1 = srm.n_control, srm.n_variant
+    if srm.balanced:
+        return check_card("Balance check", chip("Balanced", "green"), "The test is balanced. Users are split evenly between control and variant.")
+    share = n0 / (n0 + n1)
+    return check_card("Balance check", chip("Not balanced", "red"),
+                      f"The split looks wrong. Expected 50 / 50, saw {share * 100:.1f} / {100 - share * 100:.1f} ({n0:,} control, {n1:,} variant). "
+                      "Check how users were assigned before trusting these numbers.")
+
+
+def placebo_status_card(check: dict | None) -> str:
+    """The placebo A/A check as a quiet card: Passed or Not passed (a Bayesian rule that picks winners too often is a caution, so yellow).
+    The numbers behind it are in the hover tip. Results saved before the check existed ask for a refresh."""
+    if not check:
+        return check_card("Placebo A/A check", chip("Refresh needed", "grey"), "The placebo check appears after the next Refresh.")
+    _, tone, text = placebo_summary(check)
+    if check["ok"]:
+        return check_card("Placebo A/A check", chip("Passed", "green"), text.replace("**", ""))
+    return check_card("Placebo A/A check", chip("Not passed", "yellow" if check["method"] == "bayesian" else "red"), text.replace("**", ""))

@@ -31,7 +31,7 @@ Add Experiment: type an ID that exists in the assignment log, pick the method, a
 ## What it does
 
 - **Experiment Catalog** (default page): every experiment with its test type, status, verdict and progress, plus a Metrics tab. Edit an experiment in place.
-- **Experiment Results**: pick an experiment from the dropdown (type to filter the ones already in the app). A card at the top says whether the test is balanced (sample ratio check), then the lift and the verdict with a one-line reason, tables (by segment and filter) and charts over time. Frequentist: live numbers while running, full tests and a verdict only after the last day. Bayesian: chance the variant wins, risk of each choice and a verdict that can be read live after a minimum number of days. The Charts tab changes only when you press Apply.
+- **Experiment Results**: pick an experiment from the dropdown (type to filter the ones already in the app). One "Experiment Details" dropdown holds the experiment (owner, hypothesis, dates, Edit and Run) on the left, and on the right two small cards, Balance check (the sample ratio check) and Placebo A/A check (an A/A test on the control users: split them at random into two identical groups and make sure the test does not find a difference that is not there), each just Passed or not, with a big verdict card under them that gives the verdict and a one-line reason. Below it are the tables (by segment and filter) and charts over time. Frequentist: live numbers while running, full tests and a verdict only after the last day. Bayesian: chance the variant wins, risk of each choice and a verdict that can be read live after a minimum number of days. The Charts tab changes only when you press Apply.
 - **Add Experiment**: the data scientist picks the method (Frequentist or Bayesian) and enters the plan for it. Frequentist asks for their own statistics numbers (the tool does not do power calculations); Bayesian asks for a risk threshold and a minimum number of days, with defaults. The ID must already exist in the experiment tool's assignment log.
 - **Runs** go to a background queue (4 at a time, one per experiment) so pages stay fast.
 
@@ -59,7 +59,7 @@ streamlit run app/streamlit_app.py
 ## Tests
 
 ```bash
-pytest -m "not bq"    # offline, 458 tests, about 30 seconds
+pytest -m "not bq"    # offline, 468 tests, about 30 seconds
 pytest -m bq          # against BigQuery in throwaway datasets, very slow
 ```
 
@@ -71,6 +71,7 @@ Sign-in and permissions (everyone acts as one identity), deployment, cost guards
 
 - **Sign-in:** put the app behind the company's Google sign-in and map the signed-in person to the Owner field and to edit rights.
 - **Hosting:** a container (Docker) on Cloud Run, one server, dev tools off (`P2_DEV_TOOLS=0`), a long request timeout.
+- **Continuous A/A on live traffic:** the placebo check runs per experiment on its own control users. In production, also run a stream of real A/A experiments through the same pipeline on a schedule and alert when the false-positive rate drifts from alpha or the p-values stop being uniform.
 - **Daily refresh:** a scheduled job (Cloud Scheduler) that refreshes monitoring for every live experiment each morning, with a notification when a Run fails or the split looks wrong.
 - **Cost guards:** a dry-run size check and a cap on bytes per Run, a BigQuery daily quota, and pruning of old Run history.
 - **Safety nets:** an edit-conflict warning when two people change the same experiment, and CI that runs the BigQuery tests.

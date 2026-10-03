@@ -35,10 +35,23 @@ h2, h3 { font-size: 1.15rem !important; font-weight: 650 !important; padding: .1
                            background: rgba(59,130,246,.06); min-height: 8.4rem; }
 [data-testid="stMetricLabel"] p { font-size: .8rem; opacity: .8; text-transform: uppercase; letter-spacing: .03em; }
 [data-testid="stMetricValue"] { font-size: 1.6rem; font-weight: 700; }
-.verdict-card { border: 1px solid rgba(148,163,184,.35); border-radius: .75rem; padding: .7rem .9rem; background: rgba(59,130,246,.06); min-height: 8.4rem; box-sizing: border-box; }
+.verdict-card { border: 1px solid rgba(148,163,184,.35); border-radius: .75rem; padding: 1rem 1.2rem; background: rgba(59,130,246,.06); min-height: 9.5rem; box-sizing: border-box; }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
+.detail-grid .verdict-card { grid-column: 1 / -1; }
+.detail-spacer { height: .6rem; }
+/* the left half of Experiment Details speaks the same way as the cards on the right: a small uppercase label, then the value larger */
+[data-testid="stExpander"] h3 { font-size: 1.5rem !important; margin-bottom: .4rem !important; }
+[data-testid="stExpander"] .chip { font-size: .95rem; padding: .15rem .8rem; }
+.fields { display: grid; grid-template-columns: auto 1fr; column-gap: 2.5rem; margin-top: .4rem; }
+.field { margin: .55rem 0; }
+.field .label { font-size: .8rem; opacity: .8; text-transform: uppercase; letter-spacing: .03em; margin-bottom: .2rem; }
+.field .value { font-size: 1.05rem; line-height: 1.5; }
+.check-card { border: 1px solid rgba(148,163,184,.35); border-radius: .75rem; padding: .8rem 1rem; background: rgba(59,130,246,.06); min-height: 5.6rem; box-sizing: border-box; }
+.check-card .label { font-size: .8rem; opacity: .8; text-transform: uppercase; letter-spacing: .03em; margin-bottom: .55rem; }
+.check-card .chip { font-size: .95rem; padding: .15rem .8rem; }
 .verdict-card .label { font-size: .8rem; opacity: .8; text-transform: uppercase; letter-spacing: .03em; margin-bottom: .45rem; }
 .verdict-card .chip { font-size: .95rem; padding: .15rem .8rem; }
-.verdict-card .reason { font-size: 1.05rem; margin-top: .7rem; line-height: 1.45; }
+.verdict-card .reason { font-size: 1.15rem; margin-top: .9rem; line-height: 1.5; }
 /* tabs, buttons, tables, progress */
 [data-testid="stTab"] { font-weight: 600; padding: .55rem 1.1rem; margin-right: .5rem; }
 [data-testid="stTab"][aria-selected="true"] { font-weight: 750; }
@@ -93,6 +106,22 @@ def chip(text: str, tone: str = "grey") -> str:
 def cell(line1: str, line2: str = "") -> str:
     """One catalog table cell: a main line and a quieter line below it. Both are HTML, so callers escape any text they pass."""
     return f'<div class="cell"><div class="l1">{line1}</div><div class="l2">{line2 or "&nbsp;"}</div></div>'
+
+
+def check_card(label: str, chip_html: str, tip: str = "") -> str:
+    """A small status card: a label and one chip. The longer explanation is a hover tip, so the card itself stays quiet."""
+    title = f' title="{html.escape(tip, quote=True)}"' if tip else ""
+    return f'<div class="check-card"{title}><div class="label">{html.escape(label)}</div>{chip_html}</div>'
+
+
+def field(label: str, value: str) -> str:
+    """One labelled value on the left of Experiment Details. `value` is HTML, so callers escape any text they pass."""
+    return f'<div class="field"><div class="label">{html.escape(label)}</div><div class="value">{value}</div></div>'
+
+
+def details_panel(balance: str, placebo: str, verdict: str) -> str:
+    """The right half of Experiment Details as one block: the two status cards side by side, the big verdict card under them."""
+    return f'<div class="detail-grid">{balance}{placebo}{verdict}</div>'
 
 
 def method_of(row: dict) -> str:

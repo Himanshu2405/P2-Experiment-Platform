@@ -719,13 +719,13 @@ def test_the_edit_button_is_there_in_every_status():
     assert not any("Edit details" in e.label for e in at.expander) and not any(b.key in ("copy_btn", "details_go") for b in at.button)
 
 
-def test_there_is_no_decision_form_for_now_and_the_run_button_is_called_run():
+def test_there_is_no_decision_form_for_now_and_the_rerun_button_is_called_refresh():
     planned_experiment()
     at = page("experiments", search_id="exp-001")
     at.button(key="run_go").click().run()
     assert not [w for w in at.selectbox if w.key == "dec_choice"] and not any(b.key == "dec_go" for b in at.button)
     assert not any(h.value == "Decision" for h in at.subheader)
-    assert at.button(key="run_go").label == "Run"                                            # when the final analysis is already there
+    assert at.button(key="run_go").label == "Refresh"                                            # when the final analysis is already there
     p = platform()
     assert p.record_decision(p.get_actor("priya"), "exp-001", "ship", "ok")["status"] == "Decided"   # the backend still supports it for later
     st.cache_data.clear()
@@ -1057,15 +1057,14 @@ def test_the_app_shell_has_three_pages_on_top_and_no_sidebar_or_sign_in():
         assert page(page_name).title[0].value == heading
 
 
-def test_the_headline_is_the_lift_and_a_wide_verdict_with_a_one_line_reason():
+def test_the_headline_is_a_big_verdict_with_a_one_line_reason_and_no_lift_card():
     planned_experiment()
     at = page("experiments", search_id="exp-001")
-    assert [m.label for m in at.metric] == []                                                      # no numbers yet, so no cards
+    waiting = [m.value for m in at.markdown if 'class="verdict-card"' in m.value][0].split('<div class="verdict-card"')[1]
+    assert "No verdict yet" in waiting and "No numbers yet" in waiting                             # the card is there before the first Run
     at.button(key="run_go").click().run()
-    assert [m.label for m in at.metric] == ["Lift (variant vs control)"]                           # the arm averages are in the table
-    lift = at.metric[0]
-    assert (lift.value, lift.delta) == ("+60.0%", "+6.000 pp")
-    verdict = [m.value for m in at.markdown if 'class="verdict-card"' in m.value][0]
+    assert len(at.metric) == 0                                                                      # the lift and the arm averages are in the table
+    verdict = [m.value for m in at.markdown if 'class="verdict-card"' in m.value][0].split('<div class="verdict-card"')[1]
     assert "Significant improvement" in verdict and "The lift is real, not chance (p = 0.007, below your alpha of 0.05)." in verdict
     assert "users" not in verdict and "Final analysis" not in verdict                               # details live in the table, not the card
 
@@ -1074,7 +1073,7 @@ def test_a_live_frequentist_headline_says_when_the_verdict_comes():
     running_experiment()
     at = page("experiments", search_id="exp-001")
     at.button(key="monitor_go").click().run()
-    verdict = [m.value for m in at.markdown if 'class="verdict-card"' in m.value][0]
+    verdict = [m.value for m in at.markdown if 'class="verdict-card"' in m.value][0].split('<div class="verdict-card"')[1]
     assert "In progress" in verdict and "The verdict comes after the last day" in verdict
 
 
@@ -1084,7 +1083,7 @@ def test_the_results_page_explains_the_colours_and_shows_a_short_owner_name():
     at.button(key="run_go").click().run()
     assert any("Colour key" in c.value and "lower is better" in c.value for c in at.caption)
     header = " ".join(m.value for m in at.markdown)
-    assert "<b>Owner</b> Priya &nbsp;" in header and "(Checkout owner)" not in header
+    assert '<div class="label">Owner</div><div class="value">Priya</div>' in header and "(Checkout owner)" not in header
 
 
 def test_the_search_and_dropdowns_are_compact_not_full_width():
@@ -1229,7 +1228,7 @@ def test_changing_the_launch_date_after_a_run_flags_the_numbers_as_out_of_date_u
     st.cache_data.clear()
     stale = page("experiments", search_id="exp-001")
     warn = [w.value for w in stale.warning if "out of date" in w.value]
-    assert warn and "launch date is now 2026-01-05 (it was 2026-01-01)" in warn[0] and "Press Run" in warn[0]
+    assert warn and "launch date is now 2026-01-05 (it was 2026-01-01)" in warn[0] and "Press Refresh" in warn[0]
     assert stale.dataframe                                                                                    # the old numbers are still there, but clearly marked
     stale.button(key="run_go").click().run()
     st.cache_data.clear()

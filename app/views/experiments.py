@@ -14,8 +14,8 @@ from p2.services.errors import PlatformError
 from p2.stats import bayes
 from p2.stats.srm import srm_check
 import ui
-from results_view import (NEUTRAL_BAND, bayes_reason, bayes_table, bayes_time_frame, chance_chart, diff_chart, diff_frame, fmt_value, frequentist_reason,
-                          harm_sentence, metric_table, risk_chart, risk_frame, risk_sentence, risk_time_chart, series_frame, style_table, time_chart)
+from results_view import (balance_status_card, bayes_reason, bayes_table, bayes_time_frame, chance_chart, diff_chart, diff_frame, frequentist_reason, harm_sentence,
+                          metric_table, placebo_status_card, risk_chart, risk_frame, risk_sentence, risk_time_chart, series_frame, style_table, time_chart)
 
 ss = st.session_state
 actor = current_actor()
@@ -122,16 +122,52 @@ elif today <= end:
     progress, tone = f"Day {(today - exp['launch_date']).days + 1} of {days}", "blue"
 else:
     progress, tone = f"Ended {end}", "grey"
-with st.container(border=True):
-    left, right = st.columns([5, 2], vertical_alignment="center")
+
+# ------------------------------------------------------------------ what the three cards on the right of the details will say
+no_numbers = ("No numbers yet. " + ("Refresh monitoring to see the live numbers." if running else "Run the final analysis to see the results.")
+              if can_edit else "No numbers yet.")
+metric_ids = [d["item_id"] for d in design if d["kind"] == "metric"]
+role_of = {d["item_id"]: d["role"] for d in design if d["kind"] == "metric"}
+names = {m: f"{registry.get(m).display_name} ({role_of[m]})" for m in metric_ids}
+version = {d["item_id"]: d["item_version"] for d in design}
+primary_id = next((d["item_id"] for d in design if d["role"] == "primary"), None)
+headline = next((r for r in rows if r["role"] == "primary"), None) if rows and design and not busy else None   # a Run in progress hides the old numbers
+balance_card = ui.check_card("Balance check", ui.chip("Waiting for a Run", "grey"))
+placebo_card = ui.check_card("Placebo A/A check", ui.chip("Waiting for a Run", "grey"))
+verdict_title, verdict_html = "Verdict", ui.chip("No verdict yet", "grey")
+reason = ("Save a complete plan to see a verdict." if not design else "A Run is rebuilding the numbers." if busy
+          else "The numbers were calculated with the other method. Press Refresh to calculate them again." if other_method else no_numbers)
+if headline:
+    pm = registry.get(headline["item_id"], version[headline["item_id"]])
+    is_rate = pm.type == "binary"
+    srm = srm_check(headline["n_control"], headline["n_variant"]) if headline["n_control"] and headline["n_variant"] else None
+    if srm:
+        balance_card = balance_status_card(srm)
+    check = (headline.get("params") or {}).get("placebo")
+    placebo_card = placebo_status_card(check)
+    verdict_title = f"Verdict on {pm.display_name}"
+    if bayesian:
+        head_out = bayes_numbers(chosen, (headline["run_at"], "headline", str(exp["launch_date"]), str(end), design), [headline])[0]
+        verdict_html = ui.verdict_chip(head_out.verdict) if head_out and head_out.verdict else ui.chip("Refresh needed", "grey")
+        head_plan = bayes.plan_from_row(pm, next(d for d in design if d["item_id"] == headline["item_id"]))
+        head_min_days = min(head_plan.min_days if head_plan and head_plan.role == "primary" else bayes.DEFAULT_MIN_DAYS, days)
+        threshold = head_plan.threshold_abs(headline["mean_control"]) if head_plan and head_plan.role == "primary" else None
+        reason = bayes_reason(head_out, is_rate, threshold, head_min_days)
+    else:
+        verdict_html = (ui.verdict_chip(headline["verdict"]) if is_final and headline["verdict"] else ui.chip("In progress", "grey"))
+        reason = frequentist_reason(headline, is_final, end)
+
+# ------------------------------------------------------------------ Experiment Details: the experiment on the left, the checks and the verdict on the right
+with st.expander("Experiment Details", expanded=True):
+    left, right = st.columns(2, gap="large")
     with left:
         st.subheader(exp["name"])
         st.markdown(ui.status_chip(status) + " " + ui.chip(progress, tone) + " " + ui.chip(exp["product_id"], "grey"), unsafe_allow_html=True)
-        st.markdown(f'<div class="meta"><b>Owner</b> {ui.short_name(owners.get(exp["owner_user_id"], exp["owner_user_id"]))} &nbsp;|&nbsp; <b>Runs</b> {exp["launch_date"]} to {end} '
-                    f'({days} days' + (f', planned {exp["runtime_days"]}' if days != exp["runtime_days"] else "") + ")</div>", unsafe_allow_html=True)
-        if exp["hypothesis"]:
-            st.markdown(f'<div class="meta"><b>Hypothesis</b> {html.escape(exp["hypothesis"])}</div>', unsafe_allow_html=True)
-    with right:
+        runs = f'{exp["launch_date"]} to {end} ({days} days' + (f', planned {exp["runtime_days"]}' if days != exp["runtime_days"] else "") + ")"
+        st.markdown('<div class="fields">' + ui.field("Owner", html.escape(ui.short_name(owners.get(exp["owner_user_id"], exp["owner_user_id"]))))
+                    + ui.field("Runs", html.escape(runs)) + "</div>"
+                    + (ui.field("Hypothesis", html.escape(exp["hypothesis"])) if exp["hypothesis"] else ""), unsafe_allow_html=True)
+        st.markdown('<div class="detail-spacer"></div>', unsafe_allow_html=True)
         buttons = st.columns(2)
         with buttons[0]:
             if st.button("Edit", key="edit_plan", width="stretch", help="Open this experiment in the Experiment Catalog to change it. Everything except the ID can be changed."):
@@ -148,7 +184,11 @@ with st.container(border=True):
                 elif status != "Analyzed":
                     queue_run("Run final analysis", "run_go", type="primary", width="stretch", help="Runs the full tests on the whole runtime and gives the verdict.")
                 else:
-                    queue_run("Run", "run_go", width="stretch", help="Runs the final analysis again on the data through the end date.")
+                    queue_run("Refresh", "run_go", width="stretch", help="Refresh: runs the final analysis again on the data through the end date.")
+    with right:
+        verdict_card = (f'<div class="verdict-card"><div class="label">{html.escape(verdict_title)}</div>{verdict_html}'
+                        f'<div class="reason">{html.escape(reason)}</div></div>')
+        st.markdown(ui.details_panel(balance_card, placebo_card, verdict_card), unsafe_allow_html=True)
 if not design:
     st.caption("No complete plan saved yet.")
 run_panel()
@@ -157,7 +197,7 @@ if not run and jobs and jobs[0]["error"]:
 if not design:
     st.stop()
 if other_method:
-    st.info("The saved numbers were calculated with the Bayesian method, and this experiment is now frequentist. Press Run to calculate them again.")
+    st.info("The saved numbers were calculated with the Bayesian method, and this experiment is now frequentist. Press Refresh to calculate them again.")
 if busy:        # a Run is rebuilding the numbers: show nothing old, so nobody mistakes last run's numbers for the new ones
     st.caption("The numbers are hidden while this run rebuilds them, so old numbers are not mistaken for new ones. They appear here when it finishes.")
     st.stop()
@@ -166,51 +206,11 @@ failed_after = bool(rows and jobs and jobs[0]["status"] == "failed" and jobs[0][
 if changes:        # one message, not two: what changed, and (if it applies) that the latest run failed
     st.warning("These numbers are out of date: " + "; ".join(changes) + " since they were calculated."
                + (f" The latest run failed, so they are from the last successful run ({rows[0]['run_at']:%Y-%m-%d %H:%M})." if failed_after else "")
-               + " Press Run to update them.")
+               + " Press Refresh to update them.")
 elif failed_after:
     st.warning(f"The latest run failed, so the numbers below are from the last successful run ({rows[0]['run_at']:%Y-%m-%d %H:%M}).")
 
 # ------------------------------------------------------------------ numbers: two tabs, Tables and Charts
-no_numbers = ("No numbers yet. " + ("Refresh monitoring to see the live numbers." if running else "Run the final analysis to see the results.")
-              if can_edit else "No numbers yet.")
-metric_ids = [d["item_id"] for d in design if d["kind"] == "metric"]
-role_of = {d["item_id"]: d["role"] for d in design if d["kind"] == "metric"}
-names = {m: f"{registry.get(m).display_name} ({role_of[m]})" for m in metric_ids}
-version = {d["item_id"]: d["item_version"] for d in design}
-primary_id = next((d["item_id"] for d in design if d["role"] == "primary"), None)
-# ------------------------------------------------------------------ the headline numbers of the primary metric
-headline = next((r for r in rows if r["role"] == "primary"), None) if rows else None
-if headline:
-    pm = registry.get(headline["item_id"], version[headline["item_id"]])
-    is_rate, higher_is_better = pm.type == "binary", pm.good_direction == "higher"
-    lift = headline["relative_lift"]
-    srm = srm_check(headline["n_control"], headline["n_variant"]) if headline["n_control"] and headline["n_variant"] else None
-    if srm:
-        share = srm.n_control / (srm.n_control + srm.n_variant)
-        with st.container(border=True, key="srm_card"):
-            if srm.balanced:
-                st.markdown(ui.chip("Balanced", "green") + " &nbsp; **The test is balanced.** Users are split evenly between control and variant.", unsafe_allow_html=True)
-            else:
-                st.markdown(ui.chip("Not balanced", "red") + f" &nbsp; **The split looks wrong.** Expected 50 / 50, saw {share * 100:.1f} / {100 - share * 100:.1f} "
-                            f"({srm.n_control:,} control, {srm.n_variant:,} variant). Check how users were assigned before trusting these numbers.", unsafe_allow_html=True)
-    flat = lift is None or abs(lift * 100) < NEUTRAL_BAND
-    cards = st.columns([1, 3])       # the lift, and a wide verdict with its reason; the arm averages and users are in the table
-    cards[0].metric("Lift (variant vs control)", "n/a" if lift is None else f"{lift * 100:+.1f}%",
-                    delta=fmt_value(is_rate, headline["difference"], True),
-                    delta_color="off" if flat else ("normal" if higher_is_better else "inverse"))
-    if bayesian:
-        head_out = bayes_numbers(chosen, (headline["run_at"], "headline", str(exp["launch_date"]), str(end), design), [headline])[0]
-        verdict_html = ui.verdict_chip(head_out.verdict) if head_out and head_out.verdict else ui.chip("Run again", "grey")
-        head_plan = bayes.plan_from_row(pm, next(d for d in design if d["item_id"] == headline["item_id"]))
-        head_min_days = min(head_plan.min_days if head_plan and head_plan.role == "primary" else bayes.DEFAULT_MIN_DAYS, days)
-        threshold = head_plan.threshold_abs(headline["mean_control"]) if head_plan and head_plan.role == "primary" else None
-        reason = bayes_reason(head_out, is_rate, threshold, head_min_days)
-    else:
-        verdict_html = (ui.verdict_chip(headline["verdict"]) if is_final and headline["verdict"] else ui.chip("In progress", "grey"))
-        reason = frequentist_reason(headline, is_final, end)
-    cards[1].markdown(f'<div class="verdict-card"><div class="label">Verdict on {html.escape(pm.display_name)}</div>{verdict_html}'
-                      f'<div class="reason">{html.escape(reason)}</div></div>', unsafe_allow_html=True)
-
 tab_tables, tab_charts = st.tabs(["Tables", "Charts"])
 
 with tab_tables:
@@ -308,7 +308,7 @@ with tab_charts:
                     metric, r = registry.get(m, version[m]), by_item.get(m)
                     arms = bayes.arms_of(metric, r) if r else None
                     if arms is None:
-                        st.info(f"{names[m]}: run again to see the Bayesian charts.")
+                        st.info(f"{names[m]}: refresh to see the Bayesian charts.")
                         continue
                     plan = bayes.plan_from_row(metric, design_of[m])
                     out = bayes_numbers(chosen, (r["run_at"], f"chart-{m}", str(exp["launch_date"]), str(end), design), [r])[0]

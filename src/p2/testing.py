@@ -43,6 +43,11 @@ class FakeRunner:
         """Control 10% (mean 5 for money-like metrics), variant a clear, significant lift; 450 users per arm."""
         return {m: {"control": Arm(450, 0.10, 0.09), "variant": Arm(450, 0.16, 0.1344)} for m in metric_ids}
 
+    def control_values(self, final_table, metric_id, cap=50_000):
+        """450 control users with a skewed positive value, the same every time, for the placebo check of a continuous metric."""
+        import numpy as np
+        return np.random.default_rng(7).gamma(2.0, 2.5, 450)
+
     def segment_stats(self, final_table, dimension_ids, filter_ids, metric_ids):
         """Every slice has two segments for a dimension ('a' repeats the overall numbers, 'b' has a smaller, weaker effect) and one
         unnamed segment for a filter alone (a quarter smaller than everyone, with the same effect)."""

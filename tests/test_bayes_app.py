@@ -1,5 +1,6 @@
 """The Bayesian method end to end on the in-memory store: the service layer (plans, runs, catalog verdict), the plan form and the
 results page. The fake runner gives control 10% against variant 16% with 450 users per arm."""
+import re
 from datetime import date, datetime, timedelta, timezone
 
 import pandas as pd
@@ -79,7 +80,7 @@ def test_the_final_run_of_a_bayesian_experiment_runs_no_test_and_stores_the_vari
     rows = {r["item_id"]: r for r in plat.latest_results("exp-1")}
     assert set(rows) == {"conversion_rate", "refund_rate", "add_to_cart_rate"}
     c = rows["conversion_rate"]
-    assert c["kind"] == "final" and c["params"] == {"method": "bayesian"}
+    assert c["kind"] == "final" and c["params"]["method"] == "bayesian" and set(c["params"]) == {"method", "placebo"}
     assert (c["p_value"], c["verdict"], c["ci_low"], c["achieved_power"]) == (None, None, None, None)
     assert (c["mean_control"], c["var_control"], c["var_variant"], c["n_control"]) == (0.10, 0.09, 0.1344, 450)
     assert c["difference"] == pytest.approx(0.06) and plat.get_experiment("exp-1")["status"] == "Analyzed"
@@ -254,7 +255,7 @@ def test_live_bayesian_numbers_show_a_verdict_once_the_minimum_days_have_passed(
     assert t.loc["Conversion rate", "Chance variant wins"] == "99.6%" and t.loc["Conversion rate", "Expected difference"].startswith("+5.9")
     assert t.loc["Conversion rate", "Risk: ship variant"].startswith("0.00") and t.loc["Conversion rate", "Risk: keep control"].endswith(" pp")
     assert t.loc["Refund rate", "Risk: ship variant"] == "" and t.loc["Refund rate", "Chance of harm"].endswith("%")     # guardrails show harm, not risks
-    verdict = [m.value for m in at.markdown if 'class="verdict-card"' in m.value][0]
+    verdict = [m.value for m in at.markdown if 'class="verdict-card"' in m.value][0].split('<div class="verdict-card"')[1]
     assert "Variant is the safer choice" in verdict and "Shipping the variant risks only" in verdict and "under your 0.050 pp limit" in verdict
     assert "users" not in verdict and "chance the variant wins" not in verdict                                       # one line, the rest is in the table
 
@@ -349,3 +350,81 @@ def test_old_results_without_variances_ask_for_a_new_run_for_averages_but_not_fo
     assert t.loc["Conversion rate", "Chance variant wins"] != "" and t.loc["Revenue per user", "Chance variant wins"] == ""
     assert t.loc["Revenue per user", "Verdict"] == ""                                    # a secondary metric has no verdict to wait for
     assert any("out of date" in w.value for w in at.warning)                             # the plan changed since the run
+
+
+# ---- the placebo check -------------------------------------------------------------------------------------------------------
+def test_every_run_saves_a_placebo_check_on_the_primary_metric_for_both_methods(plat):
+    bayes_design(plat)
+    plat.run_analysis(who(plat), "exp-1", as_of=AFTER)
+    rows = {r["item_id"]: r for r in plat.latest_results("exp-1")}
+    check = rows["conversion_rate"]["params"]["placebo"]
+    assert check["method"] == "bayesian" and check["reps"] == 200 and check["n"] == 450 and 0.0 <= check["rate"] <= 1.0
+    assert "placebo" not in (rows["refund_rate"]["params"] or {}) and "placebo" not in (rows["add_to_cart_rate"]["params"] or {})
+    plat.create_experiment(who(plat), "exp-2", "checkout", "n", "h", date(2026, 1, 1), 14)
+    plat.save_design(who(plat), "exp-2", freq_primary(), [], [])
+    plat.run_analysis(who(plat), "exp-2", as_of=AFTER)
+    freq = plat.latest_results("exp-2")[0]["params"]
+    assert freq["placebo"]["method"] == "frequentist" and freq["placebo"]["expected"] == 0.05 and freq["alpha"] == 0.05   # the plan numbers are still there
+    plat.refresh_monitor(who(plat), "exp-2", as_of=datetime(2026, 1, 6, tzinfo=timezone.utc))
+    assert plat.latest_results("exp-2", "interim")[0]["params"]["placebo"]["reps"] == 200                          # live runs get it too
+
+
+def test_a_continuous_primary_metric_uses_the_control_users_own_values(plat):
+    plat.create_experiment(who(plat), "exp-1", "checkout", "n", "h", date(2026, 1, 1), 14)
+    revenue = REG.get("revenue_per_user")
+    plat.save_design(who(plat), "exp-1", MetricPlan(revenue, "primary", 3.0, 0.1, "relative", 0.05, 0.8, "two-sided", 27.0), [], [])
+    plat.run_analysis(who(plat), "exp-1", as_of=AFTER)
+    check = plat.latest_results("exp-1")[0]["params"]["placebo"]
+    assert check["n"] == 450 and check["method"] == "frequentist"                                               # the fake runner supplies 450 values
+
+
+def check_cards(at):
+    """The two small status cards of the details: {label: html}."""
+    cards = {}
+    for m in at.markdown:
+        for part in m.value.split('<div class="check-card"')[1:]:       # both cards share one block with the verdict card
+            cards["Balance check" if "Balance check" in part.split("</div>")[0] else "Placebo A/A check"] = part.split('class="verdict-card"')[0]
+    return cards
+
+
+def test_the_placebo_card_is_a_quiet_passed_or_not_with_the_numbers_in_a_hover_tip_and_asks_for_a_run_on_older_results():
+    planned("exp-001", date(2026, 1, 1))
+    at = page("experiments", search_id="exp-001")
+    assert "Waiting for a Run" in check_cards(at)["Placebo A/A check"]                    # the cards are there before the first Run
+    at.button(key="run_go").click().run()
+    card = check_cards(at)["Placebo A/A check"]
+    assert not at.exception and ">Passed<" in card or ">Not passed<" in card
+    assert "In 200 random splits of your control users into two identical groups of 450" in card and "**" not in card        # the detail is the hover tip
+    assert "random splits" not in " ".join(m.value for m in at.markdown if 'class="check-card"' not in m.value)           # and nowhere else on the page
+    assert "random splits" not in re.sub(r'title="[^"]*"', "", " ".join(m.value for m in at.markdown))                      # only inside a hover tip
+    p = platform()
+    for r in p.store.select("results", {"experiment_id": "exp-001"}):                    # results saved before the check existed
+        p.store.update("results", {"experiment_id": "exp-001", "item_id": r["item_id"], "run_at": r["run_at"]}, {"params": {"method": "bayesian"}})
+    st.cache_data.clear()
+    old = page("experiments", search_id="exp-001")
+    assert ">Refresh needed<" in check_cards(old)["Placebo A/A check"] and "appears after the next Refresh" in check_cards(old)["Placebo A/A check"]
+
+
+def test_the_details_are_one_dropdown_with_the_experiment_on_the_left_and_the_checks_and_verdict_on_the_right():
+    planned("exp-001", date(2026, 1, 1))
+    at = page("experiments", search_id="exp-001")
+    at.button(key="run_go").click().run()
+    assert [e.label for e in at.expander] == ["Experiment Details"] and at.expander[0].proto.expanded
+    assert any(s.value == "Banner" for s in at.subheader) and len(at.metric) == 0                    # no separate lift card
+    inside = " ".join(m.value for m in at.expander[0].markdown)
+    for part in ("Owner", "Hypothesis", "Lifts conversion", '<div class="label">Runs</div><div class="value">2026-01-01', "Balance check", "Placebo A/A check", 'class="verdict-card"'):
+        assert part in inside, part
+    assert {b.key for b in at.expander[0].button} == {"edit_plan", "run_go"}                          # Edit and Run live in the details too
+    cards = check_cards(at)
+    assert ">Balanced<" in cards["Balance check"]
+    assert "balanced" not in re.sub(r"title=\"[^\"]*\"", "", cards["Balance check"]).replace("Balance check", "").replace(">Balanced<", "").lower()   # only the chip, no sentence
+    verdict = [m.value for m in at.expander[0].markdown if 'class="verdict-card"' in m.value][0].split('<div class="verdict-card"')[1]
+    assert "Verdict on Conversion rate" in verdict and "Variant is the safer choice" in verdict
+
+
+def test_an_unbalanced_split_says_not_balanced_and_keeps_the_split_in_the_tip():
+    from p2.stats.srm import srm_check
+    from results_view import balance_status_card
+    card = balance_status_card(srm_check(600, 400))
+    assert ">Not balanced<" in card and "60.0 / 40.0" in card and "Check how users were assigned" in card
+    assert ">Balanced<" in balance_status_card(srm_check(500, 500))

@@ -142,7 +142,7 @@ def test_the_bayesian_table_shows_chances_risks_and_a_verdict_and_tells_when_a_r
     assert (g["Risk: ship variant"], g["Chance of harm"], g.Verdict) == ("", "3.4%", "⚠️ Inconclusive")       # a guardrail shows harm, not the two risks
     assert s["Chance variant wins"] == "" and s.Verdict == ""                                                 # nothing to rebuild and nothing to wait for
     waiting = bayes_table(rows[:1], [None], REG, DESIGN)
-    assert waiting.iloc[0].Verdict == "Run again to see Bayesian numbers"
+    assert waiting.iloc[0].Verdict == "Refresh to see Bayesian numbers"
     assert df.attrs["good_up"] == [True, False, True]
     style_table(df)                                                                                           # the colours apply to this table too
 
@@ -221,4 +221,31 @@ def test_the_verdict_reason_is_one_plain_line_for_each_method():
     assert bayes_reason(out(0.0001, 0.0002, bayes.VERDICT_EITHER), True, 0.0005, 7).endswith("so either is fine.")
     assert bayes_reason(out(0.004, 0.0001, bayes.VERDICT_CONTROL), True, 0.0005, 7).startswith("Keeping control risks only 0.010 pp")
     assert bayes_reason(out(0.0, 0.0, "Collecting evidence (day 3 of 7)"), True, 0.0005, 7) == "Too early: the verdict comes after 7 days of data."
-    assert bayes_reason(None, True, 0.0005, 7) == "Run again to see the Bayesian numbers."
+    assert bayes_reason(None, True, 0.0005, 7) == "Refresh to see the Bayesian numbers."
+
+
+def test_the_placebo_card_says_in_plain_words_whether_the_analysis_can_be_trusted():
+    from results_view import placebo_summary
+    freq = {"method": "frequentist", "reps": 200, "n": 4500, "rate": 0.045, "expected": 0.05, "low": 0.015, "high": 0.095, "ok": True}
+    chip, tone, text = placebo_summary(freq)
+    assert (chip, tone) == ("Placebo passed", "green")
+    assert text == ("**The test behaves correctly on your data.** In 200 random splits of your control users into two identical groups of 4,500, "
+                    "the test found a difference 4.5% of the time (expected about 5%, normal range 1.5% to 9.5%).")
+    chip, tone, text = placebo_summary({**freq, "rate": 0.2, "ok": False})
+    assert (chip, tone) == ("Placebo failed", "red") and "finds differences that are not there" in text and "Do not trust the p-values" in text
+    bayes_ok = {"method": "bayesian", "reps": 200, "n": 450, "rate": 0.03, "expected": None, "low": None, "high": None, "ok": True}
+    chip, tone, text = placebo_summary(bayes_ok)
+    assert (chip, tone) == ("Placebo passed", "green") and "named a safer arm 3.0% of the time" in text
+    chip, tone, text = placebo_summary({**bayes_ok, "rate": 0.355, "ok": False})
+    assert (chip, tone) == ("High false calls", "yellow") and "35.5%" in text and "a smaller threshold makes the rule more cautious" in text
+
+
+def test_the_placebo_status_card_is_just_passed_or_not_passed():
+    from results_view import placebo_status_card
+    freq = {"method": "frequentist", "reps": 200, "n": 4500, "rate": 0.045, "expected": 0.05, "low": 0.015, "high": 0.095, "ok": True}
+    assert ">Passed<" in placebo_status_card(freq) and "#16a34a" in placebo_status_card(freq)
+    assert ">Not passed<" in placebo_status_card({**freq, "rate": 0.2, "ok": False}) and "#dc2626" in placebo_status_card({**freq, "rate": 0.2, "ok": False})
+    bayes_high = {"method": "bayesian", "reps": 200, "n": 450, "rate": 0.355, "expected": None, "low": None, "high": None, "ok": False}
+    assert ">Not passed<" in placebo_status_card(bayes_high) and "#b7791f" in placebo_status_card(bayes_high)        # a caution, so yellow, not red
+    assert "35.5%" in placebo_status_card(bayes_high) and "Do not trust" not in placebo_status_card(bayes_high)
+    assert ">Refresh needed<" in placebo_status_card(None)

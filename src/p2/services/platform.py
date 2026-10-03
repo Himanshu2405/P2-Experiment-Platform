@@ -6,6 +6,7 @@ the audit log. The UI never touches the Store directly.
 import hashlib
 import re
 import uuid
+from dataclasses import asdict
 from datetime import date, datetime, timedelta, timezone
 
 from p2.pipeline.runner import BuildResult, DataQualityError, StepResult, end_of
@@ -14,7 +15,7 @@ from p2.services.catalog import CatalogMixin, seed_rows
 from p2.services.runs import RunManager
 from p2.services.permissions import Actor, require_admin, require_create_experiment, require_edit_experiment
 from p2.store import base as store_errors
-from p2.stats import bayes
+from p2.stats import bayes, placebo
 from p2.stats.bayes import BayesPlan
 from p2.stats.plan import MetricPlan
 from p2.stats.tests import analyze_metric
@@ -462,6 +463,10 @@ class Platform(CatalogMixin):
             run_at = self.clock()
             rows = (self._outcomes(experiment_id, design, summary, run_at, through, bayesian) if final
                     else self._interim(experiment_id, design, summary, run_at, through))
+            check = self._placebo(runner, result.final_table, design, summary, bayesian)
+            for r in rows:
+                if check and r["role"] == "primary":      # the placebo check belongs to the primary metric's row
+                    r["params"] = {**(r.get("params") or {}), "placebo": check}
             steps.append(StepResult("stats", None, "ok", len(rows), 0.0))
             series = runner.daily_series(experiment_id, items["metric"], exp["launch_date"], through)
             steps.append(StepResult("daily", None, "ok", len(series), 0.0))
@@ -502,6 +507,25 @@ class Platform(CatalogMixin):
         self._audit(actor.user_id, "analysis.run" if final else "monitor.refresh", "experiment", experiment_id,
                     {"job_id": job_id, "audience_users": result.audience_users, "through": through.isoformat()})
         return result
+
+    def _placebo(self, runner, final_table: str, design: list[dict], summary: dict, bayesian: bool) -> dict | None:
+        """The placebo check (an A/A test on the control users) for the primary metric, as the dict saved in its result row; None when the
+        runner cannot supply control values or there are too few users to split."""
+        d = next((x for x in design if x["kind"] == "metric" and x["role"] == "primary"), None)
+        if d is None or not hasattr(runner, "control_values"):
+            return None
+        metric = self.metric_registry().get(d["item_id"], d["item_version"])
+        control = summary[d["item_id"]]["control"]
+        values = None if metric.type == "binary" else runner.control_values(final_table, d["item_id"])
+        try:
+            if bayesian:
+                plan = bayes.plan_from_row(metric, d)
+                result = placebo.run_placebo(metric, control, values, "bayesian", threshold_abs=plan.threshold_abs(control.mean), min_days=plan.min_days)
+            else:
+                result = placebo.run_placebo(metric, control, values, "frequentist", alpha=d["alpha"], sidedness=d["sidedness"])
+        except ValueError:
+            return None
+        return asdict(result)
 
     def _interim(self, experiment_id: str, design: list[dict], summary: dict, run_at: datetime, through: date) -> list[dict]:
         """Descriptive numbers for monitoring: counts, means, difference and lift. Deliberately no tests or intervals."""

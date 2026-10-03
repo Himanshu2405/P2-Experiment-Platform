@@ -11,6 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta, timezone
 
+import numpy as np
 import pandas as pd
 
 from p2.pipeline import sqlgen
@@ -240,6 +241,13 @@ class PipelineRunner:
 
     def load_final(self, experiment_id: str) -> pd.DataFrame:
         return self.wh.query_df(f"SELECT * FROM `{sqlgen.table(self.wh.analytics, experiment_id, 'final')}`")
+
+    def control_values(self, final_table: str, metric_id: str, cap: int = 50_000) -> np.ndarray:
+        """The primary metric's value for control users, for the placebo check of a continuous metric: one column, one arm, and at most
+        `cap` users (a fixed pseudo-random subset, so the same users come back every time). The only user-level values Python reads."""
+        df = self.wh.query_df(f"SELECT CAST(`{metric_id}` AS FLOAT64) AS v FROM `{final_table}` WHERE arm = 'control' "
+                              f"AND `{metric_id}` IS NOT NULL ORDER BY FARM_FINGERPRINT(CAST(user_id AS STRING)) LIMIT {int(cap)}")
+        return df["v"].to_numpy(dtype=float)
 
     # ---- summary statistics (one scan, any experiment size) -----------------------------------
     def summary_stats(self, final_table: str, metric_ids: list[str]) -> dict[str, dict[str, Arm]]:
