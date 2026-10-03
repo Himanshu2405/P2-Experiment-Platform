@@ -1,0 +1,26 @@
+[project]
+name = "p2"
+version = "0.1.0"
+description = "Experiment platform demo: governed metrics, data sources, background runs, and frequentist analysis with a sample ratio check"
+requires-python = ">=3.12"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"p2.simulator" = ["*.yaml"]
+"p2.warehouse" = ["*.yaml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = [
+  "ignore:Loading DataFrames via google-cloud-bigquery:PendingDeprecationWarning",
+  "ignore:Retrieving DataFrames via google-cloud-bigquery:PendingDeprecationWarning",
+  "ignore:.*pandas-gbq.*:FutureWarning",
+  "ignore:BigQuery Storage module not found:UserWarning",
+]
+markers = ["bq: needs BigQuery credentials; runs against a throwaway dataset (deselect with -m 'not bq')"]

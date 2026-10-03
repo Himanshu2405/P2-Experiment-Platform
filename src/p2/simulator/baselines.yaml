@@ -1,0 +1,30 @@
+# Baseline parameters of the generative model for each product.
+#
+# Checkout: order value, orders per buyer and the share of buyers with a refund were calibrated once
+# (2026-09-29) from the BigQuery public dataset thelook_ecommerce, calendar year 2025:
+#   mean order value 86.33, sd 94.18 (lognormal sigma = sqrt(ln(1 + (sd/mean)^2)) = 0.885)
+#   1.171 orders per buyer (extra orders lambda = 0.171)
+#   11.7% of buyers had a returned item (about 0.11 per completed order)
+# thelook has no realistic visitor funnel (about 99.9% of event users purchase), so the funnel rates,
+# the cancel rate, and all Email and Onboarding parameters are round numbers, not calibrated.
+checkout:
+  p_add_to_cart: 0.10
+  p_begin_given_add: 0.75
+  p_order_given_begin: 0.4667
+  extra_orders_lambda: 0.171
+  mean_order_value: 86.33
+  order_value_sigma: 0.885
+  p_cancel: 0.03
+  p_refund: 0.11
+email:
+  extra_sends_lambda: 1.0
+  p_open: 0.22
+  p_click_given_open: 0.12
+  p_unsubscribe: 0.003
+  p_bounce: 0.01
+onboarding:
+  p_profile: 0.70
+  p_first_project_given_profile: 0.55
+  p_invite_given_project: 0.30
+  p_activate_given_project: 0.65
+  p_paid_given_activated: 0.12

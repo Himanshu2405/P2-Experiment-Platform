@@ -1,0 +1,17 @@
+# Look and feel of the app. Run `streamlit run app/streamlit_app.py` from this folder so this file is picked up.
+[theme]
+primaryColor = "#3b82f6"
+baseRadius = "0.6rem"
+buttonRadius = "0.5rem"
+font = "sans-serif"
+headingFont = "sans-serif"
+
+[theme.light]
+borderColor = "#d5deea"
+dataframeBorderColor = "#c3cfdf"
+dataframeHeaderBackgroundColor = "#e6eefb"
+
+[theme.dark]
+borderColor = "#2f3d57"
+dataframeBorderColor = "#3d4d6b"
+dataframeHeaderBackgroundColor = "#1c2a45"

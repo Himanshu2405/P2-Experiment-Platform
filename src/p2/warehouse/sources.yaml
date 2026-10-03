@@ -1,0 +1,249 @@
+# Source registry: the nine raw tables the company's systems land (see DATA_SOURCES.md and SCHEMA.md).
+# One place defines each table: columns with descriptions, partitioning, clustering, and how duplicates are resolved.
+# The raw DDL, the de-duplicated staging views, and SCHEMA.md are all generated from this file.
+# Every table also gets an implicit `ingested_at TIMESTAMP NOT NULL` column (when the row landed).
+# dedupe_order lists the winner first: the first row in this order per dedupe_key is kept.
+sources:
+  - source_id: exp_assignments
+    product_id: shared
+    description: "The experiment tool's log of which user was bucketed into which arm, and when."
+    user_column: user_id
+    time_column: assigned_at
+    dedupe_key: [experiment_id, user_id]
+    dedupe_order: assigned_at ASC, ingested_at ASC
+    partition: DATE(assigned_at)
+    cluster: [experiment_id, user_id]
+    columns:
+      - name: experiment_id
+        type: STRING
+        description: "Experiment the user was assigned to; lowercase letters, digits and hyphens."
+      - name: user_id
+        type: STRING
+        description: "The assigned user; matches users.user_id."
+      - name: arm
+        type: STRING
+        description: "Which group the user was bucketed into: control or variant."
+      - name: assigned_at
+        type: TIMESTAMP
+        description: "When the user was bucketed (UTC). Starts the user's 7-day measurement window."
+
+  - source_id: users
+    product_id: shared
+    description: "Company user master with one row per user: signup date, geography, acquisition channel and industry."
+    user_column: user_id
+    time_column: signup_date
+    dedupe_key: [user_id]
+    dedupe_order: ingested_at DESC
+    cluster: [user_id]
+    columns:
+      - name: user_id
+        type: STRING
+        description: "Unique user identifier used by every other table."
+      - name: signup_date
+        type: DATE
+        description: "Day the user signed up."
+      - name: country
+        type: STRING
+        nullable: true
+        description: "Two-letter country code; missing for about 3 percent of users."
+      - name: region
+        type: STRING
+        nullable: true
+        description: "Sales region of the country (NA, EMEA, APAC, LATAM); missing when country is missing."
+      - name: acquisition_channel
+        type: STRING
+        description: "How the user first arrived (organic, paid_search, partner, sales, referral)."
+      - name: industry
+        type: STRING
+        nullable: true
+        description: "Industry of the user's business (retail, media, services, health, other); missing for about 5 percent."
+
+  - source_id: plan_history
+    product_id: shared
+    description: "Slowly changing plan history, with one row each time a user's plan changes."
+    user_column: user_id
+    time_column: effective_date
+    dedupe_key: [user_id, effective_date]
+    dedupe_order: ingested_at DESC
+    partition: effective_date
+    cluster: [user_id]
+    columns:
+      - name: user_id
+        type: STRING
+        description: "The user whose plan changed."
+      - name: effective_date
+        type: DATE
+        description: "Day the new plan took effect."
+      - name: plan_tier
+        type: STRING
+        description: "Plan in force from that day (free, standard, premium)."
+      - name: mrr
+        type: FLOAT64
+        description: "Monthly recurring revenue on that plan; 0 for free."
+
+  - source_id: checkout_events
+    product_id: checkout
+    description: "Storefront funnel events (visit, add_to_cart, begin_checkout), one row per event."
+    user_column: user_id
+    time_column: event_ts
+    dedupe_key: [event_id]
+    dedupe_order: event_ts ASC, ingested_at ASC
+    partition: DATE(event_ts)
+    cluster: [event_type, user_id]
+    columns:
+      - name: event_id
+        type: STRING
+        description: "Unique event identifier; duplicates of the same id are retries."
+      - name: user_id
+        type: STRING
+        description: "The user who did it."
+      - name: event_type
+        type: STRING
+        description: "What happened (visit, add_to_cart, begin_checkout)."
+      - name: event_ts
+        type: TIMESTAMP
+        description: "When it happened (UTC)."
+
+  - source_id: checkout_orders
+    product_id: checkout
+    description: "Current state of each order; a row is updated when its status or refund changes."
+    user_column: user_id
+    time_column: order_ts
+    dedupe_key: [order_id]
+    dedupe_order: updated_at DESC, ingested_at DESC
+    partition: DATE(order_ts)
+    cluster: [user_id]
+    columns:
+      - name: order_id
+        type: STRING
+        description: "Unique order identifier."
+      - name: user_id
+        type: STRING
+        description: "The buyer."
+      - name: order_ts
+        type: TIMESTAMP
+        description: "When the order was placed (UTC)."
+      - name: order_value
+        type: FLOAT64
+        description: "Gross order value before discounts and refunds."
+      - name: item_count
+        type: INT64
+        description: "Number of items in the order."
+      - name: discount_value
+        type: FLOAT64
+        description: "Discount applied to the order; 0 if none."
+      - name: status
+        type: STRING
+        description: "completed or cancelled. Only completed orders count as purchases."
+      - name: refund_ts
+        type: TIMESTAMP
+        nullable: true
+        description: "When the order was refunded; null if it was not."
+      - name: refund_value
+        type: FLOAT64
+        nullable: true
+        description: "Amount refunded; null if not refunded."
+      - name: updated_at
+        type: TIMESTAMP
+        description: "When this version of the order row was last changed; the latest version wins."
+
+  - source_id: email_sends
+    product_id: email
+    description: "Every email sent to a user, one row per send."
+    user_column: user_id
+    time_column: sent_ts
+    dedupe_key: [send_id]
+    dedupe_order: sent_ts ASC, ingested_at ASC
+    partition: DATE(sent_ts)
+    cluster: [user_id]
+    columns:
+      - name: send_id
+        type: STRING
+        description: "Unique send identifier; email_events.send_id refers to it."
+      - name: user_id
+        type: STRING
+        description: "The recipient."
+      - name: campaign_id
+        type: STRING
+        description: "Campaign the email belongs to."
+      - name: campaign_type
+        type: STRING
+        description: "Kind of campaign (promo, newsletter, lifecycle)."
+      - name: sent_ts
+        type: TIMESTAMP
+        description: "When the email was sent (UTC)."
+
+  - source_id: email_events
+    product_id: email
+    description: "Recipient reactions to sent emails (open, click, unsubscribe, bounce), one row per reaction."
+    user_column: user_id
+    time_column: event_ts
+    dedupe_key: [event_id]
+    dedupe_order: event_ts ASC, ingested_at ASC
+    partition: DATE(event_ts)
+    cluster: [event_type, user_id]
+    columns:
+      - name: event_id
+        type: STRING
+        description: "Unique event identifier; duplicates of the same id are retries."
+      - name: send_id
+        type: STRING
+        description: "The send this reaction belongs to (email_sends.send_id)."
+      - name: user_id
+        type: STRING
+        description: "The recipient who reacted."
+      - name: event_type
+        type: STRING
+        description: "What happened (open, click, unsubscribe, bounce)."
+      - name: event_ts
+        type: TIMESTAMP
+        description: "When it happened (UTC)."
+
+  - source_id: onboarding_events
+    product_id: onboarding
+    description: "Onboarding milestones reached by each new user (signup through activation), one row per milestone."
+    user_column: user_id
+    time_column: event_ts
+    dedupe_key: [event_id]
+    dedupe_order: event_ts ASC, ingested_at ASC
+    partition: DATE(event_ts)
+    cluster: [step, user_id]
+    columns:
+      - name: event_id
+        type: STRING
+        description: "Unique event identifier; duplicates of the same id are retries."
+      - name: user_id
+        type: STRING
+        description: "The user who reached the milestone."
+      - name: step
+        type: STRING
+        description: "Milestone (signup, profile_completed, first_project, invited_teammate, activated)."
+      - name: event_ts
+        type: TIMESTAMP
+        description: "When the milestone was reached (UTC)."
+
+  - source_id: payments
+    product_id: onboarding
+    description: "Payments users make when they buy or upgrade a plan, one row per payment."
+    user_column: user_id
+    time_column: paid_ts
+    dedupe_key: [payment_id]
+    dedupe_order: paid_ts ASC, ingested_at ASC
+    partition: DATE(paid_ts)
+    cluster: [user_id]
+    columns:
+      - name: payment_id
+        type: STRING
+        description: "Unique payment identifier."
+      - name: user_id
+        type: STRING
+        description: "The paying user."
+      - name: paid_ts
+        type: TIMESTAMP
+        description: "When the payment was made (UTC)."
+      - name: amount
+        type: FLOAT64
+        description: "Amount paid."
+      - name: plan_tier
+        type: STRING
+        description: "Plan purchased (standard, premium)."

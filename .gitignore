@@ -1,0 +1,25 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+
+# Local data and databases (generated, never commit)
+data/
+*.db
+*.sqlite
+
+# Secrets and credentials (never commit)
+.env
+.env.*
+*credentials*.json
+*service_account*.json
+application_default_credentials.json
+*.pem
+*.key
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/

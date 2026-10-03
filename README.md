@@ -1,0 +1,42 @@
+# P2: Experiment Platform (demo)
+
+A small internal tool where data scientists add A/B experiments and product managers follow the results. It is a learning and demo project built on synthetic data. It runs on Streamlit with BigQuery as the only store.
+
+## What it does
+
+- **Experiment Catalog** (default page): every experiment with status, progress and verdict, plus a Metrics tab. Edit an experiment in place.
+- **Experiment Results**: search by experiment ID. A card at the top says whether the test is balanced (sample ratio check), then the primary metric, tables (by segment and filter) and charts over time. Live numbers while running, full tests and a verdict only after the last day.
+- **Add Experiment**: the data scientist enters the plan and their own statistics numbers (the tool does not do power calculations). The ID must already exist in the experiment tool's assignment log.
+- **Runs** go to a background queue (4 at a time, one per experiment) so pages stay fast.
+
+## How it works
+
+- Source tables (raw) are cleaned by generated staging views, then a per-experiment table is built from small metric, segment and filter queries. See [DATA_SOURCES.md](DATA_SOURCES.md).
+- Statistics: two-sample tests, confidence intervals and a sample ratio check (`src/p2/stats/`).
+- The app keeps state in memory and writes to BigQuery in the background. See [SCALABILITY.md](SCALABILITY.md).
+- Full design: [TECH_SPEC.md](TECH_SPEC.md). Roadmap and checklist: [PLAN.md](PLAN.md). Why things were decided: [P2_Decisions_Log.md](P2_Decisions_Log.md). Table dictionary: [SCHEMA.md](SCHEMA.md).
+
+## Run it
+
+You need Python 3.12 or newer and Google Cloud credentials with BigQuery access (`gcloud auth application-default login`). The project id is set in `src/p2/warehouse/bq.py` (`DEFAULT_PROJECT`); change it to your own.
+
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt && pip install -e .
+python -m p2.simulator            # creates the datasets and lands the synthetic users (once)
+streamlit run app/streamlit_app.py
+```
+
+- On the Add Experiment page, open "Dev only: land the September demo data". It lands 6 demo experiments (`sep-checkout-1`, `sep-email-2` and so on) with users assigned on every day of 1 to 30 Sep 2026, so any launch and end date inside September works. It takes a few minutes.
+- Settings (environment variables): `P2_ENV` (dataset set, default `dev`), `P2_STORE` (`bigquery` or `memory`), `P2_DEV_TOOLS=0` (hide the dev button), `P2_REFRESH_SECONDS`, `P2_FLUSH_SECONDS`, `P2_MAX_RUNS`.
+
+## Tests
+
+```bash
+pytest -m "not bq"    # offline, about 25 seconds
+pytest -m bq          # against BigQuery in throwaway datasets, very slow
+```
+
+## Not in scope (demo)
+
+Sign-in and permissions (everyone acts as one identity), deployment, cost guards, CUPED, Bayesian analysis, ratio metrics and multiple-comparison correction.
