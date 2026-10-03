@@ -124,3 +124,101 @@ def test_segment_tables_have_no_power_column():
     df = metric_table([seg], REG, DESIGN, True, power=False)
     assert "Power" not in df.columns and df.iloc[0].Verdict == "✅ Significant improvement"
 
+
+
+def test_the_bayesian_table_shows_chances_risks_and_a_verdict_and_tells_when_a_run_is_needed():
+    from p2.stats.bayes import BayesOutcome
+    from results_view import bayes_table
+    o = BayesOutcome(0.972, 0.0101, 0.25, 0.0002, 0.0201, 0.0001, 0.0102, None, "Variant is the safer choice")
+    harm = BayesOutcome(0.1, -0.001, -0.2, -0.003, 0.001, 0.003, 0.0001, 0.034, "Inconclusive")
+    rows = [row("conversion_rate", "primary", 0.04, 0.05, final=False), row("refund_rate", "guardrail", 0.005, 0.004, final=False),
+            row("revenue_per_user", "secondary", 3.0, 3.3, final=False)]
+    df = bayes_table(rows, [o, harm, None], REG, DESIGN)
+    assert list(df.columns) == ["Metric", "Role / type", "Control", "Variant", "Lift", "Chance variant wins", "Expected difference", "95% credible interval",
+                                "Risk: ship variant", "Risk: keep control", "Chance of harm", "Verdict", "Users (control / variant)"]
+    a, g, s = df.iloc[0], df.iloc[1], df.iloc[2]
+    assert (a["Chance variant wins"], a["Expected difference"], a["95% credible interval"]) == ("97.2%", "+1.010 pp", "+0.020 pp to +2.010 pp")
+    assert (a["Risk: ship variant"], a["Risk: keep control"], a["Chance of harm"], a.Verdict) == ("0.010 pp", "1.020 pp", "", "✅ Variant is the safer choice")
+    assert (g["Risk: ship variant"], g["Chance of harm"], g.Verdict) == ("", "3.4%", "⚠️ Inconclusive")       # a guardrail shows harm, not the two risks
+    assert s["Chance variant wins"] == "" and s.Verdict == ""                                                 # nothing to rebuild and nothing to wait for
+    waiting = bayes_table(rows[:1], [None], REG, DESIGN)
+    assert waiting.iloc[0].Verdict == "Run again to see Bayesian numbers"
+    assert df.attrs["good_up"] == [True, False, True]
+    style_table(df)                                                                                           # the colours apply to this table too
+
+
+def test_collecting_evidence_has_an_hourglass_and_the_bayesian_verdicts_are_tinted():
+    from p2.stats.bayes import BayesOutcome
+    from results_view import bayes_table
+    wait = BayesOutcome(0.6, 0.001, 0.1, -0.01, 0.01, 0.002, 0.001, None, "Collecting evidence (day 2 of 7)")
+    df = bayes_table([row("conversion_rate", "primary", 0.04, 0.05, final=False)], [wait], REG, DESIGN)
+    assert df.iloc[0].Verdict == "⏳ Collecting evidence (day 2 of 7)"
+    assert GREY in style_table(df).to_html()                                                   # waiting is grey, not the yellow of "inconclusive"
+    few = row("conversion_rate", "primary", 0.04, 0.05, final=False, n_control=1)
+    assert bayes_table([few], [None], REG, DESIGN).iloc[0].Verdict == "Too few users yet"
+
+
+def test_the_bayesian_charts_build_from_the_numbers():
+    from p2.stats.bayes import BayesOutcome
+    from results_view import bayes_time_frame, chance_chart, risk_chart, risk_frame, risk_time_chart
+    conv = REG.get("conversion_rate")
+    out = BayesOutcome(0.9, 0.01, 0.1, 0.0, 0.02, 0.0003, 0.01, None)
+    rf = risk_frame(out, True, 0.0005)
+    assert list(rf.choice) == ["Ship variant", "Keep control"] and list(rf.risk) == pytest.approx([0.03, 1.0]) and list(rf.threshold) == pytest.approx([0.05, 0.05])
+    assert list(rf.safe) == ["Under the threshold", "Over the threshold"] and list(rf.label) == ["0.030 pp", "1.000 pp"]
+    assert len(risk_chart(rf, True, "t").to_dict()["layer"]) == 4                                     # bars, values, threshold line and its label
+    no_threshold = risk_frame(out, True, None)
+    assert set(no_threshold.safe) == {"No threshold"} and len(risk_chart(no_threshold, True, "t").to_dict()["layer"]) == 2
+    series = [{"item_id": "conversion_rate", "day": date(2026, 1, d), "arm": arm, "n_users": 200 * d, "mean_value": m, "var_value": m * (1 - m)}
+              for d in range(1, 6) for arm, m in (("control", 0.10), ("variant", 0.12))]
+    tf = bayes_time_frame(series, conv, 0.0005)
+    assert len(tf) == 5 and tf.chance_to_win.is_monotonic_increasing and tf.chance_to_win.between(0, 100).all()
+    assert (tf.low < tf.difference).all() and (tf.difference < tf.high).all() and tf.difference.iloc[-1] == pytest.approx(2.0, abs=0.1)   # pp
+    assert (tf.high - tf.low).is_monotonic_decreasing                                                # more users, a narrower interval
+    assert tf.risk_control.iloc[-1] > 1 and tf.threshold.iloc[0] == pytest.approx(0.05)              # in pp: a 2 pp gap risks about 2 pp, not 0.02
+    assert tf.risk_control.iloc[-1] > tf.risk_variant.iloc[-1]                                       # the variant is ahead, so keeping control risks more
+    assert len(risk_time_chart(tf, True, "t").to_dict()["layer"]) == 3                               # two lines, the threshold and its label
+    assert len(risk_time_chart(bayes_time_frame(series, conv, None), True, "t").to_dict()["layer"]) == 1
+    spec = str(diff_chart(tf, True, "t", band_label="95% credible").to_dict())
+    assert "95% credible low" in spec and chance_chart(tf, "t").to_dict()["layer"]
+    assert bayes_time_frame(series, REG.get("refund_rate"), None).empty
+
+
+def test_the_risk_and_harm_sentences_say_the_decision_in_plain_words():
+    from p2.stats.bayes import BayesOutcome
+    from results_view import harm_sentence, risk_sentence
+    o = lambda rv, rc: BayesOutcome(0.5, 0.0, 0.0, -0.01, 0.01, rv, rc, None)
+    assert risk_sentence(o(0.0001, 0.004), True, 0.0005).endswith("so **the variant is the safer choice**.")
+    assert "we lose **0.010 pp** on average" in risk_sentence(o(0.0001, 0.004), True, 0.0005)
+    assert risk_sentence(o(0.004, 0.0001), True, 0.0005).endswith("so **control is the safer choice**.")
+    assert risk_sentence(o(0.0001, 0.0002), True, 0.0005).endswith("so **either choice is fine**.")
+    assert risk_sentence(o(0.001, 0.0044), True, 0.0005).endswith("so **there is not enough evidence**.")
+    assert "most we accept" not in risk_sentence(o(0.001, 0.004), True, None)                      # a secondary metric has no threshold
+    h = BayesOutcome(0.1, 0.0, 0.0, -0.01, 0.01, 0.0, 0.0, 0.034)
+    assert harm_sentence(h, True, 0.001, 0.01) == ("There is a **3.4%** chance this guardrail got worse by more than 0.100 pp. "
+                                                  "It passes when that chance is below **1%**.")
+
+
+def test_the_verdict_reason_is_one_plain_line_for_each_method():
+    from p2.stats import bayes
+    from p2.stats.bayes import BayesOutcome
+    from results_view import bayes_reason, frequentist_reason
+    win = {"p_value": 0.003, "verdict": "Significant improvement", "params": {"alpha": 0.05}}
+    assert frequentist_reason(win, True, date(2026, 1, 14)) == "The lift is real, not chance (p = 0.003, below your alpha of 0.05)."
+    flat = {"p_value": 0.21, "verdict": "No significant difference", "params": {"alpha": 0.1}}
+    assert frequentist_reason(flat, True, date(2026, 1, 14)) == "The difference could be chance (p = 0.210, above your alpha of 0.1)."
+    wrong_way = {"p_value": 0.01, "verdict": "No significant difference", "params": {"alpha": 0.05}}
+    assert "only counts improvements" in frequentist_reason(wrong_way, True, date(2026, 1, 14))
+    assert frequentist_reason({"p_value": 0.0001, "verdict": "Significant decline", "params": {}}, True, None) == (
+        "The variant is really worse, not by chance (p < 0.001, below your alpha of 0.05).")
+    assert frequentist_reason(win, False, date(2026, 1, 14)).startswith("The verdict comes after the last day (2026-01-14)")
+    out = lambda rv, rc, v: BayesOutcome(0.5, 0.0, 0.0, -0.01, 0.01, rv, rc, None, v)
+    assert bayes_reason(out(0.0001, 0.004, bayes.VERDICT_VARIANT), True, 0.0005, 7) == (
+        "Shipping the variant risks only 0.010 pp, under your 0.050 pp limit, while keeping control risks 0.400 pp.")
+    assert bayes_reason(out(0.00097, 0.00435, bayes.VERDICT_MORE), True, 0.0005, 7) == (
+        "Both choices still risk more than your 0.050 pp limit (ship 0.097 pp, keep 0.435 pp); more data may settle it.")
+    assert bayes_reason(out(0.00097, 0.00435, bayes.VERDICT_DONE), True, 0.0005, 7).startswith("The test has ended and both choices still risk more")
+    assert bayes_reason(out(0.0001, 0.0002, bayes.VERDICT_EITHER), True, 0.0005, 7).endswith("so either is fine.")
+    assert bayes_reason(out(0.004, 0.0001, bayes.VERDICT_CONTROL), True, 0.0005, 7).startswith("Keeping control risks only 0.010 pp")
+    assert bayes_reason(out(0.0, 0.0, "Collecting evidence (day 3 of 7)"), True, 0.0005, 7) == "Too early: the verdict comes after 7 days of data."
+    assert bayes_reason(None, True, 0.0005, 7) == "Run again to see the Bayesian numbers."

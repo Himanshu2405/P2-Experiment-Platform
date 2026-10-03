@@ -14,6 +14,8 @@ from p2.services.catalog import CatalogMixin, seed_rows
 from p2.services.runs import RunManager
 from p2.services.permissions import Actor, require_admin, require_create_experiment, require_edit_experiment
 from p2.store import base as store_errors
+from p2.stats import bayes
+from p2.stats.bayes import BayesPlan
 from p2.stats.plan import MetricPlan
 from p2.stats.tests import analyze_metric
 from p2.store.base import Store
@@ -197,8 +199,27 @@ class Platform(CatalogMixin):
                 latest[r["experiment_id"]] = r
         for row in rows:
             last = latest.get(row["experiment_id"])
-            row["verdict"] = last["verdict"] if last and (last.get("kind") or "final") == "final" else None
+            if row.get("method") == "bayesian":     # no peeking rule for Bayesian: the live verdict shows too
+                row["verdict"] = self._bayes_verdict(row, last)
+            else:
+                row["verdict"] = last["verdict"] if last and (last.get("kind") or "final") == "final" else None
         return rows
+
+    def _bayes_verdict(self, exp: dict, last: dict | None) -> str | None:
+        """The Bayesian verdict on the primary metric from the latest run, final or live (None before any run)."""
+        if last is None:
+            return None
+        design = [d for d in self.get_design(exp["experiment_id"]) if d["kind"] == "metric"]
+        if not any(d["item_id"] == last["item_id"] for d in design):
+            return None
+        out = bayes.analyze_rows([last], design, self.metric_registry(), exp["launch_date"], end_of(exp))[0]
+        return out.verdict if out else None
+
+    def bayes_outcomes(self, experiment_id: str, rows: list[dict]) -> list[bayes.BayesOutcome | None]:
+        """The Bayesian numbers for results or segment rows of an experiment, computed now from the saved counts, means and variances."""
+        exp = self.get_experiment(experiment_id)
+        design = [d for d in self.get_design(experiment_id) if d["kind"] == "metric"]
+        return bayes.analyze_rows(rows, design, self.metric_registry(), exp["launch_date"], end_of(exp))
 
     @staticmethod
     def _summarize(exp: dict, items: list[dict]) -> dict:
@@ -254,14 +275,18 @@ class Platform(CatalogMixin):
         return row
 
     # ---- design ----------------------------------------------------------------------------
-    def save_design(self, actor: Actor, experiment_id: str, primary: MetricPlan, guardrails: list[MetricPlan],
+    def save_design(self, actor: Actor, experiment_id: str, primary: MetricPlan | BayesPlan, guardrails: list[MetricPlan | BayesPlan],
                     secondary_ids: list[str], dimension_ids: list[str] | tuple = (), filter_ids: list[str] | tuple = ()) -> None:
         """Validate the picks and store the plan: one row per metric, filter and dimension. The numbers are the data
-        scientist's own; the tool records and follows them."""
+        scientist's own; the tool records and follows them. The kind of plan decides the experiment's method: BayesPlans make it Bayesian,
+        MetricPlans frequentist, and the two cannot be mixed."""
         exp = self.get_experiment(experiment_id)
         require_edit_experiment(actor, exp["owner_user_id"])
         registry = self.metric_registry()
         plans = [primary, *guardrails]
+        method = "bayesian" if isinstance(primary, BayesPlan) else "frequentist"
+        if any(isinstance(p, BayesPlan) != (method == "bayesian") for p in plans):
+            raise errors.InvalidInput("every metric plan must use the experiment's method (all Bayesian or all frequentist)")
         attr_rows = []
         for kind, ids, cap in (("filter", filter_ids, MAX_FILTERS), ("dimension", dimension_ids, MAX_DIMENSIONS)):
             if len(set(ids)) != len(ids):
@@ -285,9 +310,7 @@ class Platform(CatalogMixin):
                 raise ValueError("roles in the plan do not match the selection")
         except (ValueError, KeyError) as e:
             raise errors.InvalidInput(str(e.args[0]) if isinstance(e, KeyError) else str(e)) from None
-        rows = [{"experiment_id": experiment_id, "item_id": pl.metric.metric_id, "item_version": pl.metric.version,
-                 "kind": "metric", "role": pl.role, "baseline": pl.baseline, "std": pl.std, "effect": pl.effect,
-                 "effect_kind": pl.effect_kind, "alpha": pl.alpha, "power": pl.power, "sidedness": pl.sidedness} for pl in plans]
+        rows = [self._plan_row(experiment_id, pl) for pl in plans]
         rows += [{"experiment_id": experiment_id, "item_id": m, "item_version": registry.get(m).version,
                   "kind": "metric", "role": "secondary"} for m in secondary_ids]
         rows += attr_rows
@@ -299,11 +322,23 @@ class Platform(CatalogMixin):
             if old:
                 self.store.insert_many("experiment_items", old)  # put the previous plan back
             raise
+        if exp.get("method") != method:
+            self.store.update("experiments", {"experiment_id": experiment_id}, {"method": method})
         if exp["status"] == "Draft":     # a plan can be changed at any time; the status only follows the first save and the runs
             self._move_status(experiment_id, "Designed")
         self._audit(actor.user_id, "experiment.design", "experiment", experiment_id,
-                    {"primary": primary.metric.metric_id, "guardrails": [g.metric.metric_id for g in guardrails],
+                    {"method": method, "primary": primary.metric.metric_id, "guardrails": [g.metric.metric_id for g in guardrails],
                      "secondary": list(secondary_ids), "filters": list(filter_ids), "dimensions": list(dimension_ids)})
+
+    @staticmethod
+    def _plan_row(experiment_id: str, pl: MetricPlan | BayesPlan) -> dict:
+        base = {"experiment_id": experiment_id, "item_id": pl.metric.metric_id, "item_version": pl.metric.version, "kind": "metric", "role": pl.role}
+        if isinstance(pl, BayesPlan):    # a Bayesian primary stores its risk threshold; a guardrail its margin (in effect) and harm limit
+            if pl.role == "primary":
+                return {**base, "loss_threshold": pl.threshold, "effect_kind": pl.threshold_kind, "min_days": pl.min_days}
+            return {**base, "effect": pl.margin, "effect_kind": pl.margin_kind, "harm_limit": pl.harm_limit}
+        return {**base, "baseline": pl.baseline, "std": pl.std, "effect": pl.effect, "effect_kind": pl.effect_kind, "alpha": pl.alpha,
+                "power": pl.power, "sidedness": pl.sidedness}
 
     def get_design(self, experiment_id: str) -> list[dict]:
         rows = self.store.select("experiment_items", {"experiment_id": experiment_id})
@@ -360,9 +395,11 @@ class Platform(CatalogMixin):
     @staticmethod
     def _plan_stamp(exp: dict, design: list[dict]) -> str:
         """A short fingerprint of everything that decides what a Run calculates: the dates and the whole plan."""
-        parts = [str(exp["launch_date"]), str(end_of(exp))] + sorted(
-            "|".join(str(r.get(k)) for k in ("kind", "item_id", "item_version", "role", "baseline", "std", "effect", "effect_kind", "alpha", "power", "sidedness"))
-            for r in design)
+        keys = ("kind", "item_id", "item_version", "role", "baseline", "std", "effect", "effect_kind", "alpha", "power", "sidedness")
+        if exp.get("method") == "bayesian":      # the Bayesian numbers join the fingerprint only for Bayesian experiments, so older stamps stay valid
+            keys += ("loss_threshold", "min_days", "harm_limit")
+        parts = [str(exp["launch_date"]), str(end_of(exp))] + ([exp["method"]] if exp.get("method") == "bayesian" else []) + sorted(
+            "|".join(str(r.get(k)) for k in keys) for r in design)
         return hashlib.sha1("\n".join(parts).encode()).hexdigest()[:12]
 
     def plan_changes_since_run(self, experiment_id: str) -> list[str]:
@@ -409,6 +446,7 @@ class Platform(CatalogMixin):
         if not items["metric"]:
             raise errors.InvalidInput(f"{experiment_id} has no metrics in its plan")
         end = end_of(exp)
+        bayesian = exp.get("method") == "bayesian"
         today = (as_of or datetime.now(timezone.utc)).date()
         through = end if final else min(end, today - timedelta(days=1))   # monitoring covers complete days only
         job_id = uuid.uuid4().hex
@@ -422,7 +460,7 @@ class Platform(CatalogMixin):
             ids = [m["item_id"] for m in items["metric"]]
             summary = runner.summary_stats(result.final_table, ids)
             run_at = self.clock()
-            rows = (self._outcomes(experiment_id, design, summary, run_at, through) if final
+            rows = (self._outcomes(experiment_id, design, summary, run_at, through, bayesian) if final
                     else self._interim(experiment_id, design, summary, run_at, through))
             steps.append(StepResult("stats", None, "ok", len(rows), 0.0))
             series = runner.daily_series(experiment_id, items["metric"], exp["launch_date"], through)
@@ -430,7 +468,7 @@ class Platform(CatalogMixin):
             dim_ids, flt_ids = [d["item_id"] for d in items["dimension"]], [f["item_id"] for f in items["filter"]]
             if dim_ids or flt_ids:
                 seg = runner.segment_stats(result.final_table, dim_ids, flt_ids, ids)
-                seg_rows = self._segments(experiment_id, design, seg, run_at, through, final)
+                seg_rows = self._segments(experiment_id, design, seg, run_at, through, final, bayesian)
                 steps.append(StepResult("segments", None, "ok", len(seg_rows), 0.0))
         except Exception as e:                           # any failure ends the job cleanly instead of leaving it "running" for ever
             expected = isinstance(e, (DataQualityError, ValueError))
@@ -478,13 +516,16 @@ class Platform(CatalogMixin):
             rows.append({"experiment_id": experiment_id, "item_id": d["item_id"], "run_at": run_at, "role": d["role"],
                          "mean_control": c.mean, "mean_variant": v.mean, "difference": v.mean - c.mean,
                          "relative_lift": (v.mean - c.mean) / c.mean if c.mean else None, "n_control": c.n, "n_variant": v.n,
+                         "var_control": c.var, "var_variant": v.var,
                          "kind": "interim", "through_date": through, "params": {"interim": True}})
         return rows
 
-    def _segments(self, experiment_id: str, design: list[dict], seg: dict, run_at: datetime, through: date, final: bool) -> list[dict]:
+    def _segments(self, experiment_id: str, design: list[dict], seg: dict, run_at: datetime, through: date, final: bool,
+                  bayesian: bool = False) -> list[dict]:
         """One row per slice and metric. A slice is a dimension value, a filter (users who pass it) or both together. Exploratory: every
-        metric gets the plain two-sided test at 0.05 (no plan numbers, no correction for the number of slices). A slice needs both arms,
-        and two users in each for the final test."""
+        metric gets the plain two-sided test at 0.05 (no plan numbers, no correction for the number of slices); a Bayesian experiment gets
+        no test here, its Bayesian numbers are computed from the saved counts, means and variances when the page opens. A slice needs both
+        arms, and two users in each for the final test."""
         registry = self.metric_registry()
         plan = {d["item_id"]: d for d in design if d["kind"] == "metric"}
         rows = []
@@ -499,8 +540,9 @@ class Platform(CatalogMixin):
                     base = {"experiment_id": experiment_id, "item_id": item_id, "dimension_id": dim, "segment": str(segment), "filter_id": flt,
                             "run_at": run_at, "kind": "final" if final else "interim", "role": plan[item_id]["role"], "mean_control": c.mean,
                             "mean_variant": v.mean, "n_control": c.n, "n_variant": v.n, "through_date": through,
-                            "difference": v.mean - c.mean, "relative_lift": (v.mean - c.mean) / c.mean if c.mean else None}
-                    if final:
+                            "difference": v.mean - c.mean, "relative_lift": (v.mean - c.mean) / c.mean if c.mean else None,
+                            "var_control": c.var, "var_variant": v.var}
+                    if final and not bayesian:
                         out = analyze_metric(registry.get(item_id, plan[item_id]["item_version"]), "secondary", c, v, None)
                         base.update({"difference": out.difference, "relative_lift": out.relative_lift, "ci_low": out.ci_low,
                                      "ci_high": out.ci_high, "ci_level": out.ci_level, "p_value": out.p_value, "verdict": out.verdict})
@@ -512,8 +554,10 @@ class Platform(CatalogMixin):
         rows = self.store.select("segment_results", {"experiment_id": experiment_id})
         return sorted(rows, key=lambda r: (r["dimension_id"] or "", r["segment"], r["filter_id"] or "", ROLE_ORDER[r["role"]], r["item_id"]))
 
-    def _outcomes(self, experiment_id: str, design: list[dict], summary: dict, run_at: datetime, through: date) -> list[dict]:
-        """Run the right test for every metric in its role and shape the rows for the results table."""
+    def _outcomes(self, experiment_id: str, design: list[dict], summary: dict, run_at: datetime, through: date,
+                  bayesian: bool = False) -> list[dict]:
+        """Run the right test for every metric in its role and shape the rows for the results table. A Bayesian experiment runs no test:
+        its rows hold counts, means and variances, and the Bayesian numbers are computed from them when the page opens."""
         registry = self.metric_registry()
         rows = []
         for d in design:
@@ -523,6 +567,14 @@ class Platform(CatalogMixin):
             arms = summary[d["item_id"]]
             if "control" not in arms or "variant" not in arms:
                 raise ValueError(f"{d['item_id']}: the built table has no users in one arm")
+            if bayesian:
+                c, v = arms["control"], arms["variant"]
+                rows.append({"experiment_id": experiment_id, "item_id": d["item_id"], "run_at": run_at, "role": d["role"],
+                             "mean_control": c.mean, "mean_variant": v.mean, "difference": v.mean - c.mean,
+                             "relative_lift": (v.mean - c.mean) / c.mean if c.mean else None, "n_control": c.n, "n_variant": v.n,
+                             "var_control": c.var, "var_variant": v.var, "kind": "final", "through_date": through,
+                             "params": {"method": "bayesian"}})
+                continue
             plan = None
             if d["role"] in ("primary", "guardrail"):
                 plan = MetricPlan(metric, d["role"], d["baseline"], d["effect"], d["effect_kind"], d["alpha"], d["power"],
@@ -536,7 +588,7 @@ class Platform(CatalogMixin):
                          "ci_low": out.ci_low, "ci_high": out.ci_high, "p_value": out.p_value, "verdict": out.verdict,
                          "achieved_power": out.achieved_power, "n_control": arms["control"].n, "n_variant": arms["variant"].n,
                          "relative_lift": out.relative_lift, "ci_level": out.ci_level, "kind": "final", "through_date": through,
-                         "params": params})
+                         "var_control": arms["control"].var, "var_variant": arms["variant"].var, "params": params})
         return rows
 
     def daily_series(self, experiment_id: str) -> list[dict]:

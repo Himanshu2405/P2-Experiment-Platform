@@ -475,8 +475,8 @@ def test_after_extending_a_finished_experiment_the_page_shows_live_numbers_again
 
 
 def search(at, text):
-    at.text_input(key="search_text").set_value(text)
-    return at.button(key="search_go").click().run()
+    at.selectbox(key="search_pick").set_value(text)
+    return at.run()
 
 
 def test_the_experiments_page_is_a_search_with_no_portfolio_overview():
@@ -484,28 +484,39 @@ def test_the_experiments_page_is_a_search_with_no_portfolio_overview():
     p.create_experiment(p.get_actor("priya"), "exp-001", "checkout", "Banner", "Lifts conversion", date(2026, 1, 1), 14)
     at = page("experiments", "viewer")
     assert not at.exception and at.info and "Search for an experiment by its ID" in at.info[0].value
-    assert len(at.dataframe) == 0 and len(at.metric) == 0 and len(at.selectbox) == 0      # no filters, status counts or table of everything
-    assert at.text_input(key="search_text").label == "Experiment ID"
+    assert len(at.dataframe) == 0 and len(at.metric) == 0 and [s.key for s in at.selectbox] == ["search_pick"]   # no filters, status counts or table of everything
+    assert at.selectbox(key="search_pick").label == "Experiment ID" and at.selectbox(key="search_pick").value is None
 
 
-def test_searching_by_id_opens_that_experiment_ignoring_case_and_spaces():
+def test_picking_an_id_opens_that_experiment_and_picking_another_switches():
     p = platform()
     p.create_experiment(p.get_actor("priya"), "exp-001", "checkout", "Banner", "Lifts conversion", date(2026, 1, 1), 14)
     p.create_experiment(p.get_actor("marcus"), "exp-002", "email", "Subject", "Lifts opens", date(2026, 1, 1), 14)
-    at = search(page("experiments", "viewer"), "  EXP-002 ")
+    at = search(page("experiments", "viewer"), "exp-002")
     assert not at.exception and not at.error
     assert any(s.value == "Subject" for s in at.subheader) and any(">email<" in m.value for m in at.markdown)
     at = search(at, "exp-001")
     assert any(s.value == "Banner" for s in at.subheader)
 
 
-def test_an_unknown_id_says_so_and_suggests_similar_ones():
+def test_typing_lists_the_experiments_already_in_the_app_and_picking_one_opens_it():
+    p = platform()
+    for user, eid, product in (("priya", "sep-checkout-1", "checkout"), ("priya", "sep-checkout-2", "checkout"), ("marcus", "exp-002", "email")):
+        p.create_experiment(p.get_actor(user), eid, product, f"Name {eid}", "h", date(2026, 1, 1), 14)
+    at = page("experiments", "viewer")
+    box = at.selectbox(key="search_pick")
+    assert box.options == ["exp-002", "sep-checkout-1", "sep-checkout-2"] and not box.accept_new_options   # the box filters these as you type "sep"
+    at = search(at, "sep-checkout-2")
+    assert not at.error and any(s.value == "Name sep-checkout-2" for s in at.subheader)
+    assert at.selectbox(key="search_pick").value == "sep-checkout-2"
+
+
+def test_a_saved_pick_that_no_longer_exists_falls_back_to_the_empty_search():
     p = platform()
     p.create_experiment(p.get_actor("priya"), "exp-001", "checkout", "Banner", "h", date(2026, 1, 1), 14)
-    at = search(page("experiments"), "exp-0")
-    assert at.error and "No experiment with the id" in at.error[0].value
-    assert any("Similar ids: exp-001" in c.value for c in at.caption)
-    assert not at.exception
+    at = page("experiments", search_id="exp-gone", search_pick="exp-gone")
+    assert not at.exception and not at.error and at.selectbox(key="search_pick").value is None
+    assert "Search for an experiment by its ID" in at.info[0].value
 
 
 def test_there_is_no_admin_page():
@@ -643,19 +654,27 @@ def chart_titles(at):
     return " ".join(str(c.proto.spec) for c in charts(at))
 
 
-def test_the_charts_show_only_the_metrics_picked_in_the_filter():
+def apply_charts(at, metrics):
+    """Pick metrics in the chart filter and press Apply (the charts do not change before that)."""
+    at.multiselect(key="chart_metrics_exp-001").set_value(metrics)
+    return at.button(key="chart_apply").click().run()
+
+
+def test_the_charts_show_only_the_metrics_picked_in_the_filter_once_apply_is_pressed():
     planned_experiment()
     at = page("experiments", search_id="exp-001")
     at.button(key="run_go").click().run()
     box = at.multiselect(key="chart_metrics_exp-001")
     assert set(box.options) == {"Conversion rate (primary)", "Refund rate (guardrail)"}              # the role is part of the name
     assert "Conversion rate" in chart_titles(at) and "Refund rate" not in chart_titles(at)         # neither chart has the unpicked metric
-    box.set_value(["conversion_rate", "refund_rate"]).run()
+    box.set_value(["conversion_rate", "refund_rate"])     # (the browser holds a form's values back until Apply; AppTest cannot show that)
+    at.button(key="chart_apply").click().run()
     assert not at.exception and len(charts(at)) == 4                                               # per metric: the two arms over time and the difference
     assert "Refund rate" in chart_titles(at)
-    at.multiselect(key="chart_metrics_exp-001").set_value(["refund_rate"]).run()
+    at = apply_charts(at, ["refund_rate"])
+    assert len(charts(at)) == 2
     assert "Refund rate" in chart_titles(at) and "Conversion rate" not in chart_titles(at)
-    at.multiselect(key="chart_metrics_exp-001").set_value([]).run()
+    at = apply_charts(at, [])
     assert len(charts(at)) == 0 and any("Pick at least one metric" in i.value for i in at.info)
 
 
@@ -746,7 +765,7 @@ def test_the_open_target_set_by_save_and_run_opens_that_experiment():
     create_in_ui("priya", "First")
     create_in_ui("marcus", "Second", baseline=5.0)
     at = page("experiments", "viewer", open_target="exp-001")
-    assert any(s.value == "First" for s in at.subheader) and at.text_input(key="search_text").value == "exp-001"
+    assert any(s.value == "First" for s in at.subheader) and at.selectbox(key="search_pick").value == "exp-001"
 
 
 def test_the_run_log_and_history_are_kept_in_the_backend_not_shown_on_the_page():
@@ -913,6 +932,13 @@ def row_texts(at):
     return [m.value for m in at.markdown]
 
 
+def catalog_rows(at):
+    """One list per catalog row: the (main line, quiet line) of each of its cells, in column order."""
+    import re
+    cells = [re.findall(r'<div class="l[12]">(.*?)</div>', c) for c in row_texts(at) if 'class="cell"' in c]
+    return [[(c[0], c[1].replace("&nbsp;", "")) for c in cells[i:i + 7]] for i in range(0, len(cells), 7)]     # experiment, product/owner, status, test, metric, launch, verdict
+
+
 def test_the_experiment_catalog_lists_live_experiments_first_with_progress_and_verdict():
     planned_experiment()                                                                           # priya: ran in January, then analysed
     p = platform()
@@ -923,18 +949,23 @@ def test_the_experiment_catalog_lists_live_experiments_first_with_progress_and_v
     at = page("catalog", "viewer")
     assert not at.exception
     cells = row_texts(at)
-    assert [c for c in cells if c.startswith("**exp-")] == ["**exp-002**", "**exp-003**", "**exp-001**"]   # live, then not started, then ended
-    assert [h for h in cells if h in ("**Experiment**", "**Verdict**", "**Progress**", "**Launch to end**")] == ["**Experiment**", "**Launch to end**", "**Verdict**", "**Progress**"]
+    rows = catalog_rows(at)
+    assert [r[0][0] for r in rows] == ["exp-002", "exp-003", "exp-001"]                               # live, then not started, then ended
+    assert [h for h in cells if h in ("**Experiment**", "**Test**", "**Verdict**", "**Progress**", "**Launch to end**")] == [
+        "**Experiment**", "**Test**", "**Launch to end**", "**Verdict**", "**Progress**"]
     joined = " ".join(cells)
     assert "3 experiments" in joined and "1 live" in joined and "1 not started" in joined and "1 ended" in joined             # the summary line
     bars = [c for c in cells if 'class="pbar"' in c]
     assert [("Live, day 4 of 14" in b) for b in bars] == [True, False, False] and "Starts in 5 days" in bars[1] and "Ended, 14 days" in bars[2]
     assert "#3b82f6" in bars[0] and "#eab308" in bars[1] and "#22c55e" in bars[2]                        # blue while live, yellow before, green after
-    assert joined.count("Significant improvement") == 1 and joined.count("Not run yet") == 2 and "Conversion rate" in cells and "Click rate" in cells
+    assert joined.count("Significant improvement") == 1 and joined.count("Not run yet") == 2
+    assert [r[4][0] for r in rows] == ["Click rate", "Conversion rate", "Conversion rate"] and {r[4][1] for r in rows} == {"Rate"}   # the metric, and its type below
     assert "rgba(34,197,94" in [c for c in cells if "Significant improvement" in c][0]                       # a green chip for the good verdict
-    captions = [c.value for c in at.caption]
-    assert "Priya" in captions and "Marcus" in captions and "Banner" in captions                            # short names under the product; the name under the id
-    assert not any("(Checkout owner)" in c for c in captions) and f"to {date.today() + timedelta(days=-3 + 13)}" in captions
+    assert [(r[0][1], r[1]) for r in rows] == [("Banner", ("Email", "Marcus")), ("Banner", ("Checkout", "Priya")), ("Banner", ("Checkout", "Priya"))]
+    assert [r[5][0] for r in rows] == [f"{date.today() - timedelta(days=3)}", f"{date.today() + timedelta(days=5)}", "2026-01-01"]
+    assert rows[0][5][1] == f"to {date.today() + timedelta(days=-3 + 13)}"
+    assert not any("(Checkout owner)" in c for c in cells)
+    assert all("Frequentist" in c for c in cells if 'class="cell"' in c and ">Frequentist<" in c) and joined.count(">Frequentist<") == 3     # the test type of each row
     assert len([b for b in at.button if b.key.startswith("cat_open_")]) == 3 and len([b for b in at.button if b.key.startswith("cat_edit_")]) == 3
     assert at.text_input(key="cat_search") is not None
 
@@ -967,7 +998,7 @@ def test_the_experiment_catalog_filters_only_by_experiment_id():
     at = page("catalog")
     assert at.text_input(key="cat_search").label == "Experiment ID" and not [s for s in at.selectbox if s.key.startswith("cat_")]
     at.text_input(key="cat_search").set_value("EXP-002").run()
-    assert [c for c in row_texts(at) if c.startswith("**exp-")] == ["**exp-002**"]
+    assert [r[0][0] for r in catalog_rows(at)] == ["exp-002"]
     at.text_input(key="cat_search").set_value("zzz").run()
     assert any("No experiments match" in i.value for i in at.info)
 
@@ -1026,16 +1057,25 @@ def test_the_app_shell_has_three_pages_on_top_and_no_sidebar_or_sign_in():
         assert page(page_name).title[0].value == heading
 
 
-def test_the_headline_cards_read_control_then_variant_then_lift_then_verdict():
+def test_the_headline_is_the_lift_and_a_wide_verdict_with_a_one_line_reason():
     planned_experiment()
     at = page("experiments", search_id="exp-001")
     assert [m.label for m in at.metric] == []                                                      # no numbers yet, so no cards
     at.button(key="run_go").click().run()
-    assert [m.label for m in at.metric] == ["Conversion rate · control", "Conversion rate · variant", "Lift (variant vs control)"]
-    control, variant, lift = at.metric
-    assert (control.value, variant.value, lift.value, lift.delta) == ("10.000%", "16.000%", "+60.0%", "+6.000 pp")
+    assert [m.label for m in at.metric] == ["Lift (variant vs control)"]                           # the arm averages are in the table
+    lift = at.metric[0]
+    assert (lift.value, lift.delta) == ("+60.0%", "+6.000 pp")
     verdict = [m.value for m in at.markdown if 'class="verdict-card"' in m.value][0]
-    assert "Significant improvement" in verdict and "900 users (450 control, 450 variant)" in verdict
+    assert "Significant improvement" in verdict and "The lift is real, not chance (p = 0.007, below your alpha of 0.05)." in verdict
+    assert "users" not in verdict and "Final analysis" not in verdict                               # details live in the table, not the card
+
+
+def test_a_live_frequentist_headline_says_when_the_verdict_comes():
+    running_experiment()
+    at = page("experiments", search_id="exp-001")
+    at.button(key="monitor_go").click().run()
+    verdict = [m.value for m in at.markdown if 'class="verdict-card"' in m.value][0]
+    assert "In progress" in verdict and "The verdict comes after the last day" in verdict
 
 
 def test_the_results_page_explains_the_colours_and_shows_a_short_owner_name():
@@ -1049,7 +1089,7 @@ def test_the_results_page_explains_the_colours_and_shows_a_short_owner_name():
 
 def test_the_search_and_dropdowns_are_compact_not_full_width():
     shell = (APP / "views" / "experiments.py").read_text()
-    assert "st.columns([3, 1, 6]" in shell and "st.columns([3, 3, 4])" in shell
+    assert "st.columns([3, 7])" in shell and "st.columns([3, 3, 4])" in shell
     assert "st.columns([3, 7]" in (APP / "experiment_catalog.py").read_text()
 
 
@@ -1297,3 +1337,21 @@ def test_the_results_page_warns_when_the_split_is_off():
 def test_no_srm_card_before_there_are_numbers():
     running_experiment()
     assert srm_card_text(page("experiments", search_id="exp-001")) == ""
+
+
+def test_the_catalog_shows_the_test_type_of_each_experiment():
+    from p2.stats.bayes import BayesPlan
+    planned_experiment()                                                                           # exp-001 is frequentist
+    p = platform()
+    p.create_experiment(p.get_actor("priya"), "exp-002", "checkout", "Bayes", "h", date(2026, 1, 1), 14)
+    p.save_design(p.get_actor("priya"), "exp-002", BayesPlan(p.metric_registry().get("conversion_rate"), "primary", threshold=0.0005), [], [])
+    st.cache_data.clear()
+    at = page("catalog")
+    assert not at.exception
+    assert [(r[0][0], r[3][0]) for r in catalog_rows(at)] == [("exp-002", ui_chip("Bayesian")), ("exp-001", ui_chip("Frequentist"))]
+    assert "**Test**" in row_texts(at)
+
+
+def ui_chip(method):
+    import ui
+    return ui.chip(method, ui.METHOD_TONE[method])

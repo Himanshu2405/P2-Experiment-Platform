@@ -29,7 +29,7 @@ Legend: DONE = covered by a completed module. PREREQ = must learn first. GAP = s
 - Unit of randomization and analysis is the user. Two arms. Each user is measured from their assignment day through the experiment's last day (launch date plus runtime minus one day).
 - Catalog items (metrics, dimensions, filters) share one lifecycle: Draft, In review, Certified, Deprecated. Only Certified items reach experiment dropdowns. Author cannot certify their own item.
 - Data foundation first (approved in DATA_SOURCES.md): 9 raw source tables over a shared user universe, platform-generated staging views with de-duplication, dimensions and filters as first-class catalog items resolved as of assignment date, a pipeline built from small one-table steps so no query gets large.
-- Frequentist analysis first. Bayesian, SRM, CUPED, multiple-comparison correction and per-segment results later.
+- Frequentist analysis first. A Bayesian method, chosen per experiment, was added on 2026-10-03. CUPED and multiple-comparison correction later.
 
 ## Direction change (2026-09-30)
 
@@ -106,7 +106,7 @@ Legend: DONE = covered by a completed module. PREREQ = must learn first. GAP = s
 - Exit: live URL, scheduled job green, budget alert intact.
 
 ### Later
-- CUPED, Bayesian, ratio metrics, per-segment results, multiple-comparison correction.
+- CUPED, ratio metrics, multiple-comparison correction. Bayesian extras: informative or historical priors, ROPE band, partial pooling for segments, monetary value of lift, prior sensitivity check, heavy-tail model for revenue.
 - Chatbot over results (PREREQ: Module 5 LangSmith videos, FastAPI 7.1), optional RAG over methodology docs (PREREQ: Module 6).
 
 ## Risks and mitigations

@@ -9,13 +9,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import streamlit as st
 
 from common import current_actor, get_platform, get_registry, read, refresh
-from p2.design_form import describe, to_plan, to_ui
+from p2.design_form import describe, describe_bayes, to_bayes_plan, to_bayes_ui, to_plan, to_ui
 from p2.pipeline.runner import end_of, last_day
 from p2.services.errors import PlatformError
+from p2.stats.bayes import (BayesPlan, DEFAULT_HARM_LIMIT, DEFAULT_MEAN_THRESHOLD, DEFAULT_MIN_DAYS, DEFAULT_RATE_THRESHOLD)
 from p2.stats.plan import MetricPlan
 
 FIELD_KEYS = ("exp_id", "owner", "name", "hypothesis", "launch", "runtime", "end", "_launch_for", "product", "filters", "dimensions", "guardrails", "secondary",
-              "primary_metric")
+              "primary_metric", "method")
 PLAN_PREFIXES = ("primary_", "guardrail_")
 ss = st.session_state
 
@@ -34,7 +35,7 @@ def _restore() -> None:
 def _reset() -> None:
     for k in _form_keys():
         del ss[k]
-    for k in ("_orig_end", "_orig_status", "_form_snapshot", "_form_mode"):
+    for k in ("_orig_end", "_orig_status", "_orig_method", "_form_snapshot", "_form_mode"):
         ss.pop(k, None)
 
 
@@ -55,6 +56,17 @@ def _set_plan_keys(prefix: str, metric, row: dict) -> None:
         ss[f"{prefix}_sided"] = ui["sidedness"]
 
 
+def _set_bayes_keys(prefix: str, metric, row: dict) -> None:
+    ui = to_bayes_ui(metric, row)
+    if "threshold" in ui:
+        ss[f"{prefix}_bthreshold"] = float(round(ui["threshold"], 6))
+        ss[f"{prefix}_bmindays"] = int(ui["min_days"])
+    else:
+        ss[f"{prefix}_bkind"] = "Relative (%)" if ui["kind"] == "relative" else "Absolute"
+        ss[f"{prefix}_bmargin_{ui['kind']}"] = float(round(ui["margin"], 6))
+        ss[f"{prefix}_bharm"] = float(round(ui["harm_limit"], 6))
+
+
 def _load(experiment_id: str) -> None:
     """Fill the form from a saved experiment and its plan, in any status. Everything but the id can then be changed."""
     _reset()
@@ -65,7 +77,11 @@ def _load(experiment_id: str) -> None:
     ss.update(exp_id=experiment_id, name=exp["name"], hypothesis=exp["hypothesis"], launch=exp["launch_date"],
               runtime=exp["runtime_days"], end=exp["end_date"], _launch_for=experiment_id)
     ss["_orig_end"], ss["_orig_status"] = end_of(exp), exp["status"]
+    ss["_orig_method"] = "Bayesian" if exp.get("method") == "bayesian" else "Frequentist"
     ss["owner"], ss["product"] = exp["owner_user_id"], exp["product_id"]
+    bayesian = exp.get("method") == "bayesian"
+    ss["method"] = "Bayesian" if bayesian else "Frequentist"
+    set_keys = _set_bayes_keys if bayesian else _set_plan_keys
     registry = get_registry()
     design = read("get_design", experiment_id)
     guards, secondary = [], []
@@ -74,10 +90,10 @@ def _load(experiment_id: str) -> None:
             continue
         if r["role"] == "primary":
             ss["primary_metric"] = r["item_id"]
-            _set_plan_keys(f"primary_{r['item_id']}", registry.get(r["item_id"]), r)
+            set_keys(f"primary_{r['item_id']}", registry.get(r["item_id"]), r)
         elif r["role"] == "guardrail":
             guards.append(r["item_id"])
-            _set_plan_keys(f"guardrail_{r['item_id']}", registry.get(r["item_id"]), r)
+            set_keys(f"guardrail_{r['item_id']}", registry.get(r["item_id"]), r)
         elif r["role"] == "secondary":
             secondary.append(r["item_id"])
     ss["guardrails"], ss["secondary"] = guards, secondary
@@ -170,6 +186,53 @@ def render(edit_id: str | None = None, title: bool = True) -> None:
                 return None
 
 
+    def bayes_inputs(metric_id: str, role: str) -> BayesPlan | None:
+        """The data scientist's Bayesian numbers for one primary or guardrail metric (all have defaults). None until they are valid."""
+        with st.container(border=True):
+            metric = registry.get(metric_id)
+            binary = metric.type == "binary"
+            k = f"{role}_{metric_id}"
+            st.markdown(f"**{metric.display_name}** &nbsp;|&nbsp; {'Rate' if binary else 'Continuous'} &nbsp;|&nbsp; {metric.product_id} &nbsp;|&nbsp; "
+                        f"{'lower' if metric.good_direction == 'lower' else 'higher'} is better")
+            if role == "primary":
+                c = st.columns(2)
+                ss.setdefault(f"{k}_bthreshold", DEFAULT_RATE_THRESHOLD * 100 if binary else DEFAULT_MEAN_THRESHOLD * 100)
+                ss.setdefault(f"{k}_bmindays", DEFAULT_MIN_DAYS)
+                threshold = c[0].number_input("Risk threshold (pp)" if binary else "Risk threshold (% of control average)", min_value=0.0, format="%.4f",
+                                              key=f"{k}_bthreshold", help="The most you are willing to lose on average if you pick the wrong arm. The verdict "
+                                              "compares the risk of shipping the variant and the risk of keeping control with it.")
+                min_days = int(c[1].number_input("Minimum days before a verdict", min_value=1, max_value=365, step=1, key=f"{k}_bmindays",
+                                                 help="Numbers show from day one, but no verdict is given before this many days of data."))
+                try:
+                    plan = to_bayes_plan(metric, role, threshold, min_days, None, "relative", None)
+                    st.caption(describe_bayes(plan))
+                    return plan
+                except ValueError as e:
+                    st.error(str(e))
+                    return None
+            c = st.columns(3)
+            ss.setdefault(f"{k}_bkind", "Relative (%)")
+            ss.setdefault(f"{k}_bharm", DEFAULT_HARM_LIMIT * 100)
+            kind_label = c[0].radio("Margin type", ["Relative (%)", "Absolute"], horizontal=True, key=f"{k}_bkind",
+                                    help="Relative is a percent of the control average; absolute is in the metric's own units (percentage points for rates).")
+            kind = "relative" if kind_label.startswith("Relative") else "absolute"
+            margin = c[1].number_input("Margin" + (" (%)" if kind == "relative" else (" (pp)" if binary else " ($)")), min_value=0.0, value=None,
+                                       format="%.4f", key=f"{k}_bmargin_{kind}", placeholder="e.g. 1",
+                                       help="How much worse the metric can get before it counts as harm.")
+            harm = c[2].number_input("Harm limit (%)", min_value=0.01, max_value=49.9, format="%.2f", key=f"{k}_bharm",
+                                     help="The guardrail passes when the chance of harm is below this. Strict by default: 1%.")
+            if margin is None:
+                st.info("Enter the margin to complete this guardrail.")
+                return None
+            try:
+                plan = to_bayes_plan(metric, role, None, None, margin, kind, harm)
+                st.caption(describe_bayes(plan))
+                return plan
+            except ValueError as e:
+                st.error(str(e))
+                return None
+
+
     def metric_label(metric_id: str) -> str:
         m = registry.get(metric_id)
         return f"{m.display_name} ({m.product_id})"
@@ -225,6 +288,14 @@ def render(edit_id: str | None = None, title: bool = True) -> None:
         # ------------------------------------------------------------------ metrics
     with st.container(border=True):
         st.subheader("Metrics", help="Any metric can be primary, a guardrail or secondary. A metric picked in one role is not offered in the others.")
+        ss.setdefault("method", "Frequentist")
+        method = st.radio("Method", ["Frequentist", "Bayesian"], horizontal=True, key="method",
+                          help="Frequentist: p-values, confidence intervals and a verdict after the last day. Bayesian: the chance the variant is better "
+                               "and the risk of each choice, live after a minimum number of days. Only the inputs for the chosen method are shown.")
+        bayesian = method == "Bayesian"
+        inputs = bayes_inputs if bayesian else stat_inputs
+        if editing and ss.get("_orig_status") in ("Running", "Analyzed", "Decided") and (ss.get("_orig_method") or "Frequentist") != method:
+            st.warning("You are changing the method of an experiment that already has results. Run it again to see the numbers in the new method.")
         all_ids = [m.metric_id for m in registry.all_metrics()]
         if ss.get("primary_metric") is not None and ss["primary_metric"] not in all_ids:
             del ss["primary_metric"]
@@ -236,12 +307,12 @@ def render(edit_id: str | None = None, title: bool = True) -> None:
         primary_id = st.selectbox("Primary metric", [i for i in all_ids if i not in guard_now | sec_now], index=None,
                                   placeholder="Choose a metric", format_func=metric_label, key="primary_metric",
                                   help="The one metric the decision is based on.")
-        primary = stat_inputs(primary_id, "primary") if primary_id else None
+        primary = inputs(primary_id, "primary") if primary_id else None
         guard_ids = st.multiselect("Guardrail metrics", [i for i in all_ids if i != primary_id and i not in sec_now], format_func=metric_label,
                                    key="guardrails", help="Metrics that must not get worse by more than your margin.")
-        guards = [stat_inputs(g, "guardrail") for g in guard_ids]
+        guards = [inputs(g, "guardrail") for g in guard_ids]
         sec_ids = st.multiselect("Secondary metrics", [i for i in all_ids if i != primary_id and i not in set(guard_ids)], format_func=metric_label,
-                                 key="secondary", help="Extra metrics to learn from. No statistical inputs; analysed as exploratory.")
+                                 key="secondary", help="Extra metrics to learn from. No inputs; shown without a verdict.")
 
         # ------------------------------------------------------------------ audience (optional)
     with st.container(border=True):

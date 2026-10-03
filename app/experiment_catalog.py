@@ -1,5 +1,6 @@
 """The Experiment Catalog: every experiment in one list, with a progress bar that shows how far a live test has run, and an
 Edit and an Open results button on each row. Editing opens the shared experiment form in place."""
+import html
 import sys
 from datetime import date
 from pathlib import Path
@@ -15,7 +16,7 @@ from p2.pipeline.runner import end_of
 
 ss = st.session_state
 MAX_ROWS = 50
-WIDTHS = [2.0, 1.4, 1.1, 1.6, 1.4, 2.2, 2.2, 0.9, 1.5]
+WIDTHS = [2.0, 1.3, 1.3, 1.3, 1.5, 1.4, 2.1, 2.2, 0.9, 1.5]
 
 
 def progress_of(launch: date, end: date, today: date) -> tuple[float, str]:
@@ -77,7 +78,7 @@ def render() -> None:
         st.caption(f"Showing the first {MAX_ROWS} of {len(rows)}. Search by ID to find the others.")
     with st.container(key="cat_header"):
         head = st.columns(WIDTHS)
-        for col, label in zip(head, ["Experiment", "Product / owner", "Status", "Primary metric", "Launch to end", "Verdict", "Progress", "", ""]):
+        for col, label in zip(head, ["Experiment", "Product, owner", "Status", "Test", "Primary metric", "Launch to end", "Verdict", "Progress", "", ""]):
             if label:
                 col.markdown(f"**{label}**")
     for r in rows[:MAX_ROWS]:
@@ -85,20 +86,22 @@ def render() -> None:
         end = end_of(r)
         with st.container(key=f"cat_row_{eid}"):
             c = st.columns(WIDTHS, vertical_alignment="center")
-            c[0].markdown(f"**{eid}**")
-            c[0].caption(r["name"])
-            c[1].markdown(ui.chip(r["product_id"], "grey"), unsafe_allow_html=True)
-            c[1].caption(owners.get(r["owner_user_id"], r["owner_user_id"]))
-            c[2].markdown(ui.status_chip(r["status"]) + ("<br>" + ui.chip("Run in progress", "blue") if eid in in_progress else ""), unsafe_allow_html=True)
-            c[3].write(registry.get(r["primary_metric"]).display_name if r["primary_metric"] else "-")
-            c[4].write(str(r["launch_date"]))
-            c[4].caption(f"to {end}")
-            c[5].markdown(verdict_chip(r), unsafe_allow_html=True)
-            frac, text = progress_of(r["launch_date"], end, today)
-            c[6].markdown(ui.progress_bar(frac, text, PHASE_TONE[phase[eid]]), unsafe_allow_html=True)
-            if c[7].button("Edit", key=f"cat_edit_{eid}", type="tertiary", icon=":material/edit:"):
+            metric = registry.get(r["primary_metric"]) if r["primary_metric"] else None
+            cells = [
+                ui.cell(html.escape(eid), html.escape(r["name"])),
+                ui.cell(html.escape(r["product_id"].capitalize()), html.escape(owners.get(r["owner_user_id"], r["owner_user_id"]))),
+                ui.cell(ui.status_chip(r["status"]), '<span class="live">Run in progress</span>' if eid in in_progress else ""),
+                ui.cell(ui.method_chip(r)),
+                ui.cell(html.escape(metric.display_name) if metric else "-", ("Rate" if metric.type == "binary" else "Continuous") if metric else ""),
+                ui.cell(str(r["launch_date"]), f"to {end}"),
+                ui.cell(verdict_chip(r)),
+                ui.progress_bar(*progress_of(r["launch_date"], end, today), PHASE_TONE[phase[eid]]),
+            ]
+            for col, cell in zip(c, cells):
+                col.markdown(cell, unsafe_allow_html=True)
+            if c[8].button("Edit", key=f"cat_edit_{eid}", type="tertiary", icon=":material/edit:"):
                 ss["catalog_edit"] = eid
                 st.rerun()
-            if c[8].button("Open results", key=f"cat_open_{eid}", type="primary"):
+            if c[9].button("Open results", key=f"cat_open_{eid}", type="primary"):
                 ss["open_target"] = eid
                 st.switch_page("views/experiments.py")

@@ -3,6 +3,7 @@
 The UI shows binary rates in percent and effects in percentage points; the plan works in fractions.
 """
 from p2.registry.registry import MetricDef
+from p2.stats.bayes import BayesPlan
 from p2.stats.plan import MetricPlan
 
 
@@ -44,3 +45,38 @@ def to_ui(metric: MetricDef, row: dict) -> dict:
         "effect": row["effect"] * 100 if (binary or row["effect_kind"] == "relative") else row["effect"],
         "alpha": row["alpha"], "power": row["power"], "sidedness": row["sidedness"],
     }
+
+
+# ---- the Bayesian method ----------------------------------------------------------------------------------------------------
+def to_bayes_plan(metric: MetricDef, role: str, threshold: float | None, min_days: int | None, margin: float | None, kind: str,
+                  harm_limit: float | None) -> BayesPlan:
+    """UI units in, fractions out. A rate's threshold is in percentage points and an average's in percent of the control average;
+    a guardrail's margin follows the margin type (percent of the control average, or the metric's own units, percentage points for rates);
+    the harm limit is in percent."""
+    binary = metric.type == "binary"
+    if role == "primary":
+        return BayesPlan(metric, "primary", threshold=None if threshold is None else threshold / 100, min_days=min_days or 0)
+    return BayesPlan(metric, "guardrail", margin=None if margin is None else margin / 100 if (binary or kind == "relative") else margin,
+                     margin_kind=kind, harm_limit=0.0 if harm_limit is None else harm_limit / 100)
+
+
+def describe_bayes(plan: BayesPlan) -> str:
+    """One plain sentence on what the entered numbers mean."""
+    m = plan.metric
+    if plan.role == "primary":
+        unit = f"{plan.threshold * 100:.3g} percentage points" if m.type == "binary" else f"{plan.threshold * 100:.3g}% of the control average"
+        return (f"Verdict after {plan.min_days} days: the variant is the safer choice when shipping it risks losing less than {unit} "
+                f"and keeping control risks more.")
+    margin = (f"{plan.margin * 100:.3g} percentage points" if m.type == "binary" and plan.margin_kind == "absolute"
+              else f"{plan.margin * 100:.3g}%" if plan.margin_kind == "relative" else f"{plan.margin:,.3g}")
+    return f"Guardrail passes when the chance it got worse by more than {margin} is below {plan.harm_limit * 100:.3g}%."
+
+
+def to_bayes_ui(metric: MetricDef, row: dict) -> dict:
+    """The form values (UI units) that reproduce a saved Bayesian experiment_items row; the inverse of to_bayes_plan."""
+    binary = metric.type == "binary"
+    if row["role"] == "primary":
+        return {"threshold": row["loss_threshold"] * 100, "min_days": row["min_days"]}
+    kind = row["effect_kind"]
+    return {"kind": kind, "margin": row["effect"] * 100 if (binary or kind == "relative") else row["effect"],
+            "harm_limit": row["harm_limit"] * 100}

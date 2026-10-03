@@ -376,6 +376,7 @@ One row per experiment: who owns it, what it tests, when it ran, where it stands
 | `decision_notes` | STRING | yes | Reasoning behind the decision. |
 | `decided_by` | STRING | yes | Who recorded the decision. |
 | `decided_at` | TIMESTAMP | yes | When it was recorded (UTC). |
+| `method` | STRING | yes | bayesian or frequentist: how the experiment is analysed. Empty means frequentist (experiments saved before the Bayesian method existed). |
 
 ### `experiment_items`
 
@@ -397,6 +398,9 @@ The metrics, filters and dimensions chosen for each experiment, pinned to a cata
 | `alpha` | FLOAT64 | yes | Significance level used in the analysis. |
 | `power` | FLOAT64 | yes | Target power the data scientist planned for; recorded for reference. |
 | `sidedness` | STRING | yes | one-sided or two-sided; guardrails are always one-sided. |
+| `loss_threshold` | FLOAT64 | yes | Bayesian primary metric only: the most expected loss accepted, in absolute units for a rate or as a share of the control average for a continuous metric (effect_kind says which). |
+| `min_days` | INT64 | yes | Bayesian primary metric only: no verdict before this many days of data. |
+| `harm_limit` | FLOAT64 | yes | Bayesian guardrail only: the guardrail passes when the chance the metric got worse by more than the margin is below this. The margin is in effect and effect_kind. |
 
 ### `results`
 
@@ -424,7 +428,9 @@ Results per experiment and metric, one set of rows per run. Interim rows (while 
 | `ci_level` | FLOAT64 | yes | Confidence level the interval was built at (for a one-sided test it is 1 minus twice alpha). |
 | `kind` | STRING | yes | final (full tests, after the last day) or interim (descriptive numbers only, while the experiment runs). |
 | `through_date` | DATE | yes | Last day of data the numbers include; for a final result it is the experiment's last day. |
-| `params` | JSON | yes | JSON of the plan the analysis followed: alpha, sidedness, effect and its kind, baseline, planned power, and the margin in metric units. |
+| `params` | JSON | yes | JSON of the plan the analysis followed: alpha, sidedness, effect and its kind, baseline, planned power, and the margin in metric units. A Bayesian experiment stores only the method. |
+| `var_control` | FLOAT64 | yes | Sample variance of the per-user value in control; the Bayesian view builds its posterior from it (empty for results saved before it was stored). |
+| `var_variant` | FLOAT64 | yes | Sample variance of the per-user value in variant. |
 
 ### `daily_stats`
 
@@ -471,6 +477,8 @@ Results per metric for every slice the Tables tab offers, for the latest run onl
 | `n_control` | INT64 | no | Users in control within the segment. |
 | `n_variant` | INT64 | no | Users in variant within the segment. |
 | `through_date` | DATE | no | Last day of data included. |
+| `var_control` | FLOAT64 | yes | Sample variance of the per-user value in control within the segment (used by the Bayesian view). |
+| `var_variant` | FLOAT64 | yes | Sample variance of the per-user value in variant within the segment. |
 
 ### `job_runs`
 

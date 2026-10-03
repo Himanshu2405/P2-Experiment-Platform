@@ -23,14 +23,14 @@ Add Experiment: type an ID that exists in the assignment log and the form opens.
 ## What it does
 
 - **Experiment Catalog** (default page): every experiment with status, progress and verdict, plus a Metrics tab. Edit an experiment in place.
-- **Experiment Results**: search by experiment ID. A card at the top says whether the test is balanced (sample ratio check), then the primary metric, tables (by segment and filter) and charts over time. Live numbers while running, full tests and a verdict only after the last day.
-- **Add Experiment**: the data scientist enters the plan and their own statistics numbers (the tool does not do power calculations). The ID must already exist in the experiment tool's assignment log.
+- **Experiment Results**: search by experiment ID. A card at the top says whether the test is balanced (sample ratio check), then the primary metric, tables (by segment and filter) and charts over time. Frequentist: live numbers while running, full tests and a verdict only after the last day. Bayesian: chance the variant wins, risk of each choice and a verdict that can be read live after a minimum number of days.
+- **Add Experiment**: the data scientist picks the method (Frequentist or Bayesian) and enters the plan for it. Frequentist asks for their own statistics numbers (the tool does not do power calculations); Bayesian asks for a risk threshold and a minimum number of days, with defaults. The ID must already exist in the experiment tool's assignment log.
 - **Runs** go to a background queue (4 at a time, one per experiment) so pages stay fast.
 
 ## How it works
 
 - Source tables (raw) are cleaned by generated staging views, then a per-experiment table is built from small metric, segment and filter queries. See [DATA_SOURCES.md](DATA_SOURCES.md).
-- Statistics: two-sample tests, confidence intervals and a sample ratio check (`src/p2/stats/`).
+- Statistics: two-sample tests, confidence intervals and a sample ratio check (`src/p2/stats/tests.py`, `srm.py`), and a Bayesian method (`src/p2/stats/bayes.py`: Beta-Binomial for rates, Normal posterior for averages, flat prior, computed from the saved counts, means and variances when the page opens, so no extra BigQuery scan).
 - The app keeps state in memory and writes to BigQuery in the background. See [SCALABILITY.md](SCALABILITY.md).
 - Full design: [TECH_SPEC.md](TECH_SPEC.md). Roadmap and checklist: [PLAN.md](PLAN.md). Why things were decided: [P2_Decisions_Log.md](P2_Decisions_Log.md). Table dictionary: [SCHEMA.md](SCHEMA.md).
 
@@ -57,7 +57,7 @@ pytest -m bq          # against BigQuery in throwaway datasets, very slow
 
 ## Not in scope (demo)
 
-Sign-in and permissions (everyone acts as one identity), deployment, cost guards, CUPED, Bayesian analysis, ratio metrics and multiple-comparison correction. The app is not deployed on purpose: it has no sign-in, and every Run scans BigQuery on the owner's account.
+Sign-in and permissions (everyone acts as one identity), deployment, cost guards, CUPED, ratio metrics and multiple-comparison correction. For Bayesian: only the flat prior (no informative prior, ROPE band or partial pooling) and no heavy-tail model for revenue. The app is not deployed on purpose: it has no sign-in, and every Run scans BigQuery on the owner's account.
 
 ## What I would do for production
 

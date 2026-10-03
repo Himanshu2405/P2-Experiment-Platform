@@ -1,7 +1,7 @@
 [project]
 name = "p2"
 version = "0.1.0"
-description = "Experiment platform demo: governed metrics, data sources, background runs, and frequentist analysis with a sample ratio check"
+description = "Experiment platform demo: governed metrics, data sources, background runs, and frequentist or Bayesian analysis with a sample ratio check"
 requires-python = ">=3.12"
 
 [build-system]

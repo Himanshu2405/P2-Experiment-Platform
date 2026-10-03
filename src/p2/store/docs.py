@@ -75,7 +75,8 @@ APP_TABLE_DOCS: dict[str, tuple[str, dict[str, str]]] = {
          "decision": "Final call once decided: ship, no ship, iterate or inconclusive.",
          "decision_notes": "Reasoning behind the decision.",
          "decided_by": "Who recorded the decision.",
-         "decided_at": "When it was recorded (UTC)."}),
+         "decided_at": "When it was recorded (UTC).",
+         "method": "bayesian or frequentist: how the experiment is analysed. Empty means frequentist (experiments saved before the Bayesian method existed)."}),
     "experiment_items": (
         "The metrics, filters and dimensions chosen for each experiment, pinned to a catalog version, with the statistical plan the data scientist entered for primary and guardrail metrics.",
         {"experiment_id": "The experiment.",
@@ -89,7 +90,10 @@ APP_TABLE_DOCS: dict[str, tuple[str, dict[str, str]]] = {
          "effect_kind": "relative or absolute.",
          "alpha": "Significance level used in the analysis.",
          "power": "Target power the data scientist planned for; recorded for reference.",
-         "sidedness": "one-sided or two-sided; guardrails are always one-sided."}),
+         "sidedness": "one-sided or two-sided; guardrails are always one-sided.",
+         "loss_threshold": "Bayesian primary metric only: the most expected loss accepted, in absolute units for a rate or as a share of the control average for a continuous metric (effect_kind says which).",
+         "min_days": "Bayesian primary metric only: no verdict before this many days of data.",
+         "harm_limit": "Bayesian guardrail only: the guardrail passes when the chance the metric got worse by more than the margin is below this. The margin is in effect and effect_kind."}),
     "results": (
         "Results per experiment and metric, one set of rows per run. Interim rows (while running) hold only counts, means and the difference; final rows add the tests. The latest run of each kind is current.",
         {"experiment_id": "The experiment.",
@@ -110,7 +114,9 @@ APP_TABLE_DOCS: dict[str, tuple[str, dict[str, str]]] = {
          "ci_level": "Confidence level the interval was built at (for a one-sided test it is 1 minus twice alpha).",
          "kind": "final (full tests, after the last day) or interim (descriptive numbers only, while the experiment runs).",
          "through_date": "Last day of data the numbers include; for a final result it is the experiment's last day.",
-         "params": "JSON of the plan the analysis followed: alpha, sidedness, effect and its kind, baseline, planned power, and the margin in metric units."}),
+         "params": "JSON of the plan the analysis followed: alpha, sidedness, effect and its kind, baseline, planned power, and the margin in metric units. A Bayesian experiment stores only the method.",
+         "var_control": "Sample variance of the per-user value in control; the Bayesian view builds its posterior from it (empty for results saved before it was stored).",
+         "var_variant": "Sample variance of the per-user value in variant."}),
     "job_runs": (
         "One row per pipeline run, with its outcome.",
         {"job_id": "Unique id of the run.",
@@ -169,7 +175,9 @@ APP_TABLE_DOCS: dict[str, tuple[str, dict[str, str]]] = {
          "verdict": "Significant improvement, Significant decline or No significant difference (final only).",
          "n_control": "Users in control within the segment.",
          "n_variant": "Users in variant within the segment.",
-         "through_date": "Last day of data included."}),
+         "through_date": "Last day of data included.",
+         "var_control": "Sample variance of the per-user value in control within the segment (used by the Bayesian view).",
+         "var_variant": "Sample variance of the per-user value in variant within the segment."}),
     "sim_ground_truth": (
         "The simulator's exact true effect per experiment and metric, used only to validate the analysis, never by it.",
         {"experiment_id": "The simulated experiment.",

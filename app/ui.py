@@ -13,10 +13,14 @@ TONES = {  # chip tone -> (background, text, border)
     "blue": ("rgba(59,130,246,0.16)", "#2563eb", "rgba(59,130,246,0.45)"),
     "grey": ("rgba(148,163,184,0.18)", "#64748b", "rgba(148,163,184,0.5)"),
     "teal": ("rgba(20,184,166,0.16)", "#0d9488", "rgba(20,184,166,0.45)"),
+    "purple": ("rgba(168,85,247,0.16)", "#9333ea", "rgba(168,85,247,0.45)"),
 }
+METHOD_TONE = {"Bayesian": "purple", "Frequentist": "blue"}
 STATUS_TONE = {"Draft": "grey", "Designed": "blue", "Running": "yellow", "Analyzed": "green", "Decided": "teal"}
 VERDICT_TONE = {"Significant improvement": "green", "Passed": "green", "Significant decline": "red", "Failed": "red",
-                "No significant difference": "grey", "Not significant": "grey", "Inconclusive": "yellow"}
+                "No significant difference": "grey", "Not significant": "grey", "Inconclusive": "yellow",
+                "Variant is the safer choice": "green", "Control is the safer choice": "red", "No meaningful difference": "grey",
+                "Not enough evidence yet": "yellow"}
 
 CSS = """
 <style>
@@ -33,6 +37,8 @@ h2, h3 { font-size: 1.15rem !important; font-weight: 650 !important; padding: .1
 [data-testid="stMetricValue"] { font-size: 1.6rem; font-weight: 700; }
 .verdict-card { border: 1px solid rgba(148,163,184,.35); border-radius: .75rem; padding: .7rem .9rem; background: rgba(59,130,246,.06); min-height: 8.4rem; box-sizing: border-box; }
 .verdict-card .label { font-size: .8rem; opacity: .8; text-transform: uppercase; letter-spacing: .03em; margin-bottom: .45rem; }
+.verdict-card .chip { font-size: .95rem; padding: .15rem .8rem; }
+.verdict-card .reason { font-size: 1.05rem; margin-top: .7rem; line-height: 1.45; }
 /* tabs, buttons, tables, progress */
 [data-testid="stTab"] { font-weight: 600; padding: .55rem 1.1rem; margin-right: .5rem; }
 [data-testid="stTab"][aria-selected="true"] { font-weight: 750; }
@@ -49,9 +55,12 @@ h2, h3 { font-size: 1.15rem !important; font-weight: 650 !important; padding: .1
 .meta { font-size: .85rem; opacity: .85; margin: .15rem 0; }
 .meta b { opacity: 1; }
 .section-note { font-size: .8rem; opacity: .75; margin-top: -.2rem; }
-/* catalog rows */
+/* catalog rows: every cell is two lines (a main line and a quieter one) so the columns line up */
+.cell .l1 { font-weight: 600; min-height: 1.9rem; display: flex; align-items: center; }
+.cell .l2 { font-size: .85rem; opacity: .75; min-height: 1.3rem; }
+.cell .live { color: #2563eb; opacity: 1; }
 .st-key-cat_header { background: rgba(59,130,246,.10); border: 1px solid rgba(148,163,184,.4); border-radius: .6rem; padding: .35rem .6rem; }
-[class*="st-key-cat_row_"] { border: 1px solid rgba(148,163,184,.35); border-radius: .6rem; padding: .35rem .6rem; background: rgba(148,163,184,.05); }
+[class*="st-key-cat_row_"] { border: 1px solid rgba(148,163,184,.35); border-radius: .6rem; padding: .6rem .6rem; background: rgba(148,163,184,.05); }
 [class*="st-key-cat_row_"]:hover { background: rgba(59,130,246,.07); border-color: rgba(59,130,246,.45); }
 /* the running indicator */
 [data-testid="stStatusWidget"] { background: #3b82f6; color: #fff; padding: 4px 12px; border-radius: 6px; font-weight: 600; }
@@ -81,6 +90,20 @@ def chip(text: str, tone: str = "grey") -> str:
     return f'<span class="chip" style="background:{bg};color:{fg};border-color:{border}">{html.escape(text)}</span>'
 
 
+def cell(line1: str, line2: str = "") -> str:
+    """One catalog table cell: a main line and a quieter line below it. Both are HTML, so callers escape any text they pass."""
+    return f'<div class="cell"><div class="l1">{line1}</div><div class="l2">{line2 or "&nbsp;"}</div></div>'
+
+
+def method_of(row: dict) -> str:
+    """Bayesian or Frequentist (an experiment saved before the Bayesian method existed has no method and is frequentist)."""
+    return "Bayesian" if row.get("method") == "bayesian" else "Frequentist"
+
+
+def method_chip(row: dict) -> str:
+    return chip(method_of(row), METHOD_TONE[method_of(row)])
+
+
 def status_chip(status: str) -> str:
     return chip(status, STATUS_TONE.get(status, "grey"))
 
@@ -88,4 +111,4 @@ def status_chip(status: str) -> str:
 def verdict_chip(verdict: str | None, fallback: str = "") -> str:
     if not verdict:
         return chip(fallback, "grey") if fallback else ""
-    return chip(verdict, VERDICT_TONE.get(verdict, "grey"))
+    return chip(verdict, VERDICT_TONE.get(verdict, "grey"))      # "Collecting evidence (day x of y)" and anything unknown are grey
