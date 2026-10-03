@@ -16,7 +16,7 @@ from p2.pipeline.runner import end_of
 
 ss = st.session_state
 MAX_ROWS = 50
-WIDTHS = [2.0, 1.3, 1.3, 1.3, 1.5, 1.4, 2.1, 2.2, 0.9, 1.5]
+WIDTHS = [1.8, 1.5, 1.2, 1.3, 1.8, 1.6, 2.4, 1.8, 1.0, 1.5]
 
 
 def progress_of(launch: date, end: date, today: date) -> tuple[float, str]:

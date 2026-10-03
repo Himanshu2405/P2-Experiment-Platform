@@ -4,26 +4,34 @@ A small internal tool where data scientists add A/B experiments and product mana
 
 ## Screenshots
 
-Synthetic data only. Experiment Catalog (the default page):
+Synthetic data only. Experiment Catalog (the default page): every experiment with its test type (Bayesian or Frequentist), status, verdict and progress.
 
 ![Experiment Catalog](docs/screenshots/catalog.png)
 
-Experiment Results: the balance card on top, headline numbers, and a table per metric.
+Experiment Results, frequentist: the balance card on top, the lift and the verdict with a one-line reason, and a table per metric.
 
-![Experiment Results tables](docs/screenshots/results.png)
+![Experiment Results tables, frequentist](docs/screenshots/results.png)
 
-The same page, Charts tab: control and variant over time, and the difference with its range.
+The same page, Charts tab: control and variant over time, and the difference with its 95% confidence band.
 
-![Experiment Results charts](docs/screenshots/results-charts.png)
+![Experiment Results charts, frequentist](docs/screenshots/results-charts.png)
 
-Add Experiment: type an ID that exists in the assignment log and the form opens.
+Experiment Results, Bayesian: the verdict says why in one line, and the table adds the chance the variant wins, the 95% credible interval and the risk of each choice.
+
+![Experiment Results tables, Bayesian](docs/screenshots/results-bayesian.png)
+
+The same page, Charts tab: control and variant over time, the risk of each choice (on all the data and by day, against the most you accept to lose), and the 95% credible interval and chance the variant wins by day.
+
+![Experiment Results charts, Bayesian](docs/screenshots/results-bayesian-charts.png)
+
+Add Experiment: type an ID that exists in the assignment log, pick the method, and only that method's inputs show (here Bayesian).
 
 ![Add Experiment](docs/screenshots/add-experiment.png)
 
 ## What it does
 
-- **Experiment Catalog** (default page): every experiment with status, progress and verdict, plus a Metrics tab. Edit an experiment in place.
-- **Experiment Results**: search by experiment ID. A card at the top says whether the test is balanced (sample ratio check), then the primary metric, tables (by segment and filter) and charts over time. Frequentist: live numbers while running, full tests and a verdict only after the last day. Bayesian: chance the variant wins, risk of each choice and a verdict that can be read live after a minimum number of days.
+- **Experiment Catalog** (default page): every experiment with its test type, status, verdict and progress, plus a Metrics tab. Edit an experiment in place.
+- **Experiment Results**: pick an experiment from the dropdown (type to filter the ones already in the app). A card at the top says whether the test is balanced (sample ratio check), then the lift and the verdict with a one-line reason, tables (by segment and filter) and charts over time. Frequentist: live numbers while running, full tests and a verdict only after the last day. Bayesian: chance the variant wins, risk of each choice and a verdict that can be read live after a minimum number of days. The Charts tab changes only when you press Apply.
 - **Add Experiment**: the data scientist picks the method (Frequentist or Bayesian) and enters the plan for it. Frequentist asks for their own statistics numbers (the tool does not do power calculations); Bayesian asks for a risk threshold and a minimum number of days, with defaults. The ID must already exist in the experiment tool's assignment log.
 - **Runs** go to a background queue (4 at a time, one per experiment) so pages stay fast.
 
@@ -51,7 +59,7 @@ streamlit run app/streamlit_app.py
 ## Tests
 
 ```bash
-pytest -m "not bq"    # offline, about 25 seconds
+pytest -m "not bq"    # offline, 458 tests, about 30 seconds
 pytest -m bq          # against BigQuery in throwaway datasets, very slow
 ```
 

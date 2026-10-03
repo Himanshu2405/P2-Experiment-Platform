@@ -51,13 +51,13 @@ h2, h3 { font-size: 1.15rem !important; font-weight: 650 !important; padding: .1
 [data-testid="stExpander"] { border-radius: .6rem; }
 [data-testid="stAlert"] { border-radius: .6rem; }
 /* chips */
-.chip { display: inline-block; padding: .08rem .6rem; border-radius: 999px; font-size: .76rem; font-weight: 600; border: 1px solid; line-height: 1.35; word-break: keep-all; overflow-wrap: normal; }
+.chip { display: inline-block; padding: .08rem .6rem; border-radius: 999px; font-size: .76rem; font-weight: 600; border: 1px solid; line-height: 1.35; word-break: keep-all; overflow-wrap: normal; white-space: nowrap; }
 .meta { font-size: .85rem; opacity: .85; margin: .15rem 0; }
 .meta b { opacity: 1; }
 .section-note { font-size: .8rem; opacity: .75; margin-top: -.2rem; }
 /* catalog rows: every cell is two lines (a main line and a quieter one) so the columns line up */
 .cell .l1 { font-weight: 600; min-height: 1.9rem; display: flex; align-items: center; }
-.cell .l2 { font-size: .85rem; opacity: .75; min-height: 1.3rem; }
+.cell .l2 { font-size: .85rem; opacity: .75; min-height: 1.3rem; padding-bottom: .3rem; }
 .cell .live { color: #2563eb; opacity: 1; }
 .st-key-cat_header { background: rgba(59,130,246,.10); border: 1px solid rgba(148,163,184,.4); border-radius: .6rem; padding: .35rem .6rem; }
 [class*="st-key-cat_row_"] { border: 1px solid rgba(148,163,184,.35); border-radius: .6rem; padding: .6rem .6rem; background: rgba(148,163,184,.05); }
