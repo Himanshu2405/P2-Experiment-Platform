@@ -399,6 +399,11 @@ Entries are chronological and later entries supersede earlier ones. Superseded b
 - **Not done.** The planned split is assumed to be 50 / 50 because the split setting was removed from the plan earlier; an uneven split would show as not balanced.
 - **Tests.** 399 offline.
 
+## 2026-10-03: demo experience planned, not built yet
+
+- **Decision.** For people who find the public repo: a short GIF in the README, then a live read-only demo mode (sample data in memory, all writes blocked, Run and Save disabled, banner) hosted free on Streamlit Community Cloud. Not deployed with the real BigQuery store because the app has no sign-in and every Run costs money. Details in `PLAN.md` ("Demo experience").
+- **Order.** A few more additions to the app first; the demo is built once they are final.
+
 ## 2026-10-03: Bayesian method added
 
 - **Decision.** The data scientist picks Bayesian or Frequentist per experiment on Add Experiment. The page shows only the inputs and outputs of the chosen method. The method is stored on the experiment and follows the plan: saving a Bayesian plan makes the experiment Bayesian, saving a frequentist plan makes it frequentist (switching is allowed; old numbers then ask for a new Run).

@@ -100,6 +100,14 @@ Legend: DONE = covered by a completed module. PREREQ = must learn first. GAP = s
   - Decision history view.
 - Exit: someone opening the app cold can see how every experiment is doing.
 
+### Demo experience (planned, to build after the final additions)
+- Why: a public repo is read, not felt. Visitors should be able to see and click the app without BigQuery or credentials, and without any cost or risk to the owner.
+- 1. A 15 to 20 second GIF or video at the top of the README (Catalog, open results, balance card, Charts tab, Add Experiment form). Recorded from the running app with headless Chrome, as the screenshots were.
+- 2. A live read-only demo mode of the same app: sample data exported from the dev store into a small file in the repo (synthetic), loaded in memory; every write blocked at the store; Run and Save disabled with a banner "Demo mode: read-only, sample data". Host on Streamlit Community Cloud from the public repo (free; sleeps when idle, so the first load is slow). Connecting it needs the owner's GitHub login, so the owner approves that step.
+- Experiments to show (suggested): `demo-banner`, `exp-002`, plus one live, one with no effect and one with an unbalanced split (so the SRM warning shows).
+- Add Experiment in demo mode: the form opens for demo IDs and shows everything; Save is disabled with a note.
+- Decided 2026-10-03: keep this plan; build after a few more additions are final.
+
 ### R7: Ship and operate
 - PREREQ: Module 7.2 (Docker), 7.5 (Cloud Run), 7.4 (observability), 7.3 (CI/CD) is DONE. Module 7.1 (FastAPI) becomes PREREQ only if a second client is added.
 - Tasks: Docker, Cloud Run, sign-in behind Google identity, Cloud Scheduler for daily runs, notifications, CI running the BigQuery tests, cost and job monitoring.
