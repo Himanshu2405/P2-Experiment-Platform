@@ -108,6 +108,23 @@ Legend: DONE = covered by a completed module. PREREQ = must learn first. GAP = s
 - Add Experiment in demo mode: the form opens for demo IDs and shows everything; Save is disabled with a note.
 - Decided 2026-10-03: keep this plan; build after a few more additions are final.
 
+### Experiment pages (next, not built yet)
+- Why: the app shows the numbers, but a decision also needs the story: why we tested, how it was designed, what we found and what we decided. People read a one-page write-up, not a dashboard. Each experiment should leave a record.
+- Three deliverables, one set per experiment (the product context is one per product):
+  - 1. **Experiment design doc (EDD).** Written before launch. Sections follow the EDD template: name, dates and owners; results summary (filled in after the end); overview (change tested, hypothesis, null hypothesis); problem and opportunity with sizing; evidence and related experiments; risks and dependencies; audience and trigger placement; success, secondary and guardrail metrics (baseline and minimum detectable effect); kill switch; decision criteria (launch bar); visible changes (control against new). The metric tables can be pre-filled from the plan already saved in the app.
+  - 2. **Product context file**, one for each of Checkout, Email and Onboarding, in the style of the existing product context file: what the product is, who it is for and how it is used or sold, the funnel and key metrics, eligibility, a log of recent initiatives, and vocabulary. It gives every design doc and page the same facts.
+  - 3. **Experiment summary page** (static git page). Title, owner, dates, sample and verdict; executive summary; what we tested and why; links to the design doc; the results table; guardrails and checks (balance and placebo); the charts; conclusion and recommendation (ship, no ship or iterate).
+- How the results get in: generated, never typed. A small export step reads one experiment's saved results from the app's store (results rows, segment rows, daily stats, the balance and placebo checks, the verdict and its one-line reason) into a file next to the design doc. A template then turns the design doc, that file and the product context into the page. The numbers on the page are exactly the numbers in the app.
+- Suggested layout: `experiments/<experiment-id>/` with `design.md`, `results.json` and the page; `products/<product>.md` for the product context. Published with GitHub Pages from the public repo.
+- Rules and scope: the repo is public and synthetic only (see the scope rules in TECH_SPEC), so the reference documents from work are format guides only. No employer names, numbers, text, links or screenshots go in. Content comes from the synthetic September experiments. Static pages, no server, no sign-in, no editor in the app. Start with three write-ups: one win, one inconclusive (`sep-checkout-1` is a good one), one no-effect (an A/A-like `-2` experiment).
+- Suggested order: product context file, then the design doc template with one real example, then the export step and the page template, then the other two write-ups. A link from the Experiment Catalog to each page can come last.
+- Open questions to settle before building:
+  - The git page example: no page file was found in the reference folder (it has design docs, a results write-up, a slide deck and a product context file). Point me to the file, or confirm the page should follow the results write-up and the deck.
+  - Which experiments to write up first, and whether the page draws its own charts or reuses the app's chart images.
+  - Whether the design doc skeleton is generated from the saved plan or written by hand.
+  - GitHub Pages must be switched on for the public repo, which is the owner's setting to approve (like the demo hosting).
+- Decided 2026-10-03: add to the plan only; nothing built yet. Build after the final app additions, alongside or before the demo experience so the demo can link to the pages.
+
 ### R7: Ship and operate
 - PREREQ: Module 7.2 (Docker), 7.5 (Cloud Run), 7.4 (observability), 7.3 (CI/CD) is DONE. Module 7.1 (FastAPI) becomes PREREQ only if a second client is added.
 - Tasks: Docker, Cloud Run, sign-in behind Google identity, Cloud Scheduler for daily runs, notifications, CI running the BigQuery tests, cost and job monitoring.
@@ -168,4 +185,5 @@ Legend: DONE = covered by a completed module. PREREQ = must learn first. GAP = s
 - [x] SRM check (2026-10-01): a card at the top of Experiment Results says the test is balanced, or warns when the split is off
 - [x] Placebo check (2026-10-03): a card on Experiment Results with an A/A test on the experiment's own control users, saved by every Run for both methods; see P2_Decisions_Log.md
 - [x] Bayesian method (2026-10-03): chosen per experiment on Add Experiment; Beta-Binomial and Normal posteriors with a flat prior, chance to win, 95% credible interval, risk of each choice and a live verdict after a minimum number of days; Bayesian charts for PMs; wide verdict card with a one-line reason for both methods; search dropdown, chart Apply button and a catalog table with a Test column; screenshots retaken. See P2_Decisions_Log.md
+- [ ] Experiment pages (planned, not built): product context file, design doc and summary page per experiment, with the results generated from the app
 - [ ] R7 Ship and operate (skipped for the demo)
