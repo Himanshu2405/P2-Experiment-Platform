@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 490" width="960" height="490" role="img" aria-labelledby="t d" font-family="-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+  <title id="t">The experiment process: EDD, then Tool, then Git page, then back to the next EDD</title>
+  <desc id="d">A circular flow. The PM and DS write the EDD before launch. The DS sets up and runs the experiment in the tool. The DS builds the git page from the EDD, the tool's results and the conclusion. The decision feeds the next experiment.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+    <filter id="soft" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <rect x="1" y="1" width="958" height="488" rx="18" fill="#ffffff" stroke="#e2e8f0" stroke-width="2"/>
+
+  <!-- the middle of the circle -->
+  <text x="480" y="222" text-anchor="middle" font-size="24" font-weight="800" fill="#0f172a">One experiment,</text>
+  <text x="480" y="252" text-anchor="middle" font-size="24" font-weight="800" fill="#0f172a">start to finish</text>
+  <text x="480" y="282" text-anchor="middle" font-size="15" fill="#64748b">the decision feeds the next one</text>
+
+  <!-- arrows, clockwise -->
+  <g fill="none" stroke="#475569" stroke-width="3" marker-end="url(#arrow)">
+    <path d="M 634 92 C 770 104 806 200 764 304"/>
+    <path d="M 594 372 L 366 372"/>
+    <path d="M 196 304 C 154 200 190 104 326 92"/>
+  </g>
+  <g font-size="15" font-weight="700" fill="#475569">
+    <text x="806" y="196" text-anchor="start">DS sets</text>
+    <text x="806" y="216" text-anchor="start">it up</text>
+    <text x="480" y="358" text-anchor="middle">DS concludes</text>
+    <text x="150" y="196" text-anchor="end">next</text>
+    <text x="150" y="216" text-anchor="end">experiment</text>
+  </g>
+
+  <!-- 1. EDD -->
+  <g filter="url(#soft)">
+    <rect x="330" y="26" width="300" height="124" rx="16" fill="#eff6ff" stroke="#2563eb" stroke-width="2.5"/>
+  </g>
+  <text x="352" y="60" font-size="24" font-weight="800" fill="#1d4ed8">1  EDD</text>
+  <text x="352" y="88" font-size="16" font-weight="700" fill="#0f172a">The plan, before launch</text>
+  <text x="352" y="114" font-size="14" fill="#334155">PM and DS: why we test,</text>
+  <text x="352" y="134" font-size="14" fill="#334155">what we test, how we decide</text>
+
+  <!-- 2. Tool -->
+  <g filter="url(#soft)">
+    <rect x="596" y="316" width="300" height="124" rx="16" fill="#f0fdf4" stroke="#16a34a" stroke-width="2.5"/>
+  </g>
+  <text x="618" y="350" font-size="24" font-weight="800" fill="#15803d">2  Tool</text>
+  <text x="618" y="378" font-size="16" font-weight="700" fill="#0f172a">The numbers</text>
+  <text x="618" y="404" font-size="14" fill="#334155">DS: set up, run, check,</text>
+  <text x="618" y="424" font-size="14" fill="#334155">and read the verdict</text>
+
+  <!-- 3. Git page -->
+  <g filter="url(#soft)">
+    <rect x="64" y="316" width="300" height="124" rx="16" fill="#faf5ff" stroke="#9333ea" stroke-width="2.5"/>
+  </g>
+  <text x="86" y="350" font-size="24" font-weight="800" fill="#7e22ce">3  Git page</text>
+  <text x="86" y="378" font-size="16" font-weight="700" fill="#0f172a">The story, after the test</text>
+  <text x="86" y="404" font-size="14" fill="#334155">DS: results, conclusion and</text>
+  <text x="86" y="424" font-size="14" fill="#334155">decision for stakeholders</text>
+</svg>

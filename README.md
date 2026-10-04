@@ -13,6 +13,29 @@ Data scientists add experiments and product managers follow the results. It is a
 - **Clean data in:** certified, versioned metrics, and data-quality gates that stop a broken build before any number is shown.
 - **Fast and cheap to run:** the heavy work stays in BigQuery and runs in the background, and the app works from summary numbers.
 
+## Live results pages
+
+Each experiment ends in a published results page, built from the tool's own numbers (synthetic data):
+
+* [Experiment results list](https://himanshu2405.github.io/P2-Experiment-Platform/experiments/)
+   * [demo-banner](https://himanshu2405.github.io/P2-Experiment-Platform/experiments/demo-banner/): Frequentist
+   * [exp-002](https://himanshu2405.github.io/P2-Experiment-Platform/experiments/exp-002/): Frequentist
+   * [sep-checkout-1](https://himanshu2405.github.io/P2-Experiment-Platform/experiments/sep-checkout-1/): Bayesian
+
+## How an experiment moves through the process
+
+![The experiment process: EDD, then Tool, then Git page, and the decision feeds the next experiment](docs/lifecycle.svg)
+
+1. **EDD (PM and DS):** the plan, written before launch.
+   - It says why we test, what we test and how we decide.
+   - It is a Markdown file per experiment, kept outside the tool ([format and examples](experiments/README.md)).
+2. **Tool (DS):** the numbers.
+   - The DS sets up the experiment, runs it and reads the results.
+   - It adds the balance and placebo checks, and a verdict with a one-line reason.
+3. **Git page (DS):** the story, after the test.
+   - It combines the EDD, the tool's results and the DS's conclusion with one fixed template.
+   - It is published for product managers and stakeholders, and the numbers and charts come straight from the tool.
+
 ## Screenshots
 
 Synthetic data only. Experiment Catalog (the default page): every experiment with its test type (Bayesian or Frequentist), status, verdict and progress.
@@ -38,10 +61,6 @@ The same page, Charts tab: control and variant over time, the risk of each choic
 Add Experiment: type an ID that exists in the assignment log, pick the method, and only that method's inputs show (here Bayesian).
 
 ![Add Experiment](docs/screenshots/add-experiment.png)
-
-## Results pages
-
-Each experiment can have a results page for product managers and stakeholders, built from three things: the design doc the PM and DS wrote, the tool's saved results, and the DS's conclusion. The numbers and charts come straight from the tool, so the page and the app always agree. See [experiments/](experiments/index.html) and [experiments/README.md](experiments/README.md).
 
 ## What it does
 
