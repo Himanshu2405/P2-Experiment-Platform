@@ -1,6 +1,17 @@
 # P2: Experiment Platform (demo)
 
-A small internal tool where data scientists add A/B experiments and product managers follow the results. It is a learning and demo project built on synthetic data. It runs on Streamlit with BigQuery as the only store.
+**An A/B testing tool that tells a product manager what won, and whether the numbers can be trusted.**
+
+Data scientists add experiments and product managers follow the results. It is a learning and demo project on synthetic data, built with Streamlit and BigQuery as the only store.
+
+- **Two ways to analyse, chosen per experiment:**
+  1. **Frequentist:** p-values and confidence intervals, with the verdict after the last day.
+  2. **Bayesian, the less common one:** the chance the variant wins and the risk of each choice, read live after a minimum number of days. It says what to do, not just whether a result is "significant".
+- **Trust checks on every result:** a sample ratio check (is the split fair?) and a placebo A/A check (does the test avoid finding differences that are not there?).
+- **Plain-English verdicts:** a one-line reason beside every verdict, so a PM can act without reading statistics.
+- **Statistics that are proven, not assumed:** matched against scipy and statsmodels, and checked by simulation (false-positive rate, interval coverage, planted effects recovered). 471 offline tests.
+- **Clean data in:** certified, versioned metrics, and data-quality gates that stop a broken build before any number is shown.
+- **Fast and cheap to run:** the heavy work stays in BigQuery and runs in the background, and the app works from summary numbers.
 
 ## Screenshots
 
@@ -59,7 +70,7 @@ streamlit run app/streamlit_app.py
 ## Tests
 
 ```bash
-pytest -m "not bq"    # offline, 468 tests, about 30 seconds
+pytest -m "not bq"    # offline, 471 tests, about 30 seconds
 pytest -m bq          # against BigQuery in throwaway datasets, very slow
 ```
 
