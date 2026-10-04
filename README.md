@@ -19,7 +19,7 @@ Synthetic data only. Experiment Catalog (the default page): every experiment wit
 
 ![Experiment Catalog](docs/screenshots/catalog.png)
 
-Experiment Results, frequentist: the balance card on top, the lift and the verdict with a one-line reason, and a table per metric.
+Experiment Results, frequentist: the Experiment Details dropdown (the experiment on the left; the balance check, the placebo A/A check and the verdict with a one-line reason on the right) and a table per metric.
 
 ![Experiment Results tables, frequentist](docs/screenshots/results.png)
 
@@ -27,7 +27,7 @@ The same page, Charts tab: control and variant over time, and the difference wit
 
 ![Experiment Results charts, frequentist](docs/screenshots/results-charts.png)
 
-Experiment Results, Bayesian: the verdict says why in one line, and the table adds the chance the variant wins, the 95% credible interval and the risk of each choice.
+Experiment Results, Bayesian: the same details panel, with the placebo check flagging a loose risk threshold, and a table that adds the chance the variant wins, the 95% credible interval and the risk of each choice.
 
 ![Experiment Results tables, Bayesian](docs/screenshots/results-bayesian.png)
 
