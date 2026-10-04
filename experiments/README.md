@@ -10,7 +10,8 @@ All names, numbers and links in these documents are fictional. The data is synth
 |---|---|---|
 | `design.md` | PM and DS, before launch | The EDD: why we test, what we test, how we judge it |
 | `conclusion.md` | DS, after the test | Decision, summary, key findings and recommendation |
-| `results.json` | exported from the tool | The numbers, exactly as the tool shows them |
+| `results.json` | exported from the tool | The numbers, exactly as the tool shows them (feeds the page, not linked from it) |
+| `tool-results.png` | screenshot of the tool's Experiment Results page | Linked from the page as "Tool results" (optional) |
 | `index.html` | built | The results page |
 
 ## The EDD format

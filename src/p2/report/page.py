@@ -138,11 +138,13 @@ def build_context(folder: Path) -> dict:
         "decision": decision, "decision_tone": tone(decision), "verdict": data["verdict"]["text"], "verdict_tone": tone(data["verdict"]["text"]),
         "verdict_reason": data["verdict"]["reason"], "primary_name": data["primary"]["name"], "is_final": data["is_final"],
         "summary": md.to_html(concl.sections["Executive summary"]),
-        "links": [("Design doc (EDD)", f"{REPO}/blob/main/experiments/{exp['id']}/design.md"), ("Results data (JSON)", "results.json"),
-                  ("Product context", f"{REPO}/blob/main/products/{exp['product']}.md")],
-        "background": [(name, md.to_html(edd.sections[name])) for name in ("Overview", "Problem and opportunity", "Hypothesis", "Evidence")],
+        "links": [("Design doc (EDD)", f"{REPO}/blob/main/experiments/{exp['id']}/design.md")]
+                 + ([("Tool results", "tool-results.png")] if (folder / "tool-results.png").exists() else [])
+                 + [("Product context", f"{REPO}/blob/main/products/{exp['product']}.md")],
+        "background": [(name, md.to_html(edd.sections[name])) for name in ("Hypothesis", "Problem and opportunity")]
+                      + ([] if compare else [("Visible changes", md.to_html(edd.sections["Visible changes"]))]),
         "design": [(name, md.to_html(edd.sections[name])) for name in ("Audience", "Metrics", "Analysis plan", "Decision criteria", "Kill switch",
-                                                                      "Visible changes", "Risks and dependencies") if not (compare and name == "Visible changes")],
+                                                                      "Risks and dependencies")],
         "compare": compare,
         "table_head": head, "table_rows": rows, "label_rule": data["label_rule"] if secondary else "",
         "legend": ("Chance to win: the chance the variant is better. Risk if ship: the average loss if we ship the variant and it is actually worse. "

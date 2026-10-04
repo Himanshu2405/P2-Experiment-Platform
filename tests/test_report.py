@@ -189,7 +189,7 @@ def folder(plat, tmp_path):
 
 def test_the_page_combines_the_design_doc_the_results_and_the_conclusion(folder):
     html = page.render_page(folder)
-    assert "<title>exp-f: Banner" in html and "Shoppers who see the free-shipping banner will complete more purchases." in html     # from the tool, the EDD
+    assert "<title>exp-f: Banner" in html and "If shoppers see the free-shipping offer in the cart" in html     # from the tool, the EDD hypothesis
     assert "Sam Rivera (fictional)" in html and "Priya (fictional)" in html and "450 control / 450 variant" in html
     assert "The banner works." in html and "Ship it." in html and '<span class="chip green">Ship</span>' in html           # from the conclusion
     assert ">10.000%<" in html and ">16.000%<" in html and "+60.0%" in html and "Significant improvement" in html          # the tool's numbers
@@ -198,6 +198,9 @@ def test_the_page_combines_the_design_doc_the_results_and_the_conclusion(folder)
     for label in ("Audience", "Metrics", "Decision criteria"):
         assert f"<summary>{label}</summary>" in html
     assert "<summary>Visible changes</summary>" not in html                                     # it is the side-by-side block instead
+    assert ">Hypothesis</h3>" in html and ">Problem and opportunity</h3>" in html         # the only background shown, the rest is in the EDD
+    assert "<details open" not in html and "<details>" in html                                  # the design details start collapsed
+    assert "results.json" not in html and "Results data" not in html and "Tool results" not in html  # no tool screenshot in this folder
     assert '<div class="arm control">' in html and '<div class="arm variant">' in html
     assert "The cart page with no shipping message until the final step." in html and "a green \"Free shipping on orders over $50\" banner" in html
 
@@ -308,8 +311,14 @@ def test_control_and_variant_sit_side_by_side_with_users_and_the_primary_metric(
     assert page.build_context(folder)["compare"]["metric"] == "Conversion rate"
 
 
-def test_without_control_and_variant_lines_the_visible_changes_stay_in_the_design_details(folder):
+def test_the_tool_results_link_appears_only_when_the_screenshot_is_in_the_folder(folder):
+    (folder / "tool-results.png").write_bytes(b"png")
+    html = page.render_page(folder)
+    assert '<a href="tool-results.png">Tool results</a>' in html and "results.json" not in html
+
+
+def test_without_control_and_variant_lines_the_visible_changes_stay_in_the_background(folder):
     edd = (folder / "design.md").read_text()
     (folder / "design.md").write_text(edd.replace("**Control:**", "**Today:**"))
     html = page.render_page(folder)
-    assert '<div class="arm control">' not in html and "<summary>Visible changes</summary>" in html
+    assert '<div class="arm control">' not in html and ">Visible changes</h3>" in html and "<summary>Visible changes</summary>" not in html
