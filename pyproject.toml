@@ -14,6 +14,7 @@ where = ["src"]
 [tool.setuptools.package-data]
 "p2.simulator" = ["*.yaml"]
 "p2.warehouse" = ["*.yaml"]
+"p2.report" = ["*.html"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

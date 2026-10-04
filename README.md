@@ -39,6 +39,10 @@ Add Experiment: type an ID that exists in the assignment log, pick the method, a
 
 ![Add Experiment](docs/screenshots/add-experiment.png)
 
+## Results pages
+
+Each experiment can have a results page for product managers and stakeholders, built from three things: the design doc the PM and DS wrote, the tool's saved results, and the DS's conclusion. The numbers and charts come straight from the tool, so the page and the app always agree. See [experiments/](experiments/index.html) and [experiments/README.md](experiments/README.md).
+
 ## What it does
 
 - **Experiment Catalog** (default page): every experiment with its test type, status, verdict and progress, plus a Metrics tab. Edit an experiment in place.

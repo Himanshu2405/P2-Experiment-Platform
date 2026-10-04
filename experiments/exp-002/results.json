@@ -1,0 +1,689 @@
+{
+ "experiment": {
+  "id": "exp-002",
+  "name": "Free Shipping Promo",
+  "method": "frequentist",
+  "product": "checkout",
+  "owner": "priya",
+  "hypothesis": "A dummy hypothesis uses a binary independent variable (coded as 0 or 1) to test if belonging to a specific group changes an outcome",
+  "launch_date": "2026-09-01",
+  "end_date": "2026-09-15",
+  "runtime_days": 15,
+  "status": "Analyzed"
+ },
+ "is_final": true,
+ "through_date": "2026-09-15",
+ "run_at": "2026-10-03T20:26:32.799535+00:00",
+ "sample": {
+  "n_control": 2483,
+  "n_variant": 2517
+ },
+ "primary": {
+  "item_id": "conversion_rate",
+  "name": "Conversion rate"
+ },
+ "plan": {
+  "alpha": 0.05,
+  "power": 0.8,
+  "sidedness": "two-sided"
+ },
+ "verdict": {
+  "text": "No significant difference",
+  "reason": "The difference could be chance (p = 0.091, above your alpha of 0.05)."
+ },
+ "metrics": [
+  {
+   "item_id": "conversion_rate",
+   "name": "Conversion rate",
+   "role": "primary",
+   "type": "rate",
+   "good_direction": "higher",
+   "description": "Share of users with at least one completed order",
+   "control": 0.04550946435763187,
+   "variant": 0.056019070321811706,
+   "difference": 0.010509605964179838,
+   "lift": 0.23093231512441198,
+   "n_control": 2483,
+   "n_variant": 2517,
+   "label": "No significant difference",
+   "p_value": 0.09063088049565282,
+   "ci_low": -0.0016522526955932131,
+   "ci_high": 0.02267146462395289,
+   "ci_level": 0.95,
+   "achieved_power": 0.059160487400736594
+  },
+  {
+   "item_id": "paid_revenue_per_user",
+   "name": "Paid revenue per user",
+   "role": "guardrail",
+   "type": "continuous",
+   "good_direction": "higher",
+   "description": "Average payment amount per new user, including users who did not pay",
+   "control": 1.4905356423681042,
+   "variant": 1.449344457687722,
+   "difference": -0.0411911846803823,
+   "lift": -0.027635155785298345,
+   "n_control": 2483,
+   "n_variant": 2517,
+   "label": "Inconclusive",
+   "p_value": 0.3313562842117804,
+   "ci_low": -0.4628888614854637,
+   "ci_high": 0.3805064921246991,
+   "ci_level": 0.9,
+   "achieved_power": 0.14732893196863256
+  },
+  {
+   "item_id": "activation_rate",
+   "name": "Activation rate",
+   "role": "secondary",
+   "type": "rate",
+   "good_direction": "higher",
+   "description": "Share of new users who reached activation",
+   "control": 0.2823197744663707,
+   "variant": 0.2757250695272153,
+   "difference": -0.006594704939155371,
+   "lift": -0.023358990533413445,
+   "n_control": 2483,
+   "n_variant": 2517,
+   "label": "Neutral",
+   "p_value": 0.6031743410347881,
+   "ci_low": -0.03145936450863847,
+   "ci_high": 0.01826995463032773,
+   "ci_level": 0.95,
+   "achieved_power": null
+  },
+  {
+   "item_id": "bounce_rate",
+   "name": "Bounce rate",
+   "role": "secondary",
+   "type": "rate",
+   "good_direction": "lower",
+   "description": "Share of users with at least one bounced email",
+   "control": 0.023358840112766836,
+   "variant": 0.027016289233214173,
+   "difference": 0.0036574491204473362,
+   "lift": 0.1565766580357022,
+   "n_control": 2483,
+   "n_variant": 2517,
+   "label": "Neutral",
+   "p_value": 0.4093594259195792,
+   "ci_low": -0.005026608374516324,
+   "ci_high": 0.012341506615410997,
+   "ci_level": 0.95,
+   "achieved_power": null
+  },
+  {
+   "item_id": "emails_per_user",
+   "name": "Emails per user",
+   "role": "secondary",
+   "type": "continuous",
+   "good_direction": "higher",
+   "description": "Average number of emails sent to a user",
+   "control": 2.0869915424889207,
+   "variant": 2.0361541517679815,
+   "difference": -0.05083739072093918,
+   "lift": -0.02435917428793752,
+   "n_control": 2483,
+   "n_variant": 2517,
+   "label": "Neutral",
+   "p_value": 0.08797987401413598,
+   "ci_low": -0.1092402306831509,
+   "ci_high": 0.0075654492412725455,
+   "ci_level": 0.95,
+   "achieved_power": null
+  }
+ ],
+ "checks": {
+  "balance": {
+   "balanced": true,
+   "p_value": 0.6306354706553414,
+   "n_control": 2483,
+   "n_variant": 2517
+  },
+  "placebo": {
+   "method": "frequentist",
+   "reps": 200,
+   "n": 2483,
+   "rate": 0.07,
+   "expected": 0.05,
+   "low": 0.015,
+   "high": 0.095,
+   "ok": true,
+   "passed": true,
+   "text": "The test behaves correctly on your data. In 200 random splits of your control users into two identical groups of 2,483, the test found a difference 7.0% of the time (expected about 5%, normal range 1.5% to 9.5%)."
+  }
+ },
+ "label_rule": "",
+ "charts": [
+  {
+   "key": "time",
+   "title": "Control and variant over time",
+   "spec": {
+    "config": {
+     "view": {
+      "continuousWidth": 300,
+      "continuousHeight": 300
+     }
+    },
+    "data": {
+     "name": "data-1fa0d036f76976c7010dbf1e36b041af"
+    },
+    "mark": {
+     "type": "line",
+     "point": {
+      "size": 90
+     }
+    },
+    "encoding": {
+     "color": {
+      "field": "arm",
+      "scale": {
+       "domain": [
+        "control",
+        "variant"
+       ],
+       "range": [
+        "#94a3b8",
+        "#3b82f6"
+       ]
+      },
+      "title": "Arm",
+      "type": "nominal"
+     },
+     "tooltip": [
+      {
+       "field": "day",
+       "format": "%b %d",
+       "title": "Day",
+       "type": "temporal"
+      },
+      {
+       "field": "arm",
+       "title": "Arm",
+       "type": "nominal"
+      },
+      {
+       "field": "value",
+       "format": ".3f",
+       "title": "Average (%)",
+       "type": "quantitative"
+      },
+      {
+       "field": "n_users",
+       "format": ",",
+       "title": "Users so far",
+       "type": "quantitative"
+      }
+     ],
+     "x": {
+      "axis": {
+       "format": "%b %d"
+      },
+      "field": "day",
+      "title": "Day",
+      "type": "temporal"
+     },
+     "y": {
+      "field": "value",
+      "scale": {
+       "zero": false
+      },
+      "title": "Cumulative average (%)",
+      "type": "quantitative"
+     }
+    },
+    "height": 300,
+    "title": "",
+    "width": "container",
+    "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
+    "datasets": {
+     "data-1fa0d036f76976c7010dbf1e36b041af": [
+      {
+       "day": "2026-09-01T00:00:00",
+       "arm": "control",
+       "value": 0.0,
+       "n_users": 310
+      },
+      {
+       "day": "2026-09-01T00:00:00",
+       "arm": "variant",
+       "value": 0.0,
+       "n_users": 329
+      },
+      {
+       "day": "2026-09-02T00:00:00",
+       "arm": "control",
+       "value": 0.0,
+       "n_users": 603
+      },
+      {
+       "day": "2026-09-02T00:00:00",
+       "arm": "variant",
+       "value": 0.1560062402496101,
+       "n_users": 641
+      },
+      {
+       "day": "2026-09-03T00:00:00",
+       "arm": "control",
+       "value": 0.44004400440044056,
+       "n_users": 909
+      },
+      {
+       "day": "2026-09-03T00:00:00",
+       "arm": "variant",
+       "value": 0.6256517205422317,
+       "n_users": 959
+      },
+      {
+       "day": "2026-09-04T00:00:00",
+       "arm": "control",
+       "value": 0.3236245954692562,
+       "n_users": 1236
+      },
+      {
+       "day": "2026-09-04T00:00:00",
+       "arm": "variant",
+       "value": 1.356743814844375,
+       "n_users": 1253
+      },
+      {
+       "day": "2026-09-05T00:00:00",
+       "arm": "control",
+       "value": 0.5772931366260418,
+       "n_users": 1559
+      },
+      {
+       "day": "2026-09-05T00:00:00",
+       "arm": "variant",
+       "value": 1.5994881637875904,
+       "n_users": 1563
+      },
+      {
+       "day": "2026-09-06T00:00:00",
+       "arm": "control",
+       "value": 1.4046461372231243,
+       "n_users": 1851
+      },
+      {
+       "day": "2026-09-06T00:00:00",
+       "arm": "variant",
+       "value": 1.8220793140407305,
+       "n_users": 1866
+      },
+      {
+       "day": "2026-09-07T00:00:00",
+       "arm": "control",
+       "value": 1.9489559164733203,
+       "n_users": 2155
+      },
+      {
+       "day": "2026-09-07T00:00:00",
+       "arm": "variant",
+       "value": 2.3213472917614957,
+       "n_users": 2197
+      },
+      {
+       "day": "2026-09-08T00:00:00",
+       "arm": "control",
+       "value": 2.013693113169554,
+       "n_users": 2483
+      },
+      {
+       "day": "2026-09-08T00:00:00",
+       "arm": "variant",
+       "value": 2.9002781088597507,
+       "n_users": 2517
+      },
+      {
+       "day": "2026-09-09T00:00:00",
+       "arm": "control",
+       "value": 2.2956101490132963,
+       "n_users": 2483
+      },
+      {
+       "day": "2026-09-09T00:00:00",
+       "arm": "variant",
+       "value": 3.337306317044111,
+       "n_users": 2517
+      },
+      {
+       "day": "2026-09-10T00:00:00",
+       "arm": "control",
+       "value": 2.7386226339105946,
+       "n_users": 2483
+      },
+      {
+       "day": "2026-09-10T00:00:00",
+       "arm": "variant",
+       "value": 4.171632896305129,
+       "n_users": 2517
+      },
+      {
+       "day": "2026-09-11T00:00:00",
+       "arm": "control",
+       "value": 3.342730567861464,
+       "n_users": 2483
+      },
+      {
+       "day": "2026-09-11T00:00:00",
+       "arm": "variant",
+       "value": 4.608661104489475,
+       "n_users": 2517
+      },
+      {
+       "day": "2026-09-12T00:00:00",
+       "arm": "control",
+       "value": 3.705195328231973,
+       "n_users": 2483
+      },
+      {
+       "day": "2026-09-12T00:00:00",
+       "arm": "variant",
+       "value": 5.005959475566154,
+       "n_users": 2517
+      },
+      {
+       "day": "2026-09-13T00:00:00",
+       "arm": "control",
+       "value": 4.188481675392674,
+       "n_users": 2483
+      },
+      {
+       "day": "2026-09-13T00:00:00",
+       "arm": "variant",
+       "value": 5.204608661104478,
+       "n_users": 2517
+      },
+      {
+       "day": "2026-09-14T00:00:00",
+       "arm": "control",
+       "value": 4.389850986709633,
+       "n_users": 2483
+      },
+      {
+       "day": "2026-09-14T00:00:00",
+       "arm": "variant",
+       "value": 5.522447357965827,
+       "n_users": 2517
+      },
+      {
+       "day": "2026-09-15T00:00:00",
+       "arm": "control",
+       "value": 4.550946435763187,
+       "n_users": 2483
+      },
+      {
+       "day": "2026-09-15T00:00:00",
+       "arm": "variant",
+       "value": 5.601907032181172,
+       "n_users": 2517
+      }
+     ]
+    }
+   }
+  },
+  {
+   "key": "difference",
+   "title": "Difference over time, with its 95% range",
+   "spec": {
+    "config": {
+     "view": {
+      "continuousWidth": 300,
+      "continuousHeight": 300
+     }
+    },
+    "layer": [
+     {
+      "data": {
+       "name": "data-42990c68f268a11fa16682fcd3437a6f"
+      },
+      "mark": {
+       "type": "rule",
+       "color": "#94a3b8",
+       "strokeDash": [
+        4,
+        3
+       ]
+      },
+      "encoding": {
+       "y": {
+        "field": "zero",
+        "type": "quantitative"
+       }
+      }
+     },
+     {
+      "data": {
+       "name": "data-7fd117c7be15a45f79272cbede872a61"
+      },
+      "mark": {
+       "type": "area",
+       "color": "#3b82f6",
+       "opacity": 0.18
+      },
+      "encoding": {
+       "x": {
+        "axis": {
+         "format": "%b %d"
+        },
+        "field": "day",
+        "title": "Day",
+        "type": "temporal"
+       },
+       "y": {
+        "field": "low",
+        "type": "quantitative"
+       },
+       "y2": {
+        "field": "high"
+       }
+      }
+     },
+     {
+      "data": {
+       "name": "data-7fd117c7be15a45f79272cbede872a61"
+      },
+      "mark": {
+       "type": "line",
+       "color": "#3b82f6",
+       "point": {
+        "color": "#3b82f6",
+        "size": 70
+       }
+      },
+      "encoding": {
+       "tooltip": [
+        {
+         "field": "day",
+         "format": "%b %d",
+         "title": "Day",
+         "type": "temporal"
+        },
+        {
+         "field": "difference",
+         "format": ".3f",
+         "title": "Difference",
+         "type": "quantitative"
+        },
+        {
+         "field": "n_control",
+         "format": ",",
+         "title": "Control users",
+         "type": "quantitative"
+        },
+        {
+         "field": "n_variant",
+         "format": ",",
+         "title": "Variant users",
+         "type": "quantitative"
+        },
+        {
+         "field": "low",
+         "format": ".3f",
+         "title": "Range low",
+         "type": "quantitative"
+        },
+        {
+         "field": "high",
+         "format": ".3f",
+         "title": "Range high",
+         "type": "quantitative"
+        }
+       ],
+       "x": {
+        "axis": {
+         "format": "%b %d"
+        },
+        "field": "day",
+        "title": "Day",
+        "type": "temporal"
+       },
+       "y": {
+        "field": "difference",
+        "scale": {
+         "zero": true
+        },
+        "title": "Variant minus control (pp)",
+        "type": "quantitative"
+       }
+      }
+     }
+    ],
+    "height": 260,
+    "title": "",
+    "width": "container",
+    "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
+    "datasets": {
+     "data-42990c68f268a11fa16682fcd3437a6f": [
+      {
+       "zero": 0
+      }
+     ],
+     "data-7fd117c7be15a45f79272cbede872a61": [
+      {
+       "day": "2026-09-01T00:00:00",
+       "difference": 0.0,
+       "n_control": 310.0,
+       "n_variant": 329.0,
+       "low": 0.0,
+       "high": 0.0
+      },
+      {
+       "day": "2026-09-02T00:00:00",
+       "difference": 0.1560062402496101,
+       "n_control": 603.0,
+       "n_variant": 641.0,
+       "low": -0.14952177382096185,
+       "high": 0.461534254320182
+      },
+      {
+       "day": "2026-09-03T00:00:00",
+       "difference": 0.18560771614179114,
+       "n_control": 909.0,
+       "n_variant": 959.0,
+       "low": -0.47332651078753785,
+       "high": 0.8445419430711202
+      },
+      {
+       "day": "2026-09-04T00:00:00",
+       "difference": 1.0331192193751186,
+       "n_control": 1236.0,
+       "n_variant": 1253.0,
+       "low": 0.31858117513037565,
+       "high": 1.7476572636198617
+      },
+      {
+       "day": "2026-09-05T00:00:00",
+       "difference": 1.0221950271615485,
+       "n_control": 1559.0,
+       "n_variant": 1563.0,
+       "low": 0.29538497094975324,
+       "high": 1.7490050833733437
+      },
+      {
+       "day": "2026-09-06T00:00:00",
+       "difference": 0.41743317681760644,
+       "n_control": 1851.0,
+       "n_variant": 1866.0,
+       "low": -0.3923117712182756,
+       "high": 1.2271781248534885
+      },
+      {
+       "day": "2026-09-07T00:00:00",
+       "difference": 0.37239137528817523,
+       "n_control": 2155.0,
+       "n_variant": 2197.0,
+       "low": -0.48616081037313374,
+       "high": 1.230943560949484
+      },
+      {
+       "day": "2026-09-08T00:00:00",
+       "difference": 0.8865849956901966,
+       "n_control": 2483.0,
+       "n_variant": 2517.0,
+       "low": 0.02922279463792532,
+       "high": 1.7439471967424678
+      },
+      {
+       "day": "2026-09-09T00:00:00",
+       "difference": 1.041696168030814,
+       "n_control": 2483.0,
+       "n_variant": 2517.0,
+       "low": 0.12553845442691425,
+       "high": 1.957853881634714
+      },
+      {
+       "day": "2026-09-10T00:00:00",
+       "difference": 1.4330102623945344,
+       "n_control": 2483.0,
+       "n_variant": 2517.0,
+       "low": 0.42196771715152925,
+       "high": 2.4440528076375396
+      },
+      {
+       "day": "2026-09-11T00:00:00",
+       "difference": 1.2659305366280114,
+       "n_control": 2483.0,
+       "n_variant": 2517.0,
+       "low": 0.18388241927660598,
+       "high": 2.3479786539794167
+      },
+      {
+       "day": "2026-09-12T00:00:00",
+       "difference": 1.3007641473341818,
+       "n_control": 2483.0,
+       "n_variant": 2517.0,
+       "low": 0.17038416662880462,
+       "high": 2.431144128039559
+      },
+      {
+       "day": "2026-09-13T00:00:00",
+       "difference": 1.0161269857118045,
+       "n_control": 2483.0,
+       "n_variant": 2517.0,
+       "low": -0.15598588103572086,
+       "high": 2.18823985245933
+      },
+      {
+       "day": "2026-09-14T00:00:00",
+       "difference": 1.1325963712561942,
+       "n_control": 2483.0,
+       "n_variant": 2517.0,
+       "low": -0.0697493213183038,
+       "high": 2.334942063830692
+      },
+      {
+       "day": "2026-09-15T00:00:00",
+       "difference": 1.0509605964179851,
+       "n_control": 2483.0,
+       "n_variant": 2517.0,
+       "low": -0.16522527915243912,
+       "high": 2.2671464719884096
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "exported_on": "2026-10-04"
+}

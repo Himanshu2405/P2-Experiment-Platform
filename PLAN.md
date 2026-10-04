@@ -127,8 +127,8 @@ Legend: DONE = covered by a completed module. PREREQ = must learn first. GAP = s
 - Steps, in order:
   - 1. DONE (draft, 2026-10-04): the EDD format is Markdown with fixed headings (`experiments/README.md` and `experiments/_template/design.md`), and the Checkout product context is in `products/checkout.md`.
   - 2. DONE (draft, for the owner to edit): a synthetic EDD for each of the three experiments that already have results in the tool: `demo-banner` (frequentist, a win), `sep-checkout-1` (Bayesian, inconclusive) and `exp-002` (frequentist, inconclusive because it ran with far fewer users than the plan needed). A Bayesian win can be added later.
-  - 3. Build the results export and the page template.
-  - 4. Write the conclusion file for each, then generate and publish the three pages.
+  - 3. DONE (2026-10-04): the results export and the page template (`src/p2/report/`, `python -m p2.report.export` and `python -m p2.report.build`), with tests.
+  - 4. DONE as drafts (2026-10-04): a conclusion file for each example, and the three pages and a list page generated. Still to do: publish them with GitHub Pages, which needs the owner's approval.
   - 5. Link the pages from the README and, in the demo, walk through the lifecycle above.
 - Decided: the EDD format is Markdown. The repo is already public. Still open: the conclusion file fields; whether the page draws its own charts or reuses images from the app; and switching on GitHub Pages, which is the owner's setting to approve when we get there.
 - Decided 2026-10-04: nothing is added to the tool, the EDD is a separate file kept outside the tool, and the conclusion lives in the page's conclusion file. Build after the final app work, before or with the demo experience.

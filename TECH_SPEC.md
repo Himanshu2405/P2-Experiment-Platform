@@ -218,6 +218,16 @@ What the data scientist enters:
 - App tests use Streamlit `AppTest`; the Owner is picked in the form.
 - Validation (offline and on BigQuery): A/A false positive rate near 5%, interval coverage near 95%, planted lifts recovered, guardrail verdicts match the truth.
 
+## 13b. Experiment results pages (`src/p2/report/`)
+
+A separate piece that builds one static page per experiment. It only reads from the tool and changes nothing in it.
+
+- **Inputs:** `experiments/<id>/design.md` (the EDD, Markdown with fixed headings, written outside the tool), `results.json` (exported from the tool's saved results) and `conclusion.md` (the DS's decision, summary and recommendation). One fixed template (`page.html`) combines them into `index.html`; `experiments/index.html` lists all pages.
+- **Export (`export.py`, `python -m p2.report.export <id>`):** reads the latest final or live results, the daily stats and the checks through the Platform (read-only), and writes plain JSON: the header facts, one entry per metric, the verdict with its reason, the balance check with its chi-square p-value, the placebo check, the plan settings and the chart specs. It also works out what the tool does not store itself: a Win, Neutral or Loss label for secondary metrics (Bayesian: Win at a 90% chance or more that the variant is better, Loss at 10% or less; frequentist: from the significance verdict).
+- **Charts (`charts.py`):** the same Vega-Lite specs the tool draws (it borrows the chart functions in `app/results_view.py`), embedded in the page and drawn in the browser with a chart library from a CDN, so a chart on a page cannot disagree with the tool.
+- **Page (`page.py`, `python -m p2.report.build`):** header (DS, PM, date, ID, period, sample, method, decision), executive summary, links, background, results table, notes, balance and placebo checks, charts, design details and the conclusion. Text from the documents is escaped, so nothing in a document can inject markup. The builder stops with a clear message when a design doc heading is missing or the decision is not Ship, Do not ship, Iterate or Inconclusive.
+- **Tests (`tests/test_report.py`):** the Markdown reader, the design doc headings, the export (it holds the numbers the tool stored and writes nothing), both methods, the label rule, the page, refusal of unfinished documents, escaping, and each example page against its own results.json.
+
 ## 14. Out of scope for now
 
 - Real authentication, notifications, scheduled jobs (deploy phase), Bayesian extras (informative or historical priors, ROPE band, partial pooling for segments, monetary value of lift, prior sensitivity check, heavy-tail models), CUPED, multiple-comparison correction, ratio metrics, per-segment statistical results, sequential testing, multi-variant tests, numeric dimensions, sample-size and power planning inside the tool, FastAPI, the chatbot.

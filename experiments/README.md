@@ -9,8 +9,9 @@ All names, numbers and links in these documents are fictional. The data is synth
 | File | Written by | Purpose |
 |---|---|---|
 | `design.md` | PM and DS, before launch | The EDD: why we test, what we test, how we judge it |
-| `conclusion.md` | DS, after the test (not built yet) | Decision, summary and recommendation |
-| `results.json` | exported from the tool (not built yet) | The numbers, exactly as the tool shows them |
+| `conclusion.md` | DS, after the test | Decision, summary, key findings and recommendation |
+| `results.json` | exported from the tool | The numbers, exactly as the tool shows them |
+| `index.html` | built | The results page |
 
 ## The EDD format
 
@@ -30,3 +31,27 @@ Headings, in order: Overview, Problem and opportunity, Hypothesis, Evidence, Ris
 - `exp-002`: a frequentist test that is inconclusive because it ran with far fewer users than planned.
 
 Product facts used by the EDDs are in `../products/`.
+
+## Building a results page
+
+The tool is not changed. The page builder only reads from it.
+
+```bash
+python -m p2.report.export <experiment-id>   # read the saved results from the tool into results.json
+python -m p2.report.build                    # build every experiment folder that has design.md, conclusion.md and results.json
+```
+
+The page combines three inputs with one fixed template (`src/p2/report/page.html`):
+
+1. `design.md`, the EDD, for the background and the design.
+2. `results.json`, the tool's numbers, charts and checks.
+3. `conclusion.md`, the DS's decision and recommendation.
+
+The builder stops with a clear message if a heading is missing or the decision is not one of Ship, Do not ship, Iterate or Inconclusive.
+
+## The conclusion file
+
+Markdown with fixed headings, written by the DS:
+
+- Header lines: `- **Decision:**` (Ship, Do not ship, Iterate or Inconclusive), `- **DS:**`, `- **Date of report:**`.
+- Sections: `## Executive summary` and `## Recommendation` (required), `## Key findings` and `## Notes on the results` (optional).
