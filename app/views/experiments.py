@@ -8,7 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import pandas as pd
 import streamlit as st
 
-from common import current_actor, get_platform, get_registry, read, refresh
+from common import current_actor, get_platform, get_registry, read, read_only, refresh
 from p2.pipeline.runner import end_of
 from p2.services.errors import PlatformError
 from p2.stats import bayes
@@ -48,7 +48,7 @@ today = date.today()
 running = today <= end
 status = exp["status"]
 design = read("get_design", chosen)
-can_edit = True      # no permissions: everyone can edit and run (trust the data scientists)
+can_edit = not read_only()      # no permissions: everyone can edit and run (trust the data scientists), except in the public demo
 
 final = read("latest_results", chosen, "final")
 interim = read("latest_results", chosen, "interim")
@@ -168,23 +168,24 @@ with st.expander("Experiment Details", expanded=True):
                     + ui.field("Runs", html.escape(runs)) + "</div>"
                     + (ui.field("Hypothesis", html.escape(exp["hypothesis"])) if exp["hypothesis"] else ""), unsafe_allow_html=True)
         st.markdown('<div class="detail-spacer"></div>', unsafe_allow_html=True)
-        buttons = st.columns(2)
-        with buttons[0]:
-            if st.button("Edit", key="edit_plan", width="stretch", help="Open this experiment in the Experiment Catalog to change it. Everything except the ID can be changed."):
-                ss["catalog_edit"] = chosen
-                st.switch_page("views/catalog.py")
-        with buttons[1]:
-            if design and status in ("Designed", "Running", "Analyzed") and busy:
-                st.button("Queued" if run["state"] == "queued" else "Running", key="run_busy", disabled=True, width="stretch",
-                          help="A Run for this experiment is already in progress.")
-            elif design and status in ("Designed", "Running", "Analyzed"):
-                if running:
-                    queue_run("Refresh", "monitor_go", type="primary", width="stretch",
-                              help=f"Refresh monitoring: builds the data through yesterday and updates the live numbers. The final analysis unlocks after {end}.")
-                elif status != "Analyzed":
-                    queue_run("Run final analysis", "run_go", type="primary", width="stretch", help="Runs the full tests on the whole runtime and gives the verdict.")
-                else:
-                    queue_run("Refresh", "run_go", width="stretch", help="Refresh: runs the final analysis again on the data through the end date.")
+        if can_edit:     # the public demo shows no Edit or Run buttons
+            buttons = st.columns(2)
+            with buttons[0]:
+                if st.button("Edit", key="edit_plan", width="stretch", help="Open this experiment in the Experiment Catalog to change it. Everything except the ID can be changed."):
+                    ss["catalog_edit"] = chosen
+                    st.switch_page("views/catalog.py")
+            with buttons[1]:
+                if design and status in ("Designed", "Running", "Analyzed") and busy:
+                    st.button("Queued" if run["state"] == "queued" else "Running", key="run_busy", disabled=True, width="stretch",
+                              help="A Run for this experiment is already in progress.")
+                elif design and status in ("Designed", "Running", "Analyzed"):
+                    if running:
+                        queue_run("Refresh", "monitor_go", type="primary", width="stretch",
+                                  help=f"Refresh monitoring: builds the data through yesterday and updates the live numbers. The final analysis unlocks after {end}.")
+                    elif status != "Analyzed":
+                        queue_run("Run final analysis", "run_go", type="primary", width="stretch", help="Runs the full tests on the whole runtime and gives the verdict.")
+                    else:
+                        queue_run("Refresh", "run_go", width="stretch", help="Refresh: runs the final analysis again on the data through the end date.")
     with right:
         verdict_card = (f'<div class="verdict-card"><div class="label">{html.escape(verdict_title)}</div>{verdict_html}'
                         f'<div class="reason">{html.escape(reason)}</div></div>')

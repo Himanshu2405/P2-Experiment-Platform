@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>demo-preview: Preview-text rewrite | Experiment results</title>
+<style>
+:root { --navy: #1a1b2e; --navy-2: #26274a; --ink: #0f172a; --muted: #64748b; --line: #e2e8f0; --bg: #f8fafc; --card: #ffffff; --blue: #2563eb; --yellow: #fde047;
+        --green: #15803d; --green-bg: #dcfce7; --green-line: #86efac; --red: #b91c1c; --red-bg: #fee2e2; --red-line: #fca5a5;
+        --amber: #92400e; --amber-bg: #fef3c7; --amber-line: #fcd34d; --grey: #475569; --grey-bg: #e2e8f0; --grey-line: #cbd5e1; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.65 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+
+/* the dark header band */
+.hero { background: linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 100%); color: #fff; padding: 1rem 0 1.05rem; }
+.tag { display: inline-block; background: var(--yellow); color: var(--navy); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; font-size: .7rem; padding: .22rem .65rem; border-radius: .35rem; }
+.hero h1 { font-size: 1.65rem; line-height: 1.2; margin: .5rem 0 .75rem; letter-spacing: -.01em; }
+.meta { display: flex; flex-wrap: wrap; gap: .55rem 2.2rem; border-top: 1px solid rgba(255,255,255,.14); padding-top: .7rem; }
+.meta .k { color: #8b93b3; font-size: .64rem; letter-spacing: .09em; text-transform: uppercase; font-weight: 600; line-height: 1.3; }
+.meta .v { font-size: .93rem; font-weight: 600; line-height: 1.35; }
+
+main.wrap { padding-bottom: 4rem; }
+.kicker { color: var(--blue); font-weight: 800; letter-spacing: .1em; text-transform: uppercase; font-size: .78rem; margin: 2.2rem 0 .1rem; }
+h2 { font-size: 1.7rem; line-height: 1.25; margin: 0 0 1rem; letter-spacing: -.01em; }
+h3 { font-size: 1.05rem; margin: 1.4rem 0 .35rem; color: #1e293b; }
+p { margin: .5rem 0 .8rem; }
+a { color: var(--blue); }
+
+/* chips */
+.chip { display: inline-block; padding: .1rem .75rem; border-radius: 999px; font-size: .85rem; font-weight: 700; border: 1px solid; white-space: nowrap; line-height: 1.5; }
+.chip.green { color: var(--green); background: var(--green-bg); border-color: var(--green-line); }
+.chip.red { color: var(--red); background: var(--red-bg); border-color: var(--red-line); }
+.chip.yellow { color: var(--amber); background: var(--amber-bg); border-color: var(--amber-line); }
+.chip.grey { color: var(--grey); background: var(--grey-bg); border-color: var(--grey-line); }
+.chip.star { color: #713f12; background: #fde047; border-color: #facc15; }
+.chip.big { font-size: 1.05rem; padding: .2rem 1rem; }
+
+/* cards and callouts */
+.card, .panel { background: var(--card); border: 1px solid var(--line); border-radius: .85rem; box-shadow: 0 1px 2px rgba(15,23,42,.04); }
+.panel { padding: 1.1rem 1.4rem; }
+.callout { border-radius: .85rem; padding: 1.1rem 1.4rem; border: 1px solid var(--line); border-left: 6px solid var(--blue); background: #eff6ff; }
+.callout h3 { margin-top: 0; }
+.callout p:last-child, .panel p:last-child { margin-bottom: 0; }
+.summary { border-left-color: var(--navy); background: #fff; font-size: 1.08rem; }
+.links { margin: 1rem 0 0; display: flex; gap: .6rem; flex-wrap: wrap; }
+.links a { padding: .45rem 1rem; border: 1px solid var(--line); border-radius: .6rem; background: var(--card); text-decoration: none; font-weight: 700; font-size: .92rem; }
+.links a:hover { border-color: var(--blue); }
+
+/* the results table */
+.verdict { display: flex; gap: 1.2rem; align-items: center; flex-wrap: wrap; margin-bottom: 1rem; }
+.verdict .reason { font-size: 1.1rem; flex: 1 1 340px; }
+.verdict .what { color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; font-weight: 600; margin-bottom: .3rem; }
+.note { color: var(--muted); font-size: .9rem; }
+.table-wrap { overflow-x: auto; border-radius: .85rem; border: 1px solid var(--line); background: var(--card); box-shadow: 0 1px 2px rgba(15,23,42,.04); margin: .8rem 0; }
+table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+.edd table { margin: .6rem 0; border: 1px solid var(--line); }
+thead th { background: var(--navy); color: #fff; padding: .8rem .6rem; text-align: left; font-weight: 700; font-size: .85rem; letter-spacing: .01em; }
+td { padding: .75rem .6rem; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.table-wrap tbody tr:last-child td { border-bottom: 0; }
+th.num, td.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+td.wrap { white-space: normal; min-width: 8.5rem; }
+tr.primary td { background: #fff7ed; }
+tr.primary td:first-child { font-weight: 800; }
+td .sub2 { color: var(--muted); font-size: .78rem; font-weight: 500; }
+td .sub { color: var(--muted); font-size: .75rem; font-weight: 500; text-transform: capitalize; }
+td.pos { color: #15803d; font-weight: 700; } td.neg { color: #b91c1c; font-weight: 700; } td.flat { color: var(--muted); font-weight: 600; } td.strong { font-weight: 800; }
+td .chip { font-size: .78rem; padding: .05rem .65rem; white-space: normal; text-align: center; }     /* long Bayesian labels wrap instead of being cut off */
+
+.compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: .4rem; }
+.arm { border-radius: .85rem; padding: 1.15rem 1.4rem 1rem; border: 1px solid var(--line); display: flex; flex-direction: column; }
+.arm.control { background: #f1f5f9; border-left: 6px solid #94a3b8; }
+.arm.variant { background: #eff6ff; border-left: 6px solid var(--blue); }
+.arm .name { font-size: 1.3rem; font-weight: 800; margin-bottom: .3rem; }
+.arm p { margin: 0 0 .9rem; font-size: 1.03rem; flex: 1; }
+.arm .stats { display: flex; gap: 2rem; flex-wrap: wrap; border-top: 1px solid rgba(15,23,42,.1); padding-top: .75rem; }
+.arm .stats .k { color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; font-weight: 700; }
+.arm .stats .v { font-weight: 800; font-size: 1.1rem; }
+.arm .stats .v .lift { font-size: .9rem; margin-left: .35rem; } .lift.pos { color: #15803d; } .lift.neg { color: #b91c1c; } .lift.flat { color: var(--muted); }
+.checks { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; margin-top: 1rem; }
+.check { padding: 1rem 1.3rem; }
+.check .label { color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; margin-bottom: .45rem; }
+.check p { margin: .55rem 0 0; font-size: .93rem; color: #334155; }
+
+.charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 1rem; }
+.chart-card { padding: .9rem 1.1rem 1rem; min-width: 0; }
+.chart-card h3 { margin: 0 0 .5rem; font-size: 1rem; }
+.chart { width: 100%; }
+
+details { background: var(--card); border: 1px solid var(--line); border-radius: .85rem; padding: .2rem 1.3rem; margin: .65rem 0; }
+summary { cursor: pointer; font-weight: 700; padding: .65rem 0; }
+details > *:not(summary) { margin-bottom: 1rem; }
+
+/* the conclusion */
+.findings { list-style: none; margin: 0; padding: 0; background: var(--card); border: 1px solid var(--line); border-radius: .85rem; }
+.findings li { display: flex; gap: 1rem; padding: 1rem 1.3rem; border-bottom: 1px solid var(--line); }
+.findings li:last-child { border-bottom: 0; }
+.findings .n { flex: 0 0 2rem; height: 2rem; border-radius: 50%; background: var(--navy); color: #fff; font-weight: 800; display: grid; place-items: center; font-size: .9rem; margin-top: .1rem; }
+.findings .lead { font-weight: 800; }
+.decision { margin-top: 1.4rem; padding: 1.3rem 1.6rem; border-radius: .85rem; border: 1px solid; border-left-width: 6px; }
+.decision.green { background: #f0fdf4; border-color: var(--green-line); border-left-color: #22c55e; }
+.decision.red { background: #fef2f2; border-color: var(--red-line); border-left-color: #ef4444; }
+.decision.yellow { background: #fffbeb; border-color: var(--amber-line); border-left-color: #f59e0b; }
+.decision.grey { background: #f1f5f9; border-color: var(--grey-line); border-left-color: #64748b; }
+.decision .head { display: flex; align-items: center; gap: .9rem; flex-wrap: wrap; margin-bottom: .5rem; }
+.decision .title { font-size: 1.25rem; font-weight: 800; }
+.decision p { margin: .3rem 0; font-size: 1.04rem; }
+
+footer { margin-top: 3.5rem; padding-top: 1.1rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .85rem; }
+code { background: #eef2ff; padding: .05rem .35rem; border-radius: .3rem; font-size: .9em; }
+@media (max-width: 700px) { .compare { grid-template-columns: 1fr; } }
+@media (max-width: 600px) { .hero h1 { font-size: 1.8rem; } .charts { grid-template-columns: 1fr; } h2 { font-size: 1.4rem; } }
+@media print { .links { display: none; } .hero { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <span class="tag">Experiment results</span>
+    <h1>demo-preview: Preview-text rewrite</h1>
+    <div class="meta">
+      <div><div class="k">DS</div><div class="v">Marcus (fictional)</div></div>
+      <div><div class="k">PM</div><div class="v">Jordan Lee (fictional)</div></div>
+      <div><div class="k">Date of report</div><div class="v">2026-10-04</div></div>
+      <div><div class="k">Experiment ID</div><div class="v">demo-preview</div></div>
+      <div><div class="k">Period</div><div class="v">2026-08-03 to 2026-08-23 (21 days)</div></div>
+      <div><div class="k">Sample</div><div class="v">15,074 control / 14,926 variant</div></div>
+      <div><div class="k">Method</div><div class="v">Bayesian</div></div>
+      <div><div class="k">Decision</div><div class="v"><span class="chip green">Ship</span></div></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="kicker">Summary</div>
+  <h2>Executive summary</h2>
+  <div class="callout summary"><p>The new preview text raised the click rate from 4.84% to 6.36% (+1.52 pp, +31.3% relative), and there is close to a 100% chance the variant is better. Shipping it carries no measurable risk, while keeping control would give up about 1.5 pp of clicks. The open-rate guardrail passed, the split was balanced and the placebo A/A check passed. We recommend shipping the new preview text for all campaigns.</p></div>
+  <div class="links">
+<a href="https://github.com/Himanshu2405/P2-Experiment-Platform/blob/main/experiments/demo-preview/design.md">Design doc (EDD)</a><a href="tool-results.png">Tool results</a><a href="https://github.com/Himanshu2405/P2-Experiment-Platform/blob/main/products/email.md">Product context</a>  </div>
+
+  <div class="kicker">Background</div>
+  <h2>What we tested and why</h2>
+  <div class="edd panel">
+    <h3 style="margin-top:0">Hypothesis</h3>
+    <p><strong>Testable statement:</strong> If the preview text says what the main link leads to, then the click rate will rise by about 20% relative, because readers who open already know the click is worth it.</p>
+    <h3>Problem and opportunity</h3>
+    <p><strong>Problem:</strong> About a third of readers open our emails, but only about one in eight of those who open clicks through. The preview text today repeats the subject line, so it tells readers nothing new about what is inside.</p>
+<p><strong>Opportunity:</strong> Preview text is cheap to change and is seen by every reader. A clearer promise could turn more opens into clicks without sending more email.</p>
+<p><strong>Sizing:</strong> About 30,000 readers receive a campaign in three weeks. At a 5% click rate that is about 1,500 clickers. A 20% relative lift is about 300 more clickers every three weeks.</p>
+  </div>
+  <h3 style="margin:1.4rem 0 .5rem">Control and variant</h3>
+  <div class="compare">
+    <div class="arm control">
+      <div class="name">Control</div>
+      <p>The preview text repeats the subject line, for example "Our August newsletter is here".</p>
+      <div class="stats"><div><div class="k">Users</div><div class="v">15,074</div></div><div><div class="k">Click rate</div><div class="v">4.843%</div></div></div>
+    </div>
+    <div class="arm variant">
+      <div class="name">Variant</div>
+      <p>The preview text says what the main link leads to, for example "Inside: the 5-minute setup guide for automations".</p>
+      <div class="stats"><div><div class="k">Users</div><div class="v">14,926</div></div><div><div class="k">Click rate</div><div class="v">6.358%<span class="lift pos">+31.3%</span></div></div></div>
+    </div>
+  </div>
+
+  <div class="kicker">Results</div>
+  <h2>Bayesian analysis</h2>
+  <div class="panel verdict">
+    <div>
+      <div class="what">Verdict from the tool on Click rate</div>
+      <span class="chip big green">Variant is the safer choice</span>
+    </div>
+    <div class="reason">Shipping the variant risks only 0.000 pp, under your 0.004 pp limit, while keeping control risks 1.515 pp.</div>
+  </div>
+  <p class="note">On the full runtime. Rates are in percentage points (pp) and the lift is relative to control.</p>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Metric</th><th>Type</th><th class="num">Control</th><th class="num">Variant</th><th class="num">Lift</th><th class="num">Chance to win</th><th class="num">Difference (95% interval)</th><th class="num">Risk if ship</th><th class="num">Risk if keep</th><th class="num">Chance of harm</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr class="primary">
+        <td>Click rate<br><span class="sub">rate</span></td>
+        <td><span class="chip star">Primary &#9733;</span></td>
+        <td class="num ">4.843%</td>
+        <td class="num ">6.358%</td>
+        <td class="num pos">+31.3%</td>
+        <td class="num strong">100.0%</td>
+        <td class="num ">+1.515 pp<br><span class="sub2">+0.997 pp to +2.036 pp</span></td>
+        <td class="num ">0.000 pp</td>
+        <td class="num ">1.515 pp</td>
+        <td class="num "></td>
+        <td><span class="chip green">Variant is the safer choice</span></td>
+      </tr>
+      <tr>
+        <td>Open rate<br><span class="sub">rate</span></td>
+        <td><span class="chip red">Guardrail</span></td>
+        <td class="num ">37.674%</td>
+        <td class="num ">37.632%</td>
+        <td class="num flat">-0.1%</td>
+        <td class="num strong">46.8%</td>
+        <td class="num ">-0.042 pp<br><span class="sub2">-1.135 pp to +1.057 pp</span></td>
+        <td class="num "></td>
+        <td class="num "></td>
+        <td class="num ">0.0%</td>
+        <td><span class="chip green">Passed</span></td>
+      </tr>
+      <tr>
+        <td>Bounce rate<br><span class="sub">rate</span></td>
+        <td><span class="chip grey">Secondary</span></td>
+        <td class="num ">2.003%</td>
+        <td class="num ">2.097%</td>
+        <td class="num neg">+4.7%</td>
+        <td class="num strong">28.2%</td>
+        <td class="num ">+0.094 pp<br><span class="sub2">-0.227 pp to +0.414 pp</span></td>
+        <td class="num ">0.122 pp</td>
+        <td class="num ">0.029 pp</td>
+        <td class="num "></td>
+        <td><span class="chip grey">Neutral</span></td>
+      </tr>
+      <tr>
+        <td>Emails per user<br><span class="sub">continuous</span></td>
+        <td><span class="chip grey">Secondary</span></td>
+        <td class="num ">2.020</td>
+        <td class="num ">2.019</td>
+        <td class="num flat">-0.0%</td>
+        <td class="num strong">47.6%</td>
+        <td class="num ">-0.001<br><span class="sub2">-0.024 to +0.022</span></td>
+        <td class="num ">0.005</td>
+        <td class="num ">0.004</td>
+        <td class="num "></td>
+        <td><span class="chip grey">Neutral</span></td>
+      </tr>
+      <tr>
+        <td>Unsubscribe rate<br><span class="sub">rate</span></td>
+        <td><span class="chip grey">Secondary</span></td>
+        <td class="num ">0.610%</td>
+        <td class="num ">0.482%</td>
+        <td class="num pos">-21.0%</td>
+        <td class="num strong">93.3%</td>
+        <td class="num ">-0.128 pp<br><span class="sub2">-0.296 pp to +0.039 pp</span></td>
+        <td class="num ">0.002 pp</td>
+        <td class="num ">0.130 pp</td>
+        <td class="num "></td>
+        <td><span class="chip green">Win</span></td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+<p class="note">Chance to win: the chance the variant is better. Risk if ship: the average loss if we ship the variant and it is actually worse. Risk if keep: the average loss if we keep control and the variant was actually better. Chance of harm (guardrails): the chance the metric got worse by more than the margin.</p><p class="note">Secondary metrics are labelled Win when the chance the variant is better is 90% or more, Loss when it is 10% or less, and Neutral in between.</p><div class="callout" style="margin-top:1rem"><h3>Notes on the results</h3><p>Unsubscribes went down (0.61% to 0.48%) with a 93% chance the variant is better. It is a secondary metric and the change is small in absolute terms, so we treat it as a good sign, not a result.</p>
+<p>Bounce rate and emails per user did not move, as expected: both groups received the same campaigns.</p>
+<p>The risk threshold was set before launch from the placebo check, which is why a decisive call here can be trusted. The same rule with the loose threshold used in <code>sep-checkout-1</code> would name a winner too often.</p></div>
+  <div class="checks">
+    <div class="card check">
+      <div class="label">Balance check</div>
+      <span class="chip big green">Balanced</span>
+      <p>Chi-square p = 39.28%.
+Users are split evenly between control and variant (15,074 and 14,926).
+</p>
+    </div>
+    <div class="card check">
+      <div class="label">Placebo A/A check</div>
+      <span class="chip big green">Passed</span>
+      <p>On identical groups, the rule rarely picks a winner. In 200 random splits of your control users into two identical groups of 15,074, it named a safer arm 7.0% of the time.</p>
+    </div>
+  </div>
+
+  <div class="kicker">Charts</div>
+  <h2>Click rate over time</h2>
+  <div class="charts">
+    <div class="card chart-card"><h3>Control and variant over time</h3><div class="chart" id="chart-time"></div></div>
+    <div class="card chart-card"><h3>Risk of each choice, on all the data</h3><div class="chart" id="chart-risk"></div></div>
+    <div class="card chart-card"><h3>Risk of each choice, by day</h3><div class="chart" id="chart-risk_time"></div></div>
+    <div class="card chart-card"><h3>Difference with its 95% credible interval, by day</h3><div class="chart" id="chart-difference"></div></div>
+    <div class="card chart-card"><h3>Chance the variant wins, by day</h3><div class="chart" id="chart-chance"></div></div>
+  </div>
+  <p class="note">Charts are drawn from the tool's own chart definitions, so they match the tool exactly.</p>
+
+  <div class="kicker">Design</div>
+  <h2>How the test was set up</h2>
+  <p class="note">From the design doc written before launch. Open a section for details; the full design doc is linked at the top.</p>
+  <div class="edd">
+  <details><summary>Audience</summary><ul><li><strong>Who is in:</strong> All readers who receive a campaign email during the test.</li><li><strong>Where they enter:</strong> The first campaign send during the test.</li><li><strong>Split:</strong> 50 / 50.</li><li><strong>Sample size:</strong> n/a for a Bayesian test. About 30,000 readers are expected over 21 days, about 15,000 per group.</li></ul></details>
+  <details><summary>Metrics</summary><h3>Primary</h3>
+<table><thead><tr><th>Metric</th><th>Baseline</th><th>Minimum detectable effect</th></tr></thead><tbody><tr><td>Click rate</td><td>about 5%</td><td>n/a (Bayesian); expected +20% relative</td></tr></tbody></table>
+<h3>Secondary</h3>
+<table><thead><tr><th>Metric</th><th>Why it matters</th></tr></thead><tbody><tr><td>Unsubscribe rate</td><td>Shows whether readers feel misled by the new text</td></tr><tr><td>Bounce rate</td><td>Should not move; a change would point to a delivery problem</td></tr><tr><td>Emails per user</td><td>Should not move; both groups get the same campaigns</td></tr></tbody></table>
+<h3>Guardrails</h3>
+<table><thead><tr><th>Metric</th><th>Baseline</th><th>Worst change we accept</th></tr></thead><tbody><tr><td>Open rate</td><td>about 38%</td><td>Down by at most 5% relative</td></tr></tbody></table></details>
+  <details><summary>Analysis plan</summary><ul><li><strong>Method and settings:</strong> Bayesian with a flat prior. Risk threshold 0.004 percentage points, minimum 7 days before a verdict, guardrail harm limit 1%. The threshold was set with the placebo check in mind: after <code>sep-checkout-1</code>, where a loose threshold named a winner in a third of identical splits, we picked a threshold that names a winner in fewer than 1 in 10 identical splits at about 15,000 readers per group.</li><li><strong>Checks:</strong> balance check (is the split fair?) and placebo A/A check (does the test avoid finding differences that are not there?).</li><li><strong>Segments and filters:</strong> Region and plan tier, to look for differences; no filters.</li></ul></details>
+  <details><summary>Decision criteria</summary><p><strong>Ship if:</strong> Shipping the variant risks less than 0.004 percentage points of click rate while keeping control risks more, and the open-rate guardrail passes.</p>
+<p><strong>Do not ship if:</strong> Keeping control risks less than the threshold while shipping the variant risks more, or the open-rate guardrail fails.</p>
+<p><strong>Otherwise:</strong> If both choices risk more than the threshold after 21 days, the result is inconclusive. We would not ship on this evidence.</p></details>
+  <details><summary>Kill switch</summary><p>Stop the test if the balance check shows a broken split, or if the open rate falls by more than 10% relative.</p></details>
+  <details><summary>Risks and dependencies</summary><ul><li><strong>Risks:</strong> A different preview text could change how many readers open at all, so open rate is a guardrail. A promise that the page does not keep could raise unsubscribes (watched as a secondary metric).</li><li><strong>Dependencies:</strong> The content team writes the new preview text for every campaign in the test.</li></ul></details>
+  </div>
+
+  <div class="kicker">Conclusion</div>
+  <h2>Summary and recommendation</h2>
+  <ol class="findings">
+    <li><span class="n">1</span><div><span class="lead">Primary metric:</span> click rate rose 31.3%, from 4.84% to 6.36%. The 95% credible interval for the difference is +1.00 pp to +2.04 pp, so even the low end is a clear gain.</div></li>
+    <li><span class="n">2</span><div><span class="lead">Risk is below the limit only for the variant:</span> shipping the variant risks 0.000 pp, keeping control risks 1.515 pp. The limit was 0.004 pp.</div></li>
+    <li><span class="n">3</span><div><span class="lead">Guardrail passed:</span> open rate was 37.67% in control and 37.63% in the variant. The chance it fell by more than 5% relative is 0.05%, well under our 1% limit.</div></li>
+    <li><span class="n">4</span><div><span class="lead">Checks passed:</span> the split was balanced (p = 39.3%) and the placebo A/A check named a safer arm in 7.0% of identical splits, below the 10% bar.</div></li>
+  </ol>
+  <div class="decision green">
+    <div class="head"><span class="chip big green">Ship</span><span class="title">Clear primary win, guardrail clear</span></div>
+    <p>Ship the new preview text for all campaigns. Keep watching open rate and unsubscribe rate for two weeks after launch. Next, test the same idea in the subject line.</p>
+  </div>
+
+  <footer>Synthetic demo data. Results exported from the experiment tool on 2026-10-04. Part of the P2 Experiment Platform demo.</footer>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/vega@6"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-lite@6"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-embed@7"></script>
+<script>
+const charts = {"time": {"config": {"view": {"continuousWidth": 300, "continuousHeight": 300}}, "data": {"name": "data-041fb081b042260fb386b149f2f8b726"}, "mark": {"type": "line", "point": {"size": 90}}, "encoding": {"color": {"field": "arm", "scale": {"domain": ["control", "variant"], "range": ["#94a3b8", "#3b82f6"]}, "title": "Arm", "type": "nominal"}, "tooltip": [{"field": "day", "format": "%b %d", "title": "Day", "type": "temporal"}, {"field": "arm", "title": "Arm", "type": "nominal"}, {"field": "value", "format": ".3f", "title": "Average (%)", "type": "quantitative"}, {"field": "n_users", "format": ",", "title": "Users so far", "type": "quantitative"}], "x": {"axis": {"format": "%b %d"}, "field": "day", "title": "Day", "type": "temporal"}, "y": {"field": "value", "scale": {"zero": false}, "title": "Cumulative average (%)", "type": "quantitative"}}, "height": 300, "title": "", "width": "container", "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json", "datasets": {"data-041fb081b042260fb386b149f2f8b726": [{"day": "2026-08-03T00:00:00", "arm": "control", "value": 0.5302226935312835, "n_users": 943}, {"day": "2026-08-03T00:00:00", "arm": "variant", "value": 0.29732408325074366, "n_users": 1009}, {"day": "2026-08-04T00:00:00", "arm": "control", "value": 0.5687693898655641, "n_users": 1934}, {"day": "2026-08-04T00:00:00", "arm": "variant", "value": 0.5943536404160475, "n_users": 2019}, {"day": "2026-08-05T00:00:00", "arm": "control", "value": 0.710900473933648, "n_users": 2954}, {"day": "2026-08-05T00:00:00", "arm": "variant", "value": 1.1593242795627667, "n_users": 3019}, {"day": "2026-08-06T00:00:00", "arm": "control", "value": 0.8926294312675341, "n_users": 3921}, {"day": "2026-08-06T00:00:00", "arm": "variant", "value": 1.7852715100421506, "n_users": 4033}, {"day": "2026-08-07T00:00:00", "arm": "control", "value": 1.325178389398571, "n_users": 4905}, {"day": "2026-08-07T00:00:00", "arm": "variant", "value": 2.1890547263681523, "n_users": 5025}, {"day": "2026-08-08T00:00:00", "arm": "control", "value": 1.6829350387075055, "n_users": 5942}, {"day": "2026-08-08T00:00:00", "arm": "variant", "value": 2.7275714755175833, "n_users": 6086}, {"day": "2026-08-09T00:00:00", "arm": "control", "value": 2.356660439718354, "n_users": 6959}, {"day": "2026-08-09T00:00:00", "arm": "variant", "value": 3.3799201369081704, "n_users": 7012}, {"day": "2026-08-10T00:00:00", "arm": "control", "value": 2.640555906506632, "n_users": 7915}, {"day": "2026-08-10T00:00:00", "arm": "variant", "value": 3.7801977719364137, "n_users": 7989}, {"day": "2026-08-11T00:00:00", "arm": "control", "value": 2.880054212785184, "n_users": 8854}, {"day": "2026-08-11T00:00:00", "arm": "variant", "value": 3.9759438690277147, "n_users": 8979}, {"day": "2026-08-12T00:00:00", "arm": "control", "value": 3.0770782889426966, "n_users": 9912}, {"day": "2026-08-12T00:00:00", "arm": "variant", "value": 4.121431443506219, "n_users": 9948}, {"day": "2026-08-13T00:00:00", "arm": "control", "value": 3.1825642896224653, "n_users": 10966}, {"day": "2026-08-13T00:00:00", "arm": "variant", "value": 4.358154408405668, "n_users": 10945}, {"day": "2026-08-14T00:00:00", "arm": "control", "value": 3.296336476675315, "n_users": 11983}, {"day": "2026-08-14T00:00:00", "arm": "variant", "value": 4.54735784272674, "n_users": 11941}, {"day": "2026-08-15T00:00:00", "arm": "control", "value": 3.349723417332498, "n_users": 13016}, {"day": "2026-08-15T00:00:00", "arm": "variant", "value": 4.765214704973715, "n_users": 12948}, {"day": "2026-08-16T00:00:00", "arm": "control", "value": 3.4387014096540014, "n_users": 14046}, {"day": "2026-08-16T00:00:00", "arm": "variant", "value": 4.885222381635571, "n_users": 13940}, {"day": "2026-08-17T00:00:00", "arm": "control", "value": 3.549157489717408, "n_users": 15074}, {"day": "2026-08-17T00:00:00", "arm": "variant", "value": 4.877395149403703, "n_users": 14926}, {"day": "2026-08-18T00:00:00", "arm": "control", "value": 3.9073902083056797, "n_users": 15074}, {"day": "2026-08-18T00:00:00", "arm": "variant", "value": 5.2458796730537385, "n_users": 14926}, {"day": "2026-08-19T00:00:00", "arm": "control", "value": 4.199283534562824, "n_users": 15074}, {"day": "2026-08-19T00:00:00", "arm": "variant", "value": 5.540667291973731, "n_users": 14926}, {"day": "2026-08-20T00:00:00", "arm": "control", "value": 4.464641103887463, "n_users": 15074}, {"day": "2026-08-20T00:00:00", "arm": "variant", "value": 5.848854348117392, "n_users": 14926}, {"day": "2026-08-21T00:00:00", "arm": "control", "value": 4.643757463181658, "n_users": 15074}, {"day": "2026-08-21T00:00:00", "arm": "variant", "value": 6.0967439367546685, "n_users": 14926}, {"day": "2026-08-22T00:00:00", "arm": "control", "value": 4.756534430144596, "n_users": 15074}, {"day": "2026-08-22T00:00:00", "arm": "variant", "value": 6.297735495109253, "n_users": 14926}, {"day": "2026-08-23T00:00:00", "arm": "control", "value": 4.8427756401751525, "n_users": 15074}, {"day": "2026-08-23T00:00:00", "arm": "variant", "value": 6.35803296261555, "n_users": 14926}]}}, "risk": {"config": {"view": {"continuousWidth": 300, "continuousHeight": 300}}, "layer": [{"data": {"name": "data-a96cf0baedc0c0c893700df4f8fbdb98"}, "mark": {"type": "bar", "cornerRadiusTopLeft": 4, "cornerRadiusTopRight": 4, "size": 90}, "encoding": {"color": {"field": "safe", "legend": null, "scale": {"domain": ["Under the threshold", "Over the threshold", "No threshold"], "range": ["#22c55e", "#94a3b8", "#3b82f6"]}, "type": "nominal"}, "tooltip": [{"field": "choice", "title": "Choice", "type": "nominal"}, {"field": "label", "title": "Average loss if wrong", "type": "nominal"}], "x": {"axis": {"labelAngle": 0, "labelFontSize": 13, "labelFontWeight": "bold"}, "field": "choice", "sort": ["Ship variant", "Keep control"], "title": null, "type": "nominal"}, "y": {"field": "risk", "scale": {"domain": [0, 1.8936909651382257]}, "title": "Average loss if wrong (pp)", "type": "quantitative"}}}, {"data": {"name": "data-a96cf0baedc0c0c893700df4f8fbdb98"}, "mark": {"type": "text", "color": "#64748b", "dy": -8, "fontSize": 13, "fontWeight": "bold"}, "encoding": {"text": {"field": "label", "type": "nominal"}, "x": {"axis": {"labelAngle": 0, "labelFontSize": 13, "labelFontWeight": "bold"}, "field": "choice", "sort": ["Ship variant", "Keep control"], "title": null, "type": "nominal"}, "y": {"field": "risk", "scale": {"domain": [0, 1.8936909651382257]}, "title": "Average loss if wrong (pp)", "type": "quantitative"}}}, {"data": {"name": "data-6dc692e026ffc20ac10c0cb59e9d6219"}, "mark": {"type": "rule", "color": "#ef4444", "size": 2, "strokeDash": [5, 3]}, "encoding": {"y": {"field": "threshold", "type": "quantitative"}}}, {"data": {"name": "data-6dc692e026ffc20ac10c0cb59e9d6219"}, "mark": {"type": "text", "align": "left", "color": "#ef4444", "dx": 4, "dy": -7, "fontWeight": "bold"}, "encoding": {"text": {"value": "Most we accept to lose"}, "x": {"value": 0}, "y": {"field": "threshold", "type": "quantitative"}}}], "height": 260, "title": "", "width": "container", "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json", "datasets": {"data-a96cf0baedc0c0c893700df4f8fbdb98": [{"choice": "Ship variant", "risk": 0.0, "label": "0.000 pp", "safe": "Under the threshold", "threshold": 0.004}, {"choice": "Keep control", "risk": 1.5149527721105804, "label": "1.515 pp", "safe": "Over the threshold", "threshold": 0.004}], "data-6dc692e026ffc20ac10c0cb59e9d6219": [{"choice": "Ship variant", "risk": 0.0, "label": "0.000 pp", "safe": "Under the threshold", "threshold": 0.004}]}}, "risk_time": {"config": {"view": {"continuousWidth": 300, "continuousHeight": 300}}, "layer": [{"data": {"name": "data-5c9dc979ebcbf7f9107bca678eeafe0d"}, "mark": {"type": "line", "point": {"size": 50}}, "encoding": {"color": {"field": "choice", "legend": {"orient": "top"}, "scale": {"domain": ["Ship variant", "Keep control"], "range": ["#3b82f6", "#94a3b8"]}, "title": null, "type": "nominal"}, "tooltip": [{"field": "day", "format": "%b %d", "title": "Day", "type": "temporal"}, {"field": "choice", "title": "Choice", "type": "nominal"}, {"field": "risk", "format": ".3f", "title": "Average loss if wrong", "type": "quantitative"}], "x": {"axis": {"format": "%b %d"}, "field": "day", "title": "Day", "type": "temporal"}, "y": {"field": "risk", "scale": {"zero": true}, "title": "Average loss if wrong (pp)", "type": "quantitative"}}}, {"data": {"name": "data-9bce8246ce1f1b427804b87f36557620"}, "mark": {"type": "rule", "color": "#ef4444", "size": 2, "strokeDash": [5, 3]}, "encoding": {"y": {"field": "threshold", "type": "quantitative"}}}, {"data": {"name": "data-9bce8246ce1f1b427804b87f36557620"}, "mark": {"type": "text", "align": "left", "color": "#ef4444", "dx": 4, "dy": -7, "fontWeight": "bold"}, "encoding": {"text": {"value": "Most we accept to lose"}, "x": {"value": 0}, "y": {"field": "threshold", "type": "quantitative"}}}], "height": 260, "title": "", "width": "container", "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json", "datasets": {"data-5c9dc979ebcbf7f9107bca678eeafe0d": [{"day": "2026-08-03T00:00:00", "choice": "Ship variant", "risk": 0.2753375593781564}, {"day": "2026-08-04T00:00:00", "choice": "Ship variant", "risk": 0.08735625007154482}, {"day": "2026-08-05T00:00:00", "choice": "Ship variant", "risk": 0.003721799882925731}, {"day": "2026-08-06T00:00:00", "choice": "Ship variant", "risk": 1.831355856665066e-05}, {"day": "2026-08-07T00:00:00", "choice": "Ship variant", "risk": 2.338221781367914e-05}, {"day": "2026-08-08T00:00:00", "choice": "Ship variant", "risk": 0.0}, {"day": "2026-08-09T00:00:00", "choice": "Ship variant", "risk": 2.012187199976548e-07}, {"day": "2026-08-10T00:00:00", "choice": "Ship variant", "risk": 3.510747727927463e-07}, {"day": "2026-08-11T00:00:00", "choice": "Ship variant", "risk": 1.161384603382068e-06}, {"day": "2026-08-12T00:00:00", "choice": "Ship variant", "risk": 2.1418413940873723e-06}, {"day": "2026-08-13T00:00:00", "choice": "Ship variant", "risk": 0.0}, {"day": "2026-08-14T00:00:00", "choice": "Ship variant", "risk": 0.0}, {"day": "2026-08-15T00:00:00", "choice": "Ship variant", "risk": 0.0}, {"day": "2026-08-16T00:00:00", "choice": "Ship variant", "risk": 0.0}, {"day": "2026-08-17T00:00:00", "choice": "Ship variant", "risk": 0.0}, {"day": "2026-08-18T00:00:00", "choice": "Ship variant", "risk": 0.0}, {"day": "2026-08-19T00:00:00", "choice": "Ship variant", "risk": 0.0}, {"day": "2026-08-20T00:00:00", "choice": "Ship variant", "risk": 0.0}, {"day": "2026-08-21T00:00:00", "choice": "Ship variant", "risk": 0.0}, {"day": "2026-08-22T00:00:00", "choice": "Ship variant", "risk": 0.0}, {"day": "2026-08-23T00:00:00", "choice": "Ship variant", "risk": 0.0}, {"day": "2026-08-03T00:00:00", "choice": "Keep control", "risk": 0.04084328006928442}, {"day": "2026-08-04T00:00:00", "choice": "Keep control", "risk": 0.11232518389007304}, {"day": "2026-08-05T00:00:00", "choice": "Keep control", "risk": 0.4514633937115121}, {"day": "2026-08-06T00:00:00", "choice": "Keep control", "risk": 0.8920648221620509}, {"day": "2026-08-07T00:00:00", "choice": "Keep control", "risk": 0.8651104979110209}, {"day": "2026-08-08T00:00:00", "choice": "Keep control", "risk": 1.0465772692291073}, {"day": "2026-08-09T00:00:00", "choice": "Keep control", "risk": 1.0252458621327785}, {"day": "2026-08-10T00:00:00", "choice": "Keep control", "risk": 1.13803571298062}, {"day": "2026-08-11T00:00:00", "choice": "Keep control", "risk": 1.094309917287694}, {"day": "2026-08-12T00:00:00", "choice": "Keep control", "risk": 1.0429453373060629}, {"day": "2026-08-13T00:00:00", "choice": "Keep control", "risk": 1.1739748826275094}, {"day": "2026-08-14T00:00:00", "choice": "Keep control", "risk": 1.2494412849746994}, {"day": "2026-08-15T00:00:00", "choice": "Keep control", "risk": 1.4139249288806655}, {"day": "2026-08-16T00:00:00", "choice": "Keep control", "risk": 1.445469259631715}, {"day": "2026-08-17T00:00:00", "choice": "Keep control", "risk": 1.327261333966622}, {"day": "2026-08-18T00:00:00", "choice": "Keep control", "risk": 1.3374627164316002}, {"day": "2026-08-19T00:00:00", "choice": "Keep control", "risk": 1.3403172553545177}, {"day": "2026-08-20T00:00:00", "choice": "Keep control", "risk": 1.3830987399145263}, {"day": "2026-08-21T00:00:00", "choice": "Keep control", "risk": 1.4518282164540441}, {"day": "2026-08-22T00:00:00", "choice": "Keep control", "risk": 1.54000263509726}, {"day": "2026-08-23T00:00:00", "choice": "Keep control", "risk": 1.5140548170841113}], "data-9bce8246ce1f1b427804b87f36557620": [{"day": "2026-08-03T00:00:00", "chance_to_win": 22.32, "risk_variant": 0.2753375593781564, "risk_control": 0.04084328006928442, "difference": -0.234494279308872, "ci_low": -0.008998181306799887, "ci_high": 0.0037842533056291834, "n_control": 943, "n_variant": 1009, "threshold": 0.004, "low": -0.8998181306799887, "high": 0.3784253305629183}]}}, "difference": {"config": {"view": {"continuousWidth": 300, "continuousHeight": 300}}, "layer": [{"data": {"name": "data-42990c68f268a11fa16682fcd3437a6f"}, "mark": {"type": "rule", "color": "#94a3b8", "strokeDash": [4, 3]}, "encoding": {"y": {"field": "zero", "type": "quantitative"}}}, {"data": {"name": "data-09fdea2859db72ac0c1646df1dded406"}, "mark": {"type": "area", "color": "#3b82f6", "opacity": 0.18}, "encoding": {"x": {"axis": {"format": "%b %d"}, "field": "day", "title": "Day", "type": "temporal"}, "y": {"field": "low", "type": "quantitative"}, "y2": {"field": "high"}}}, {"data": {"name": "data-09fdea2859db72ac0c1646df1dded406"}, "mark": {"type": "line", "color": "#3b82f6", "point": {"color": "#3b82f6", "size": 70}}, "encoding": {"tooltip": [{"field": "day", "format": "%b %d", "title": "Day", "type": "temporal"}, {"field": "difference", "format": ".3f", "title": "Difference", "type": "quantitative"}, {"field": "n_control", "format": ",", "title": "Control users", "type": "quantitative"}, {"field": "n_variant", "format": ",", "title": "Variant users", "type": "quantitative"}, {"field": "low", "format": ".3f", "title": "95% credible low", "type": "quantitative"}, {"field": "high", "format": ".3f", "title": "95% credible high", "type": "quantitative"}], "x": {"axis": {"format": "%b %d"}, "field": "day", "title": "Day", "type": "temporal"}, "y": {"field": "difference", "scale": {"zero": true}, "title": "Variant minus control (pp)", "type": "quantitative"}}}], "height": 260, "title": "", "width": "container", "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json", "datasets": {"data-42990c68f268a11fa16682fcd3437a6f": [{"zero": 0}], "data-09fdea2859db72ac0c1646df1dded406": [{"day": "2026-08-03T00:00:00", "chance_to_win": 22.32, "risk_variant": 0.2753375593781564, "risk_control": 0.04084328006928442, "difference": -0.234494279308872, "ci_low": -0.008998181306799887, "ci_high": 0.0037842533056291834, "n_control": 943, "n_variant": 1009, "threshold": 0.004, "low": -0.8998181306799887, "high": 0.3784253305629183}, {"day": "2026-08-04T00:00:00", "chance_to_win": 53.76499999999999, "risk_variant": 0.08735625007154482, "risk_control": 0.11232518389007304, "difference": 0.024968933818528216, "ci_low": -0.004695655250921985, "ci_high": 0.00530694215934124, "n_control": 1934, "n_variant": 2019, "threshold": 0.004, "low": -0.46956552509219857, "high": 0.530694215934124}, {"day": "2026-08-05T00:00:00", "chance_to_win": 96.34, "risk_variant": 0.003721799882925731, "risk_control": 0.4514633937115121, "difference": 0.4477415938285864, "ci_low": -0.00037521433686798345, "ci_high": 0.009521838691179299, "n_control": 2954, "n_variant": 3019, "threshold": 0.004, "low": -0.03752143368679835, "high": 0.9521838691179298}, {"day": "2026-08-06T00:00:00", "chance_to_win": 99.96000000000001, "risk_variant": 1.831355856665066e-05, "risk_control": 0.8920648221620509, "difference": 0.892046508603484, "ci_low": 0.0038685057225674294, "ci_high": 0.014104565851808299, "n_control": 3921, "n_variant": 4033, "threshold": 0.004, "low": 0.38685057225674296, "high": 1.41045658518083}, {"day": "2026-08-07T00:00:00", "chance_to_win": 99.965, "risk_variant": 2.338221781367914e-05, "risk_control": 0.8651104979110209, "difference": 0.8650871156932073, "ci_low": 0.0034860200916866685, "ci_high": 0.013856161523123106, "n_control": 4905, "n_variant": 5025, "threshold": 0.004, "low": 0.34860200916866685, "high": 1.3856161523123105}, {"day": "2026-08-08T00:00:00", "chance_to_win": 100.0, "risk_variant": 0.0, "risk_control": 1.0465772692291073, "difference": 1.0465772692291073, "ci_low": 0.0052566130755037944, "ci_high": 0.015769893112726564, "n_control": 5942, "n_variant": 6086, "threshold": 0.004, "low": 0.5256613075503794, "high": 1.5769893112726565}, {"day": "2026-08-09T00:00:00", "chance_to_win": 99.995, "risk_variant": 2.012187199976548e-07, "risk_control": 1.0252458621327785, "difference": 1.0252456609140586, "ci_low": 0.004828210735596885, "ci_high": 0.015794962423260058, "n_control": 6959, "n_variant": 7012, "threshold": 0.004, "low": 0.4828210735596885, "high": 1.5794962423260057}, {"day": "2026-08-10T00:00:00", "chance_to_win": 99.995, "risk_variant": 3.510747727927463e-07, "risk_control": 1.13803571298062, "difference": 1.138035361905847, "ci_low": 0.0058689067646400745, "ci_high": 0.016787249822933822, "n_control": 7915, "n_variant": 7989, "threshold": 0.004, "low": 0.5868906764640075, "high": 1.6787249822933823}, {"day": "2026-08-11T00:00:00", "chance_to_win": 99.995, "risk_variant": 1.161384603382068e-06, "risk_control": 1.094309917287694, "difference": 1.0943087559030906, "ci_low": 0.005577314042806023, "ci_high": 0.016190689070069063, "n_control": 8854, "n_variant": 8979, "threshold": 0.004, "low": 0.5577314042806023, "high": 1.6190689070069062}, {"day": "2026-08-12T00:00:00", "chance_to_win": 99.995, "risk_variant": 2.1418413940873723e-06, "risk_control": 1.0429453373060629, "difference": 1.0429431954646688, "ci_low": 0.005222408964925181, "ci_high": 0.015520348545808704, "n_control": 9912, "n_variant": 9948, "threshold": 0.004, "low": 0.5222408964925181, "high": 1.5520348545808704}, {"day": "2026-08-13T00:00:00", "chance_to_win": 100.0, "risk_variant": 0.0, "risk_control": 1.1739748826275094, "difference": 1.1739748826275094, "ci_low": 0.006669808268045156, "ci_high": 0.016684575176108236, "n_control": 10966, "n_variant": 10945, "threshold": 0.004, "low": 0.6669808268045155, "high": 1.6684575176108236}, {"day": "2026-08-14T00:00:00", "chance_to_win": 100.0, "risk_variant": 0.0, "risk_control": 1.2494412849746994, "difference": 1.2494412849746994, "ci_low": 0.0075604121568153765, "ci_high": 0.0173173084891984, "n_control": 11983, "n_variant": 11941, "threshold": 0.004, "low": 0.7560412156815377, "high": 1.73173084891984}, {"day": "2026-08-15T00:00:00", "chance_to_win": 100.0, "risk_variant": 0.0, "risk_control": 1.4139249288806655, "difference": 1.4139249288806655, "ci_low": 0.009315351285318095, "ci_high": 0.018846908080623354, "n_control": 13016, "n_variant": 12948, "threshold": 0.004, "low": 0.9315351285318095, "high": 1.8846908080623355}, {"day": "2026-08-16T00:00:00", "chance_to_win": 100.0, "risk_variant": 0.0, "risk_control": 1.445469259631715, "difference": 1.445469259631715, "ci_low": 0.00975615157222636, "ci_high": 0.019096719229466385, "n_control": 14046, "n_variant": 13940, "threshold": 0.004, "low": 0.9756151572226359, "high": 1.9096719229466386}, {"day": "2026-08-17T00:00:00", "chance_to_win": 100.0, "risk_variant": 0.0, "risk_control": 1.327261333966622, "difference": 1.327261333966622, "ci_low": 0.008704851751403422, "ci_high": 0.017784316892122655, "n_control": 15074, "n_variant": 14926, "threshold": 0.004, "low": 0.8704851751403422, "high": 1.7784316892122656}, {"day": "2026-08-18T00:00:00", "chance_to_win": 100.0, "risk_variant": 0.0, "risk_control": 1.3374627164316002, "difference": 1.3374627164316002, "ci_low": 0.008628390206505406, "ci_high": 0.018074592832097815, "n_control": 15074, "n_variant": 14926, "threshold": 0.004, "low": 0.8628390206505406, "high": 1.8074592832097816}, {"day": "2026-08-19T00:00:00", "chance_to_win": 100.0, "risk_variant": 0.0, "risk_control": 1.3403172553545177, "difference": 1.3403172553545177, "ci_low": 0.008526193011981991, "ci_high": 0.018254304700608976, "n_control": 15074, "n_variant": 14926, "threshold": 0.004, "low": 0.8526193011981992, "high": 1.8254304700608976}, {"day": "2026-08-20T00:00:00", "chance_to_win": 100.0, "risk_variant": 0.0, "risk_control": 1.3830987399145263, "difference": 1.3830987399145263, "ci_low": 0.00882421840744169, "ci_high": 0.018808859883432897, "n_control": 15074, "n_variant": 14926, "threshold": 0.004, "low": 0.882421840744169, "high": 1.8808859883432898}, {"day": "2026-08-21T00:00:00", "chance_to_win": 100.0, "risk_variant": 0.0, "risk_control": 1.4518282164540441, "difference": 1.4518282164540441, "ci_low": 0.00941211659727263, "ci_high": 0.01959288001103643, "n_control": 15074, "n_variant": 14926, "threshold": 0.004, "low": 0.9412116597272631, "high": 1.9592880011036429}, {"day": "2026-08-22T00:00:00", "chance_to_win": 100.0, "risk_variant": 0.0, "risk_control": 1.54000263509726, "difference": 1.54000263509726, "ci_low": 0.010219025451498876, "ci_high": 0.020546226013855962, "n_control": 15074, "n_variant": 14926, "threshold": 0.004, "low": 1.0219025451498875, "high": 2.054622601385596}, {"day": "2026-08-23T00:00:00", "chance_to_win": 100.0, "risk_variant": 0.0, "risk_control": 1.5140548170841113, "difference": 1.5140548170841113, "ci_low": 0.009926477873464951, "ci_high": 0.020318253199099964, "n_control": 15074, "n_variant": 14926, "threshold": 0.004, "low": 0.9926477873464951, "high": 2.0318253199099963}]}}, "chance": {"config": {"view": {"continuousWidth": 300, "continuousHeight": 300}}, "layer": [{"data": {"name": "data-a60eeda9c5ac7d033a2beb95bf679f3e"}, "mark": {"type": "rule", "color": "#94a3b8", "strokeDash": [4, 3]}, "encoding": {"y": {"field": "half", "type": "quantitative"}}}, {"data": {"name": "data-09fdea2859db72ac0c1646df1dded406"}, "mark": {"type": "line", "color": "#3b82f6", "point": {"color": "#3b82f6", "size": 70}}, "encoding": {"tooltip": [{"field": "day", "format": "%b %d", "title": "Day", "type": "temporal"}, {"field": "chance_to_win", "format": ".1f", "title": "Chance (%)", "type": "quantitative"}], "x": {"axis": {"format": "%b %d"}, "field": "day", "title": "Day", "type": "temporal"}, "y": {"field": "chance_to_win", "scale": {"domain": [0, 100]}, "title": "Chance variant wins (%)", "type": "quantitative"}}}], "height": 260, "title": "", "width": "container", "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json", "datasets": {"data-a60eeda9c5ac7d033a2beb95bf679f3e": [{"half": 50}], "data-09fdea2859db72ac0c1646df1dded406": [{"day": "2026-08-03T00:00:00", "chance_to_win": 22.32, "risk_variant": 0.2753375593781564, "risk_control": 0.04084328006928442, "difference": -0.234494279308872, "ci_low": -0.008998181306799887, "ci_high": 0.0037842533056291834, "n_control": 943, "n_variant": 1009, "threshold": 0.004, "low": -0.8998181306799887, "high": 0.3784253305629183}, {"day": "2026-08-04T00:00:00", "chance_to_win": 53.76499999999999, "risk_variant": 0.08735625007154482, "risk_control": 0.11232518389007304, "difference": 0.024968933818528216, "ci_low": -0.004695655250921985, "ci_high": 0.00530694215934124, "n_control": 1934, "n_variant": 2019, "threshold": 0.004, "low": -0.46956552509219857, "high": 0.530694215934124}, {"day": "2026-08-05T00:00:00", "chance_to_win": 96.34, "risk_variant": 0.003721799882925731, "risk_control": 0.4514633937115121, "difference": 0.4477415938285864, "ci_low": -0.00037521433686798345, "ci_high": 0.009521838691179299, "n_control": 2954, "n_variant": 3019, "threshold": 0.004, "low": -0.03752143368679835, "high": 0.9521838691179298}, {"day": "2026-08-06T00:00:00", "chance_to_win": 99.96000000000001, "risk_variant": 1.831355856665066e-05, "risk_control": 0.8920648221620509, "difference": 0.892046508603484, "ci_low": 0.0038685057225674294, "ci_high": 0.014104565851808299, "n_control": 3921, "n_variant": 4033, "threshold": 0.004, "low": 0.38685057225674296, "high": 1.41045658518083}, {"day": "2026-08-07T00:00:00", "chance_to_win": 99.965, "risk_variant": 2.338221781367914e-05, "risk_control": 0.8651104979110209, "difference": 0.8650871156932073, "ci_low": 0.0034860200916866685, "ci_high": 0.013856161523123106, "n_control": 4905, "n_variant": 5025, "threshold": 0.004, "low": 0.34860200916866685, "high": 1.3856161523123105}, {"day": "2026-08-08T00:00:00", "chance_to_win": 100.0, "risk_variant": 0.0, "risk_control": 1.0465772692291073, "difference": 1.0465772692291073, "ci_low": 0.0052566130755037944, "ci_high": 0.015769893112726564, "n_control": 5942, "n_variant": 6086, "threshold": 0.004, "low": 0.5256613075503794, "high": 1.5769893112726565}, {"day": "2026-08-09T00:00:00", "chance_to_win": 99.995, "risk_variant": 2.012187199976548e-07, "risk_control": 1.0252458621327785, "difference": 1.0252456609140586, "ci_low": 0.004828210735596885, "ci_high": 0.015794962423260058, "n_control": 6959, "n_variant": 7012, "threshold": 0.004, "low": 0.4828210735596885, "high": 1.5794962423260057}, {"day": "2026-08-10T00:00:00", "chance_to_win": 99.995, "risk_variant": 3.510747727927463e-07, "risk_control": 1.13803571298062, "difference": 1.138035361905847, "ci_low": 0.0058689067646400745, "ci_high": 0.016787249822933822, "n_control": 7915, "n_variant": 7989, "threshold": 0.004, "low": 0.5868906764640075, "high": 1.6787249822933823}, {"day": "2026-08-11T00:00:00", "chance_to_win": 99.995, "risk_variant": 1.161384603382068e-06, "risk_control": 1.094309917287694, "difference": 1.0943087559030906, "ci_low": 0.005577314042806023, "ci_high": 0.016190689070069063, "n_control": 8854, "n_variant": 8979, "threshold": 0.004, "low": 0.5577314042806023, "high": 1.6190689070069062}, {"day": "2026-08-12T00:00:00", "chance_to_win": 99.995, "risk_variant": 2.1418413940873723e-06, "risk_control": 1.0429453373060629, "difference": 1.0429431954646688, "ci_low": 0.005222408964925181, "ci_high": 0.015520348545808704, "n_control": 9912, "n_variant": 9948, "threshold": 0.004, "low": 0.5222408964925181, "high": 1.5520348545808704}, {"day": "2026-08-13T00:00:00", "chance_to_win": 100.0, "risk_variant": 0.0, "risk_control": 1.1739748826275094, "difference": 1.1739748826275094, "ci_low": 0.006669808268045156, "ci_high": 0.016684575176108236, "n_control": 10966, "n_variant": 10945, "threshold": 0.004, "low": 0.6669808268045155, "high": 1.6684575176108236}, {"day": "2026-08-14T00:00:00", "chance_to_win": 100.0, "risk_variant": 0.0, "risk_control": 1.2494412849746994, "difference": 1.2494412849746994, "ci_low": 0.0075604121568153765, "ci_high": 0.0173173084891984, "n_control": 11983, "n_variant": 11941, "threshold": 0.004, "low": 0.7560412156815377, "high": 1.73173084891984}, {"day": "2026-08-15T00:00:00", "chance_to_win": 100.0, "risk_variant": 0.0, "risk_control": 1.4139249288806655, "difference": 1.4139249288806655, "ci_low": 0.009315351285318095, "ci_high": 0.018846908080623354, "n_control": 13016, "n_variant": 12948, "threshold": 0.004, "low": 0.9315351285318095, "high": 1.8846908080623355}, {"day": "2026-08-16T00:00:00", "chance_to_win": 100.0, "risk_variant": 0.0, "risk_control": 1.445469259631715, "difference": 1.445469259631715, "ci_low": 0.00975615157222636, "ci_high": 0.019096719229466385, "n_control": 14046, "n_variant": 13940, "threshold": 0.004, "low": 0.9756151572226359, "high": 1.9096719229466386}, {"day": "2026-08-17T00:00:00", "chance_to_win": 100.0, "risk_variant": 0.0, "risk_control": 1.327261333966622, "difference": 1.327261333966622, "ci_low": 0.008704851751403422, "ci_high": 0.017784316892122655, "n_control": 15074, "n_variant": 14926, "threshold": 0.004, "low": 0.8704851751403422, "high": 1.7784316892122656}, {"day": "2026-08-18T00:00:00", "chance_to_win": 100.0, "risk_variant": 0.0, "risk_control": 1.3374627164316002, "difference": 1.3374627164316002, "ci_low": 0.008628390206505406, "ci_high": 0.018074592832097815, "n_control": 15074, "n_variant": 14926, "threshold": 0.004, "low": 0.8628390206505406, "high": 1.8074592832097816}, {"day": "2026-08-19T00:00:00", "chance_to_win": 100.0, "risk_variant": 0.0, "risk_control": 1.3403172553545177, "difference": 1.3403172553545177, "ci_low": 0.008526193011981991, "ci_high": 0.018254304700608976, "n_control": 15074, "n_variant": 14926, "threshold": 0.004, "low": 0.8526193011981992, "high": 1.8254304700608976}, {"day": "2026-08-20T00:00:00", "chance_to_win": 100.0, "risk_variant": 0.0, "risk_control": 1.3830987399145263, "difference": 1.3830987399145263, "ci_low": 0.00882421840744169, "ci_high": 0.018808859883432897, "n_control": 15074, "n_variant": 14926, "threshold": 0.004, "low": 0.882421840744169, "high": 1.8808859883432898}, {"day": "2026-08-21T00:00:00", "chance_to_win": 100.0, "risk_variant": 0.0, "risk_control": 1.4518282164540441, "difference": 1.4518282164540441, "ci_low": 0.00941211659727263, "ci_high": 0.01959288001103643, "n_control": 15074, "n_variant": 14926, "threshold": 0.004, "low": 0.9412116597272631, "high": 1.9592880011036429}, {"day": "2026-08-22T00:00:00", "chance_to_win": 100.0, "risk_variant": 0.0, "risk_control": 1.54000263509726, "difference": 1.54000263509726, "ci_low": 0.010219025451498876, "ci_high": 0.020546226013855962, "n_control": 15074, "n_variant": 14926, "threshold": 0.004, "low": 1.0219025451498875, "high": 2.054622601385596}, {"day": "2026-08-23T00:00:00", "chance_to_win": 100.0, "risk_variant": 0.0, "risk_control": 1.5140548170841113, "difference": 1.5140548170841113, "ci_low": 0.009926477873464951, "ci_high": 0.020318253199099964, "n_control": 15074, "n_variant": 14926, "threshold": 0.004, "low": 0.9926477873464951, "high": 2.0318253199099963}]}}};
+for (const [key, spec] of Object.entries(charts)) {
+  vegaEmbed("#chart-" + key, spec, {actions: false, renderer: "svg"}).catch(console.error);
+}
+</script>
+</body>
+</html>

@@ -9,9 +9,11 @@ Data scientists add experiments and product managers follow the results. It is a
   2. **Bayesian, the less common one:** the chance the variant wins and the risk of each choice, read live after a minimum number of days. It says what to do, not just whether a result is "significant".
 - **Trust checks on every result:** a sample ratio check (is the split fair?) and a placebo A/A check (does the test avoid finding differences that are not there?).
 - **Plain-English verdicts:** a one-line reason beside every verdict, so a PM can act without reading statistics.
-- **Statistics that are proven, not assumed:** matched against scipy and statsmodels, and checked by simulation (false-positive rate, interval coverage, planted effects recovered). 471 offline tests.
+- **Statistics that are proven, not assumed:** matched against scipy and statsmodels, and checked by simulation (false-positive rate, interval coverage, planted effects recovered). 498 offline tests.
 - **Clean data in:** certified, versioned metrics, and data-quality gates that stop a broken build before any number is shown.
 - **Fast and cheap to run:** the heavy work stays in BigQuery and runs in the background, and the app works from summary numbers.
+
+![The whole process in 25 seconds: the EDD, the tool, then the published results page](docs/lifecycle-demo.gif)
 
 ## Live results pages
 
@@ -21,6 +23,7 @@ Each experiment ends in a published results page, built from the tool's own numb
    * [demo-banner](https://himanshu2405.github.io/P2-Experiment-Platform/experiments/demo-banner/): Frequentist
    * [exp-002](https://himanshu2405.github.io/P2-Experiment-Platform/experiments/exp-002/): Frequentist
    * [sep-checkout-1](https://himanshu2405.github.io/P2-Experiment-Platform/experiments/sep-checkout-1/): Bayesian
+   * [demo-preview](https://himanshu2405.github.io/P2-Experiment-Platform/experiments/demo-preview/): Bayesian
 
 ## How an experiment moves through the process
 
@@ -88,18 +91,29 @@ streamlit run app/streamlit_app.py
 ```
 
 - On the Add Experiment page, open "Dev only: land the September demo data". It lands 6 demo experiments (`sep-checkout-1`, `sep-email-2` and so on) with users assigned on every day of 1 to 30 Sep 2026, so any launch and end date inside September works. It takes a few minutes.
-- Settings (environment variables): `P2_ENV` (dataset set, default `dev`), `P2_STORE` (`bigquery` or `memory`), `P2_DEV_TOOLS=0` (hide the dev button), `P2_REFRESH_SECONDS`, `P2_FLUSH_SECONDS`, `P2_MAX_RUNS`.
+- Settings (environment variables): `P2_ENV` (dataset set, default `dev`), `P2_STORE` (`bigquery`, `memory` for tests, or `demo`), `P2_DEV_TOOLS=0` (hide the dev button), `P2_REFRESH_SECONDS`, `P2_FLUSH_SECONDS`, `P2_MAX_RUNS`.
+
+### Read-only demo (no Google Cloud needed)
+
+```bash
+streamlit run app/demo_app.py
+```
+
+- It runs the same app on a frozen copy of the app tables (`demo/app_tables.json.gz`, 78 KB of summary numbers on synthetic data), so it needs no BigQuery and no credentials.
+- Every page and every experiment can be browsed. Adding, editing and running experiments is turned off, and a banner says so.
+- To host it for free on Streamlit Community Cloud: sign in at share.streamlit.io with GitHub, choose New app, pick this repo, branch `main` and main file `app/demo_app.py`, and set Python 3.12 or newer under Advanced settings. No secrets are needed. The app sleeps when idle, so the first visit takes about a minute.
+- To refresh the frozen copy after new runs: `python -m p2.store.frozen`.
 
 ## Tests
 
 ```bash
-pytest -m "not bq"    # offline, 471 tests, about 30 seconds
+pytest -m "not bq"    # offline, 498 tests, about 30 seconds
 pytest -m bq          # against BigQuery in throwaway datasets, very slow
 ```
 
 ## Not in scope (demo)
 
-Sign-in and permissions (everyone acts as one identity), deployment, cost guards, CUPED, ratio metrics and multiple-comparison correction. For Bayesian: only the flat prior (no informative prior, ROPE band or partial pooling) and no heavy-tail model for revenue. The app is not deployed on purpose: it has no sign-in, and every Run scans BigQuery on the owner's account.
+Sign-in and permissions (everyone acts as one identity), deployment, cost guards, CUPED, ratio metrics and multiple-comparison correction. For Bayesian: only the flat prior (no informative prior, ROPE band or partial pooling) and no heavy-tail model for revenue. The full app is not deployed on purpose: it has no sign-in, and every Run scans BigQuery on the owner's account. Only the read-only demo, which touches no BigQuery, is meant to be hosted.
 
 ## What I would do for production
 

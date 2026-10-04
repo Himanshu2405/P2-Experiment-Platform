@@ -100,7 +100,11 @@ Legend: DONE = covered by a completed module. PREREQ = must learn first. GAP = s
   - Decision history view.
 - Exit: someone opening the app cold can see how every experiment is doing.
 
-### Demo experience (planned, to build after the final additions)
+### Demo experience (built 2026-10-04)
+
+- Built: the GIF (`docs/lifecycle-demo.gif`, the whole lifecycle: EDD, tool, results page) and the read-only demo (`app/demo_app.py` on `demo/app_tables.json.gz`). Differences from the plan below: the GIF follows the lifecycle instead of the tool alone; the demo hides Add Experiment, Edit and Run instead of showing a disabled form, and it has no BigQuery runner, so nothing can be run even by accident. Hosting on Streamlit Community Cloud is the owner's step (it needs their GitHub login); the README has the steps.
+
+The original plan:
 - Why: a public repo is read, not felt. Visitors should be able to see and click the app without BigQuery or credentials, and without any cost or risk to the owner.
 - 1. A 15 to 20 second GIF or video at the top of the README (Catalog, open results, balance card, Charts tab, Add Experiment form). Recorded from the running app with headless Chrome, as the screenshots were.
 - 2. A live read-only demo mode of the same app: sample data exported from the dev store into a small file in the repo (synthetic), loaded in memory; every write blocked at the store; Run and Save disabled with a banner "Demo mode: read-only, sample data". Host on Streamlit Community Cloud from the public repo (free; sleeps when idle, so the first load is slow). Connecting it needs the owner's GitHub login, so the owner approves that step.

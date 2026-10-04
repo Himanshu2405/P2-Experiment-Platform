@@ -56,6 +56,22 @@ The probe filled the application tables with N synthetic experiments (each with 
 6. **Deployment shape.** One always-on instance (so the cache is consistent), behind company login, with a request timeout long enough for a Run, and a simple log of Run durations and failures.
 7. **Small safety nets that are not red tape:** a "someone changed this while you were editing" warning, and a lock that stops a second Run on the same experiment.
 
+## Streamlit at company scale (notes, 2026-10-04)
+
+Not built; written down so the trade-offs are clear.
+
+- **How it runs:** one long-lived Python server. Each browser tab holds a session in that server's memory, and every click reruns the page script for that session. The app needs a server that stays up, like any web app; in a company that is a container the platform keeps running and restarts.
+- **Why this app scales well enough for a team:** its state is in BigQuery, not in the app; heavy work runs in BigQuery and in a background queue; pages read a small in-memory copy. A restart loses nothing.
+- **Limits to plan for:**
+  - Memory per open tab, so large DataFrames for many users need care.
+  - Every click reruns the script, so slow code needs caching or partial reruns (`st.fragment`).
+  - Sessions live in one server, so several servers need sticky sessions, and this app's in-memory copy and Run queue assume one server (step 6).
+  - Sign-in comes from the company's identity proxy in front of the app (or `st.login`).
+  - Long analyses belong in background jobs.
+- **Where it fits:** internal tools for tens to a few hundred users, built and kept by data scientists. Not a public, high-traffic product.
+- **If it is outgrown:** the statistics, store and service layers (`src/p2/`) do not depend on Streamlit, so only `app/` would be replaced (for example by a web front end on an API).
+- **What was not done:** no load test, no sign-in, no multi-server setup. The claim is "the design allows it", not "it was proven at scale".
+
 ## Decision (2026-10-01): steps 4 to 7 skipped
 
 P2 is a demo for learning and showing, not a tool for 20 people. Steps 1 to 3 stay as built. Cost guards, pruning history, the deploy shape and the small safety nets (steps 4 to 7) will not be built unless this changes.

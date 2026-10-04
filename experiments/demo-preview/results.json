@@ -1,0 +1,1892 @@
+{
+ "experiment": {
+  "id": "demo-preview",
+  "name": "Preview-text rewrite",
+  "method": "bayesian",
+  "product": "email",
+  "owner": "marcus",
+  "hypothesis": "Rewriting the email preview text so it says what the link leads to will raise the click rate, because readers who open know what they get by clicking.",
+  "launch_date": "2026-08-03",
+  "end_date": "2026-08-23",
+  "runtime_days": 21,
+  "status": "Analyzed"
+ },
+ "is_final": true,
+ "through_date": "2026-08-23",
+ "run_at": "2026-10-04T19:53:37.927395+00:00",
+ "sample": {
+  "n_control": 15074,
+  "n_variant": 14926
+ },
+ "primary": {
+  "item_id": "click_rate",
+  "name": "Click rate"
+ },
+ "plan": {
+  "risk_threshold": 4e-05,
+  "min_days": 7,
+  "harm_limit": 0.01
+ },
+ "verdict": {
+  "text": "Variant is the safer choice",
+  "reason": "Shipping the variant risks only 0.000 pp, under your 0.004 pp limit, while keeping control risks 1.515 pp."
+ },
+ "metrics": [
+  {
+   "item_id": "click_rate",
+   "name": "Click rate",
+   "role": "primary",
+   "type": "rate",
+   "good_direction": "higher",
+   "description": "Share of users who clicked at least one email",
+   "control": 0.04842775640175125,
+   "variant": 0.0635803296261559,
+   "difference": 0.015152573224404643,
+   "lift": 0.3128902586091453,
+   "n_control": 15074,
+   "n_variant": 14926,
+   "label": "Variant is the safer choice",
+   "chance_to_win": 1.0,
+   "expected_difference": 0.015149527721105805,
+   "ci_low": 0.00996726696202815,
+   "ci_high": 0.02035831429537528,
+   "risk_variant": 0.0,
+   "risk_control": 0.015149527721105805,
+   "chance_of_harm": null
+  },
+  {
+   "item_id": "open_rate",
+   "name": "Open rate",
+   "role": "guardrail",
+   "type": "rate",
+   "good_direction": "higher",
+   "description": "Share of users who opened at least one email",
+   "control": 0.37674140904869374,
+   "variant": 0.3763231944258336,
+   "difference": -0.0004182146228601247,
+   "lift": -0.0011100840332793642,
+   "n_control": 15074,
+   "n_variant": 14926,
+   "label": "Passed",
+   "chance_to_win": 0.46831,
+   "expected_difference": -0.00042314279842905355,
+   "ci_low": -0.01135447278419511,
+   "ci_high": 0.01056732512268636,
+   "risk_variant": 0.0024409882044810123,
+   "risk_control": 0.0020178454060519584,
+   "chance_of_harm": 0.00048
+  },
+  {
+   "item_id": "bounce_rate",
+   "name": "Bounce rate",
+   "role": "secondary",
+   "type": "rate",
+   "good_direction": "lower",
+   "description": "Share of users with at least one bounced email",
+   "control": 0.020034496484012208,
+   "variant": 0.020970119254991315,
+   "difference": 0.0009356227709791075,
+   "lift": 0.04670058824416909,
+   "n_control": 15074,
+   "n_variant": 14926,
+   "label": "Neutral",
+   "chance_to_win": 0.28209,
+   "expected_difference": 0.000936795309654971,
+   "ci_low": -0.0022708034401411115,
+   "ci_high": 0.004135763186170925,
+   "risk_variant": 0.0012224236709234505,
+   "risk_control": 0.0002856283612684795,
+   "chance_of_harm": null
+  },
+  {
+   "item_id": "emails_per_user",
+   "name": "Emails per user",
+   "role": "secondary",
+   "type": "continuous",
+   "good_direction": "higher",
+   "description": "Average number of emails sent to a user",
+   "control": 2.0195037813453647,
+   "variant": 2.018759212113109,
+   "difference": -0.0007445692322556319,
+   "lift": -0.000368689199363425,
+   "n_control": 15074,
+   "n_variant": 14926,
+   "label": "Neutral",
+   "chance_to_win": 0.47618,
+   "expected_difference": -0.0007312156810962105,
+   "ci_low": -0.023511219629684995,
+   "ci_high": 0.021977044581840254,
+   "risk_variant": 0.005014304292722733,
+   "risk_control": 0.004283088611626523,
+   "chance_of_harm": null
+  },
+  {
+   "item_id": "unsubscribe_rate",
+   "name": "Unsubscribe rate",
+   "role": "secondary",
+   "type": "rate",
+   "good_direction": "lower",
+   "description": "Share of users who unsubscribed",
+   "control": 0.006103224094467334,
+   "variant": 0.004823797400509166,
+   "difference": -0.001279426693958168,
+   "lift": -0.2096312824426663,
+   "n_control": 15074,
+   "n_variant": 14926,
+   "label": "Win",
+   "chance_to_win": 0.93339,
+   "expected_difference": -0.0012792125996260325,
+   "ci_low": -0.0029626909213948185,
+   "ci_high": 0.0003910376515808241,
+   "risk_variant": 2.4868947082517482e-05,
+   "risk_control": 0.00130408154670855,
+   "chance_of_harm": null
+  }
+ ],
+ "checks": {
+  "balance": {
+   "balanced": true,
+   "p_value": 0.39283997338550425,
+   "n_control": 15074,
+   "n_variant": 14926
+  },
+  "placebo": {
+   "method": "bayesian",
+   "reps": 200,
+   "n": 15074,
+   "rate": 0.07,
+   "expected": null,
+   "low": null,
+   "high": null,
+   "ok": true,
+   "passed": true,
+   "text": "On identical groups, the rule rarely picks a winner. In 200 random splits of your control users into two identical groups of 15,074, it named a safer arm 7.0% of the time."
+  }
+ },
+ "label_rule": "Secondary metrics are labelled Win when the chance the variant is better is 90% or more, Loss when it is 10% or less, and Neutral in between.",
+ "charts": [
+  {
+   "key": "time",
+   "title": "Control and variant over time",
+   "spec": {
+    "config": {
+     "view": {
+      "continuousWidth": 300,
+      "continuousHeight": 300
+     }
+    },
+    "data": {
+     "name": "data-041fb081b042260fb386b149f2f8b726"
+    },
+    "mark": {
+     "type": "line",
+     "point": {
+      "size": 90
+     }
+    },
+    "encoding": {
+     "color": {
+      "field": "arm",
+      "scale": {
+       "domain": [
+        "control",
+        "variant"
+       ],
+       "range": [
+        "#94a3b8",
+        "#3b82f6"
+       ]
+      },
+      "title": "Arm",
+      "type": "nominal"
+     },
+     "tooltip": [
+      {
+       "field": "day",
+       "format": "%b %d",
+       "title": "Day",
+       "type": "temporal"
+      },
+      {
+       "field": "arm",
+       "title": "Arm",
+       "type": "nominal"
+      },
+      {
+       "field": "value",
+       "format": ".3f",
+       "title": "Average (%)",
+       "type": "quantitative"
+      },
+      {
+       "field": "n_users",
+       "format": ",",
+       "title": "Users so far",
+       "type": "quantitative"
+      }
+     ],
+     "x": {
+      "axis": {
+       "format": "%b %d"
+      },
+      "field": "day",
+      "title": "Day",
+      "type": "temporal"
+     },
+     "y": {
+      "field": "value",
+      "scale": {
+       "zero": false
+      },
+      "title": "Cumulative average (%)",
+      "type": "quantitative"
+     }
+    },
+    "height": 300,
+    "title": "",
+    "width": "container",
+    "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
+    "datasets": {
+     "data-041fb081b042260fb386b149f2f8b726": [
+      {
+       "day": "2026-08-03T00:00:00",
+       "arm": "control",
+       "value": 0.5302226935312835,
+       "n_users": 943
+      },
+      {
+       "day": "2026-08-03T00:00:00",
+       "arm": "variant",
+       "value": 0.29732408325074366,
+       "n_users": 1009
+      },
+      {
+       "day": "2026-08-04T00:00:00",
+       "arm": "control",
+       "value": 0.5687693898655641,
+       "n_users": 1934
+      },
+      {
+       "day": "2026-08-04T00:00:00",
+       "arm": "variant",
+       "value": 0.5943536404160475,
+       "n_users": 2019
+      },
+      {
+       "day": "2026-08-05T00:00:00",
+       "arm": "control",
+       "value": 0.710900473933648,
+       "n_users": 2954
+      },
+      {
+       "day": "2026-08-05T00:00:00",
+       "arm": "variant",
+       "value": 1.1593242795627667,
+       "n_users": 3019
+      },
+      {
+       "day": "2026-08-06T00:00:00",
+       "arm": "control",
+       "value": 0.8926294312675341,
+       "n_users": 3921
+      },
+      {
+       "day": "2026-08-06T00:00:00",
+       "arm": "variant",
+       "value": 1.7852715100421506,
+       "n_users": 4033
+      },
+      {
+       "day": "2026-08-07T00:00:00",
+       "arm": "control",
+       "value": 1.325178389398571,
+       "n_users": 4905
+      },
+      {
+       "day": "2026-08-07T00:00:00",
+       "arm": "variant",
+       "value": 2.1890547263681523,
+       "n_users": 5025
+      },
+      {
+       "day": "2026-08-08T00:00:00",
+       "arm": "control",
+       "value": 1.6829350387075055,
+       "n_users": 5942
+      },
+      {
+       "day": "2026-08-08T00:00:00",
+       "arm": "variant",
+       "value": 2.7275714755175833,
+       "n_users": 6086
+      },
+      {
+       "day": "2026-08-09T00:00:00",
+       "arm": "control",
+       "value": 2.356660439718354,
+       "n_users": 6959
+      },
+      {
+       "day": "2026-08-09T00:00:00",
+       "arm": "variant",
+       "value": 3.3799201369081704,
+       "n_users": 7012
+      },
+      {
+       "day": "2026-08-10T00:00:00",
+       "arm": "control",
+       "value": 2.640555906506632,
+       "n_users": 7915
+      },
+      {
+       "day": "2026-08-10T00:00:00",
+       "arm": "variant",
+       "value": 3.7801977719364137,
+       "n_users": 7989
+      },
+      {
+       "day": "2026-08-11T00:00:00",
+       "arm": "control",
+       "value": 2.880054212785184,
+       "n_users": 8854
+      },
+      {
+       "day": "2026-08-11T00:00:00",
+       "arm": "variant",
+       "value": 3.9759438690277147,
+       "n_users": 8979
+      },
+      {
+       "day": "2026-08-12T00:00:00",
+       "arm": "control",
+       "value": 3.0770782889426966,
+       "n_users": 9912
+      },
+      {
+       "day": "2026-08-12T00:00:00",
+       "arm": "variant",
+       "value": 4.121431443506219,
+       "n_users": 9948
+      },
+      {
+       "day": "2026-08-13T00:00:00",
+       "arm": "control",
+       "value": 3.1825642896224653,
+       "n_users": 10966
+      },
+      {
+       "day": "2026-08-13T00:00:00",
+       "arm": "variant",
+       "value": 4.358154408405668,
+       "n_users": 10945
+      },
+      {
+       "day": "2026-08-14T00:00:00",
+       "arm": "control",
+       "value": 3.296336476675315,
+       "n_users": 11983
+      },
+      {
+       "day": "2026-08-14T00:00:00",
+       "arm": "variant",
+       "value": 4.54735784272674,
+       "n_users": 11941
+      },
+      {
+       "day": "2026-08-15T00:00:00",
+       "arm": "control",
+       "value": 3.349723417332498,
+       "n_users": 13016
+      },
+      {
+       "day": "2026-08-15T00:00:00",
+       "arm": "variant",
+       "value": 4.765214704973715,
+       "n_users": 12948
+      },
+      {
+       "day": "2026-08-16T00:00:00",
+       "arm": "control",
+       "value": 3.4387014096540014,
+       "n_users": 14046
+      },
+      {
+       "day": "2026-08-16T00:00:00",
+       "arm": "variant",
+       "value": 4.885222381635571,
+       "n_users": 13940
+      },
+      {
+       "day": "2026-08-17T00:00:00",
+       "arm": "control",
+       "value": 3.549157489717408,
+       "n_users": 15074
+      },
+      {
+       "day": "2026-08-17T00:00:00",
+       "arm": "variant",
+       "value": 4.877395149403703,
+       "n_users": 14926
+      },
+      {
+       "day": "2026-08-18T00:00:00",
+       "arm": "control",
+       "value": 3.9073902083056797,
+       "n_users": 15074
+      },
+      {
+       "day": "2026-08-18T00:00:00",
+       "arm": "variant",
+       "value": 5.2458796730537385,
+       "n_users": 14926
+      },
+      {
+       "day": "2026-08-19T00:00:00",
+       "arm": "control",
+       "value": 4.199283534562824,
+       "n_users": 15074
+      },
+      {
+       "day": "2026-08-19T00:00:00",
+       "arm": "variant",
+       "value": 5.540667291973731,
+       "n_users": 14926
+      },
+      {
+       "day": "2026-08-20T00:00:00",
+       "arm": "control",
+       "value": 4.464641103887463,
+       "n_users": 15074
+      },
+      {
+       "day": "2026-08-20T00:00:00",
+       "arm": "variant",
+       "value": 5.848854348117392,
+       "n_users": 14926
+      },
+      {
+       "day": "2026-08-21T00:00:00",
+       "arm": "control",
+       "value": 4.643757463181658,
+       "n_users": 15074
+      },
+      {
+       "day": "2026-08-21T00:00:00",
+       "arm": "variant",
+       "value": 6.0967439367546685,
+       "n_users": 14926
+      },
+      {
+       "day": "2026-08-22T00:00:00",
+       "arm": "control",
+       "value": 4.756534430144596,
+       "n_users": 15074
+      },
+      {
+       "day": "2026-08-22T00:00:00",
+       "arm": "variant",
+       "value": 6.297735495109253,
+       "n_users": 14926
+      },
+      {
+       "day": "2026-08-23T00:00:00",
+       "arm": "control",
+       "value": 4.8427756401751525,
+       "n_users": 15074
+      },
+      {
+       "day": "2026-08-23T00:00:00",
+       "arm": "variant",
+       "value": 6.35803296261555,
+       "n_users": 14926
+      }
+     ]
+    }
+   }
+  },
+  {
+   "key": "risk",
+   "title": "Risk of each choice, on all the data",
+   "spec": {
+    "config": {
+     "view": {
+      "continuousWidth": 300,
+      "continuousHeight": 300
+     }
+    },
+    "layer": [
+     {
+      "data": {
+       "name": "data-a96cf0baedc0c0c893700df4f8fbdb98"
+      },
+      "mark": {
+       "type": "bar",
+       "cornerRadiusTopLeft": 4,
+       "cornerRadiusTopRight": 4,
+       "size": 90
+      },
+      "encoding": {
+       "color": {
+        "field": "safe",
+        "legend": null,
+        "scale": {
+         "domain": [
+          "Under the threshold",
+          "Over the threshold",
+          "No threshold"
+         ],
+         "range": [
+          "#22c55e",
+          "#94a3b8",
+          "#3b82f6"
+         ]
+        },
+        "type": "nominal"
+       },
+       "tooltip": [
+        {
+         "field": "choice",
+         "title": "Choice",
+         "type": "nominal"
+        },
+        {
+         "field": "label",
+         "title": "Average loss if wrong",
+         "type": "nominal"
+        }
+       ],
+       "x": {
+        "axis": {
+         "labelAngle": 0,
+         "labelFontSize": 13,
+         "labelFontWeight": "bold"
+        },
+        "field": "choice",
+        "sort": [
+         "Ship variant",
+         "Keep control"
+        ],
+        "title": null,
+        "type": "nominal"
+       },
+       "y": {
+        "field": "risk",
+        "scale": {
+         "domain": [
+          0,
+          1.8936909651382257
+         ]
+        },
+        "title": "Average loss if wrong (pp)",
+        "type": "quantitative"
+       }
+      }
+     },
+     {
+      "data": {
+       "name": "data-a96cf0baedc0c0c893700df4f8fbdb98"
+      },
+      "mark": {
+       "type": "text",
+       "color": "#64748b",
+       "dy": -8,
+       "fontSize": 13,
+       "fontWeight": "bold"
+      },
+      "encoding": {
+       "text": {
+        "field": "label",
+        "type": "nominal"
+       },
+       "x": {
+        "axis": {
+         "labelAngle": 0,
+         "labelFontSize": 13,
+         "labelFontWeight": "bold"
+        },
+        "field": "choice",
+        "sort": [
+         "Ship variant",
+         "Keep control"
+        ],
+        "title": null,
+        "type": "nominal"
+       },
+       "y": {
+        "field": "risk",
+        "scale": {
+         "domain": [
+          0,
+          1.8936909651382257
+         ]
+        },
+        "title": "Average loss if wrong (pp)",
+        "type": "quantitative"
+       }
+      }
+     },
+     {
+      "data": {
+       "name": "data-6dc692e026ffc20ac10c0cb59e9d6219"
+      },
+      "mark": {
+       "type": "rule",
+       "color": "#ef4444",
+       "size": 2,
+       "strokeDash": [
+        5,
+        3
+       ]
+      },
+      "encoding": {
+       "y": {
+        "field": "threshold",
+        "type": "quantitative"
+       }
+      }
+     },
+     {
+      "data": {
+       "name": "data-6dc692e026ffc20ac10c0cb59e9d6219"
+      },
+      "mark": {
+       "type": "text",
+       "align": "left",
+       "color": "#ef4444",
+       "dx": 4,
+       "dy": -7,
+       "fontWeight": "bold"
+      },
+      "encoding": {
+       "text": {
+        "value": "Most we accept to lose"
+       },
+       "x": {
+        "value": 0
+       },
+       "y": {
+        "field": "threshold",
+        "type": "quantitative"
+       }
+      }
+     }
+    ],
+    "height": 260,
+    "title": "",
+    "width": "container",
+    "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
+    "datasets": {
+     "data-a96cf0baedc0c0c893700df4f8fbdb98": [
+      {
+       "choice": "Ship variant",
+       "risk": 0.0,
+       "label": "0.000 pp",
+       "safe": "Under the threshold",
+       "threshold": 0.004
+      },
+      {
+       "choice": "Keep control",
+       "risk": 1.5149527721105804,
+       "label": "1.515 pp",
+       "safe": "Over the threshold",
+       "threshold": 0.004
+      }
+     ],
+     "data-6dc692e026ffc20ac10c0cb59e9d6219": [
+      {
+       "choice": "Ship variant",
+       "risk": 0.0,
+       "label": "0.000 pp",
+       "safe": "Under the threshold",
+       "threshold": 0.004
+      }
+     ]
+    }
+   }
+  },
+  {
+   "key": "risk_time",
+   "title": "Risk of each choice, by day",
+   "spec": {
+    "config": {
+     "view": {
+      "continuousWidth": 300,
+      "continuousHeight": 300
+     }
+    },
+    "layer": [
+     {
+      "data": {
+       "name": "data-5c9dc979ebcbf7f9107bca678eeafe0d"
+      },
+      "mark": {
+       "type": "line",
+       "point": {
+        "size": 50
+       }
+      },
+      "encoding": {
+       "color": {
+        "field": "choice",
+        "legend": {
+         "orient": "top"
+        },
+        "scale": {
+         "domain": [
+          "Ship variant",
+          "Keep control"
+         ],
+         "range": [
+          "#3b82f6",
+          "#94a3b8"
+         ]
+        },
+        "title": null,
+        "type": "nominal"
+       },
+       "tooltip": [
+        {
+         "field": "day",
+         "format": "%b %d",
+         "title": "Day",
+         "type": "temporal"
+        },
+        {
+         "field": "choice",
+         "title": "Choice",
+         "type": "nominal"
+        },
+        {
+         "field": "risk",
+         "format": ".3f",
+         "title": "Average loss if wrong",
+         "type": "quantitative"
+        }
+       ],
+       "x": {
+        "axis": {
+         "format": "%b %d"
+        },
+        "field": "day",
+        "title": "Day",
+        "type": "temporal"
+       },
+       "y": {
+        "field": "risk",
+        "scale": {
+         "zero": true
+        },
+        "title": "Average loss if wrong (pp)",
+        "type": "quantitative"
+       }
+      }
+     },
+     {
+      "data": {
+       "name": "data-9bce8246ce1f1b427804b87f36557620"
+      },
+      "mark": {
+       "type": "rule",
+       "color": "#ef4444",
+       "size": 2,
+       "strokeDash": [
+        5,
+        3
+       ]
+      },
+      "encoding": {
+       "y": {
+        "field": "threshold",
+        "type": "quantitative"
+       }
+      }
+     },
+     {
+      "data": {
+       "name": "data-9bce8246ce1f1b427804b87f36557620"
+      },
+      "mark": {
+       "type": "text",
+       "align": "left",
+       "color": "#ef4444",
+       "dx": 4,
+       "dy": -7,
+       "fontWeight": "bold"
+      },
+      "encoding": {
+       "text": {
+        "value": "Most we accept to lose"
+       },
+       "x": {
+        "value": 0
+       },
+       "y": {
+        "field": "threshold",
+        "type": "quantitative"
+       }
+      }
+     }
+    ],
+    "height": 260,
+    "title": "",
+    "width": "container",
+    "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
+    "datasets": {
+     "data-5c9dc979ebcbf7f9107bca678eeafe0d": [
+      {
+       "day": "2026-08-03T00:00:00",
+       "choice": "Ship variant",
+       "risk": 0.2753375593781564
+      },
+      {
+       "day": "2026-08-04T00:00:00",
+       "choice": "Ship variant",
+       "risk": 0.08735625007154482
+      },
+      {
+       "day": "2026-08-05T00:00:00",
+       "choice": "Ship variant",
+       "risk": 0.003721799882925731
+      },
+      {
+       "day": "2026-08-06T00:00:00",
+       "choice": "Ship variant",
+       "risk": 1.831355856665066e-05
+      },
+      {
+       "day": "2026-08-07T00:00:00",
+       "choice": "Ship variant",
+       "risk": 2.338221781367914e-05
+      },
+      {
+       "day": "2026-08-08T00:00:00",
+       "choice": "Ship variant",
+       "risk": 0.0
+      },
+      {
+       "day": "2026-08-09T00:00:00",
+       "choice": "Ship variant",
+       "risk": 2.012187199976548e-07
+      },
+      {
+       "day": "2026-08-10T00:00:00",
+       "choice": "Ship variant",
+       "risk": 3.510747727927463e-07
+      },
+      {
+       "day": "2026-08-11T00:00:00",
+       "choice": "Ship variant",
+       "risk": 1.161384603382068e-06
+      },
+      {
+       "day": "2026-08-12T00:00:00",
+       "choice": "Ship variant",
+       "risk": 2.1418413940873723e-06
+      },
+      {
+       "day": "2026-08-13T00:00:00",
+       "choice": "Ship variant",
+       "risk": 0.0
+      },
+      {
+       "day": "2026-08-14T00:00:00",
+       "choice": "Ship variant",
+       "risk": 0.0
+      },
+      {
+       "day": "2026-08-15T00:00:00",
+       "choice": "Ship variant",
+       "risk": 0.0
+      },
+      {
+       "day": "2026-08-16T00:00:00",
+       "choice": "Ship variant",
+       "risk": 0.0
+      },
+      {
+       "day": "2026-08-17T00:00:00",
+       "choice": "Ship variant",
+       "risk": 0.0
+      },
+      {
+       "day": "2026-08-18T00:00:00",
+       "choice": "Ship variant",
+       "risk": 0.0
+      },
+      {
+       "day": "2026-08-19T00:00:00",
+       "choice": "Ship variant",
+       "risk": 0.0
+      },
+      {
+       "day": "2026-08-20T00:00:00",
+       "choice": "Ship variant",
+       "risk": 0.0
+      },
+      {
+       "day": "2026-08-21T00:00:00",
+       "choice": "Ship variant",
+       "risk": 0.0
+      },
+      {
+       "day": "2026-08-22T00:00:00",
+       "choice": "Ship variant",
+       "risk": 0.0
+      },
+      {
+       "day": "2026-08-23T00:00:00",
+       "choice": "Ship variant",
+       "risk": 0.0
+      },
+      {
+       "day": "2026-08-03T00:00:00",
+       "choice": "Keep control",
+       "risk": 0.04084328006928442
+      },
+      {
+       "day": "2026-08-04T00:00:00",
+       "choice": "Keep control",
+       "risk": 0.11232518389007304
+      },
+      {
+       "day": "2026-08-05T00:00:00",
+       "choice": "Keep control",
+       "risk": 0.4514633937115121
+      },
+      {
+       "day": "2026-08-06T00:00:00",
+       "choice": "Keep control",
+       "risk": 0.8920648221620509
+      },
+      {
+       "day": "2026-08-07T00:00:00",
+       "choice": "Keep control",
+       "risk": 0.8651104979110209
+      },
+      {
+       "day": "2026-08-08T00:00:00",
+       "choice": "Keep control",
+       "risk": 1.0465772692291073
+      },
+      {
+       "day": "2026-08-09T00:00:00",
+       "choice": "Keep control",
+       "risk": 1.0252458621327785
+      },
+      {
+       "day": "2026-08-10T00:00:00",
+       "choice": "Keep control",
+       "risk": 1.13803571298062
+      },
+      {
+       "day": "2026-08-11T00:00:00",
+       "choice": "Keep control",
+       "risk": 1.094309917287694
+      },
+      {
+       "day": "2026-08-12T00:00:00",
+       "choice": "Keep control",
+       "risk": 1.0429453373060629
+      },
+      {
+       "day": "2026-08-13T00:00:00",
+       "choice": "Keep control",
+       "risk": 1.1739748826275094
+      },
+      {
+       "day": "2026-08-14T00:00:00",
+       "choice": "Keep control",
+       "risk": 1.2494412849746994
+      },
+      {
+       "day": "2026-08-15T00:00:00",
+       "choice": "Keep control",
+       "risk": 1.4139249288806655
+      },
+      {
+       "day": "2026-08-16T00:00:00",
+       "choice": "Keep control",
+       "risk": 1.445469259631715
+      },
+      {
+       "day": "2026-08-17T00:00:00",
+       "choice": "Keep control",
+       "risk": 1.327261333966622
+      },
+      {
+       "day": "2026-08-18T00:00:00",
+       "choice": "Keep control",
+       "risk": 1.3374627164316002
+      },
+      {
+       "day": "2026-08-19T00:00:00",
+       "choice": "Keep control",
+       "risk": 1.3403172553545177
+      },
+      {
+       "day": "2026-08-20T00:00:00",
+       "choice": "Keep control",
+       "risk": 1.3830987399145263
+      },
+      {
+       "day": "2026-08-21T00:00:00",
+       "choice": "Keep control",
+       "risk": 1.4518282164540441
+      },
+      {
+       "day": "2026-08-22T00:00:00",
+       "choice": "Keep control",
+       "risk": 1.54000263509726
+      },
+      {
+       "day": "2026-08-23T00:00:00",
+       "choice": "Keep control",
+       "risk": 1.5140548170841113
+      }
+     ],
+     "data-9bce8246ce1f1b427804b87f36557620": [
+      {
+       "day": "2026-08-03T00:00:00",
+       "chance_to_win": 22.32,
+       "risk_variant": 0.2753375593781564,
+       "risk_control": 0.04084328006928442,
+       "difference": -0.234494279308872,
+       "ci_low": -0.008998181306799887,
+       "ci_high": 0.0037842533056291834,
+       "n_control": 943,
+       "n_variant": 1009,
+       "threshold": 0.004,
+       "low": -0.8998181306799887,
+       "high": 0.3784253305629183
+      }
+     ]
+    }
+   }
+  },
+  {
+   "key": "difference",
+   "title": "Difference with its 95% credible interval, by day",
+   "spec": {
+    "config": {
+     "view": {
+      "continuousWidth": 300,
+      "continuousHeight": 300
+     }
+    },
+    "layer": [
+     {
+      "data": {
+       "name": "data-42990c68f268a11fa16682fcd3437a6f"
+      },
+      "mark": {
+       "type": "rule",
+       "color": "#94a3b8",
+       "strokeDash": [
+        4,
+        3
+       ]
+      },
+      "encoding": {
+       "y": {
+        "field": "zero",
+        "type": "quantitative"
+       }
+      }
+     },
+     {
+      "data": {
+       "name": "data-09fdea2859db72ac0c1646df1dded406"
+      },
+      "mark": {
+       "type": "area",
+       "color": "#3b82f6",
+       "opacity": 0.18
+      },
+      "encoding": {
+       "x": {
+        "axis": {
+         "format": "%b %d"
+        },
+        "field": "day",
+        "title": "Day",
+        "type": "temporal"
+       },
+       "y": {
+        "field": "low",
+        "type": "quantitative"
+       },
+       "y2": {
+        "field": "high"
+       }
+      }
+     },
+     {
+      "data": {
+       "name": "data-09fdea2859db72ac0c1646df1dded406"
+      },
+      "mark": {
+       "type": "line",
+       "color": "#3b82f6",
+       "point": {
+        "color": "#3b82f6",
+        "size": 70
+       }
+      },
+      "encoding": {
+       "tooltip": [
+        {
+         "field": "day",
+         "format": "%b %d",
+         "title": "Day",
+         "type": "temporal"
+        },
+        {
+         "field": "difference",
+         "format": ".3f",
+         "title": "Difference",
+         "type": "quantitative"
+        },
+        {
+         "field": "n_control",
+         "format": ",",
+         "title": "Control users",
+         "type": "quantitative"
+        },
+        {
+         "field": "n_variant",
+         "format": ",",
+         "title": "Variant users",
+         "type": "quantitative"
+        },
+        {
+         "field": "low",
+         "format": ".3f",
+         "title": "95% credible low",
+         "type": "quantitative"
+        },
+        {
+         "field": "high",
+         "format": ".3f",
+         "title": "95% credible high",
+         "type": "quantitative"
+        }
+       ],
+       "x": {
+        "axis": {
+         "format": "%b %d"
+        },
+        "field": "day",
+        "title": "Day",
+        "type": "temporal"
+       },
+       "y": {
+        "field": "difference",
+        "scale": {
+         "zero": true
+        },
+        "title": "Variant minus control (pp)",
+        "type": "quantitative"
+       }
+      }
+     }
+    ],
+    "height": 260,
+    "title": "",
+    "width": "container",
+    "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
+    "datasets": {
+     "data-42990c68f268a11fa16682fcd3437a6f": [
+      {
+       "zero": 0
+      }
+     ],
+     "data-09fdea2859db72ac0c1646df1dded406": [
+      {
+       "day": "2026-08-03T00:00:00",
+       "chance_to_win": 22.32,
+       "risk_variant": 0.2753375593781564,
+       "risk_control": 0.04084328006928442,
+       "difference": -0.234494279308872,
+       "ci_low": -0.008998181306799887,
+       "ci_high": 0.0037842533056291834,
+       "n_control": 943,
+       "n_variant": 1009,
+       "threshold": 0.004,
+       "low": -0.8998181306799887,
+       "high": 0.3784253305629183
+      },
+      {
+       "day": "2026-08-04T00:00:00",
+       "chance_to_win": 53.76499999999999,
+       "risk_variant": 0.08735625007154482,
+       "risk_control": 0.11232518389007304,
+       "difference": 0.024968933818528216,
+       "ci_low": -0.004695655250921985,
+       "ci_high": 0.00530694215934124,
+       "n_control": 1934,
+       "n_variant": 2019,
+       "threshold": 0.004,
+       "low": -0.46956552509219857,
+       "high": 0.530694215934124
+      },
+      {
+       "day": "2026-08-05T00:00:00",
+       "chance_to_win": 96.34,
+       "risk_variant": 0.003721799882925731,
+       "risk_control": 0.4514633937115121,
+       "difference": 0.4477415938285864,
+       "ci_low": -0.00037521433686798345,
+       "ci_high": 0.009521838691179299,
+       "n_control": 2954,
+       "n_variant": 3019,
+       "threshold": 0.004,
+       "low": -0.03752143368679835,
+       "high": 0.9521838691179298
+      },
+      {
+       "day": "2026-08-06T00:00:00",
+       "chance_to_win": 99.96000000000001,
+       "risk_variant": 1.831355856665066e-05,
+       "risk_control": 0.8920648221620509,
+       "difference": 0.892046508603484,
+       "ci_low": 0.0038685057225674294,
+       "ci_high": 0.014104565851808299,
+       "n_control": 3921,
+       "n_variant": 4033,
+       "threshold": 0.004,
+       "low": 0.38685057225674296,
+       "high": 1.41045658518083
+      },
+      {
+       "day": "2026-08-07T00:00:00",
+       "chance_to_win": 99.965,
+       "risk_variant": 2.338221781367914e-05,
+       "risk_control": 0.8651104979110209,
+       "difference": 0.8650871156932073,
+       "ci_low": 0.0034860200916866685,
+       "ci_high": 0.013856161523123106,
+       "n_control": 4905,
+       "n_variant": 5025,
+       "threshold": 0.004,
+       "low": 0.34860200916866685,
+       "high": 1.3856161523123105
+      },
+      {
+       "day": "2026-08-08T00:00:00",
+       "chance_to_win": 100.0,
+       "risk_variant": 0.0,
+       "risk_control": 1.0465772692291073,
+       "difference": 1.0465772692291073,
+       "ci_low": 0.0052566130755037944,
+       "ci_high": 0.015769893112726564,
+       "n_control": 5942,
+       "n_variant": 6086,
+       "threshold": 0.004,
+       "low": 0.5256613075503794,
+       "high": 1.5769893112726565
+      },
+      {
+       "day": "2026-08-09T00:00:00",
+       "chance_to_win": 99.995,
+       "risk_variant": 2.012187199976548e-07,
+       "risk_control": 1.0252458621327785,
+       "difference": 1.0252456609140586,
+       "ci_low": 0.004828210735596885,
+       "ci_high": 0.015794962423260058,
+       "n_control": 6959,
+       "n_variant": 7012,
+       "threshold": 0.004,
+       "low": 0.4828210735596885,
+       "high": 1.5794962423260057
+      },
+      {
+       "day": "2026-08-10T00:00:00",
+       "chance_to_win": 99.995,
+       "risk_variant": 3.510747727927463e-07,
+       "risk_control": 1.13803571298062,
+       "difference": 1.138035361905847,
+       "ci_low": 0.0058689067646400745,
+       "ci_high": 0.016787249822933822,
+       "n_control": 7915,
+       "n_variant": 7989,
+       "threshold": 0.004,
+       "low": 0.5868906764640075,
+       "high": 1.6787249822933823
+      },
+      {
+       "day": "2026-08-11T00:00:00",
+       "chance_to_win": 99.995,
+       "risk_variant": 1.161384603382068e-06,
+       "risk_control": 1.094309917287694,
+       "difference": 1.0943087559030906,
+       "ci_low": 0.005577314042806023,
+       "ci_high": 0.016190689070069063,
+       "n_control": 8854,
+       "n_variant": 8979,
+       "threshold": 0.004,
+       "low": 0.5577314042806023,
+       "high": 1.6190689070069062
+      },
+      {
+       "day": "2026-08-12T00:00:00",
+       "chance_to_win": 99.995,
+       "risk_variant": 2.1418413940873723e-06,
+       "risk_control": 1.0429453373060629,
+       "difference": 1.0429431954646688,
+       "ci_low": 0.005222408964925181,
+       "ci_high": 0.015520348545808704,
+       "n_control": 9912,
+       "n_variant": 9948,
+       "threshold": 0.004,
+       "low": 0.5222408964925181,
+       "high": 1.5520348545808704
+      },
+      {
+       "day": "2026-08-13T00:00:00",
+       "chance_to_win": 100.0,
+       "risk_variant": 0.0,
+       "risk_control": 1.1739748826275094,
+       "difference": 1.1739748826275094,
+       "ci_low": 0.006669808268045156,
+       "ci_high": 0.016684575176108236,
+       "n_control": 10966,
+       "n_variant": 10945,
+       "threshold": 0.004,
+       "low": 0.6669808268045155,
+       "high": 1.6684575176108236
+      },
+      {
+       "day": "2026-08-14T00:00:00",
+       "chance_to_win": 100.0,
+       "risk_variant": 0.0,
+       "risk_control": 1.2494412849746994,
+       "difference": 1.2494412849746994,
+       "ci_low": 0.0075604121568153765,
+       "ci_high": 0.0173173084891984,
+       "n_control": 11983,
+       "n_variant": 11941,
+       "threshold": 0.004,
+       "low": 0.7560412156815377,
+       "high": 1.73173084891984
+      },
+      {
+       "day": "2026-08-15T00:00:00",
+       "chance_to_win": 100.0,
+       "risk_variant": 0.0,
+       "risk_control": 1.4139249288806655,
+       "difference": 1.4139249288806655,
+       "ci_low": 0.009315351285318095,
+       "ci_high": 0.018846908080623354,
+       "n_control": 13016,
+       "n_variant": 12948,
+       "threshold": 0.004,
+       "low": 0.9315351285318095,
+       "high": 1.8846908080623355
+      },
+      {
+       "day": "2026-08-16T00:00:00",
+       "chance_to_win": 100.0,
+       "risk_variant": 0.0,
+       "risk_control": 1.445469259631715,
+       "difference": 1.445469259631715,
+       "ci_low": 0.00975615157222636,
+       "ci_high": 0.019096719229466385,
+       "n_control": 14046,
+       "n_variant": 13940,
+       "threshold": 0.004,
+       "low": 0.9756151572226359,
+       "high": 1.9096719229466386
+      },
+      {
+       "day": "2026-08-17T00:00:00",
+       "chance_to_win": 100.0,
+       "risk_variant": 0.0,
+       "risk_control": 1.327261333966622,
+       "difference": 1.327261333966622,
+       "ci_low": 0.008704851751403422,
+       "ci_high": 0.017784316892122655,
+       "n_control": 15074,
+       "n_variant": 14926,
+       "threshold": 0.004,
+       "low": 0.8704851751403422,
+       "high": 1.7784316892122656
+      },
+      {
+       "day": "2026-08-18T00:00:00",
+       "chance_to_win": 100.0,
+       "risk_variant": 0.0,
+       "risk_control": 1.3374627164316002,
+       "difference": 1.3374627164316002,
+       "ci_low": 0.008628390206505406,
+       "ci_high": 0.018074592832097815,
+       "n_control": 15074,
+       "n_variant": 14926,
+       "threshold": 0.004,
+       "low": 0.8628390206505406,
+       "high": 1.8074592832097816
+      },
+      {
+       "day": "2026-08-19T00:00:00",
+       "chance_to_win": 100.0,
+       "risk_variant": 0.0,
+       "risk_control": 1.3403172553545177,
+       "difference": 1.3403172553545177,
+       "ci_low": 0.008526193011981991,
+       "ci_high": 0.018254304700608976,
+       "n_control": 15074,
+       "n_variant": 14926,
+       "threshold": 0.004,
+       "low": 0.8526193011981992,
+       "high": 1.8254304700608976
+      },
+      {
+       "day": "2026-08-20T00:00:00",
+       "chance_to_win": 100.0,
+       "risk_variant": 0.0,
+       "risk_control": 1.3830987399145263,
+       "difference": 1.3830987399145263,
+       "ci_low": 0.00882421840744169,
+       "ci_high": 0.018808859883432897,
+       "n_control": 15074,
+       "n_variant": 14926,
+       "threshold": 0.004,
+       "low": 0.882421840744169,
+       "high": 1.8808859883432898
+      },
+      {
+       "day": "2026-08-21T00:00:00",
+       "chance_to_win": 100.0,
+       "risk_variant": 0.0,
+       "risk_control": 1.4518282164540441,
+       "difference": 1.4518282164540441,
+       "ci_low": 0.00941211659727263,
+       "ci_high": 0.01959288001103643,
+       "n_control": 15074,
+       "n_variant": 14926,
+       "threshold": 0.004,
+       "low": 0.9412116597272631,
+       "high": 1.9592880011036429
+      },
+      {
+       "day": "2026-08-22T00:00:00",
+       "chance_to_win": 100.0,
+       "risk_variant": 0.0,
+       "risk_control": 1.54000263509726,
+       "difference": 1.54000263509726,
+       "ci_low": 0.010219025451498876,
+       "ci_high": 0.020546226013855962,
+       "n_control": 15074,
+       "n_variant": 14926,
+       "threshold": 0.004,
+       "low": 1.0219025451498875,
+       "high": 2.054622601385596
+      },
+      {
+       "day": "2026-08-23T00:00:00",
+       "chance_to_win": 100.0,
+       "risk_variant": 0.0,
+       "risk_control": 1.5140548170841113,
+       "difference": 1.5140548170841113,
+       "ci_low": 0.009926477873464951,
+       "ci_high": 0.020318253199099964,
+       "n_control": 15074,
+       "n_variant": 14926,
+       "threshold": 0.004,
+       "low": 0.9926477873464951,
+       "high": 2.0318253199099963
+      }
+     ]
+    }
+   }
+  },
+  {
+   "key": "chance",
+   "title": "Chance the variant wins, by day",
+   "spec": {
+    "config": {
+     "view": {
+      "continuousWidth": 300,
+      "continuousHeight": 300
+     }
+    },
+    "layer": [
+     {
+      "data": {
+       "name": "data-a60eeda9c5ac7d033a2beb95bf679f3e"
+      },
+      "mark": {
+       "type": "rule",
+       "color": "#94a3b8",
+       "strokeDash": [
+        4,
+        3
+       ]
+      },
+      "encoding": {
+       "y": {
+        "field": "half",
+        "type": "quantitative"
+       }
+      }
+     },
+     {
+      "data": {
+       "name": "data-09fdea2859db72ac0c1646df1dded406"
+      },
+      "mark": {
+       "type": "line",
+       "color": "#3b82f6",
+       "point": {
+        "color": "#3b82f6",
+        "size": 70
+       }
+      },
+      "encoding": {
+       "tooltip": [
+        {
+         "field": "day",
+         "format": "%b %d",
+         "title": "Day",
+         "type": "temporal"
+        },
+        {
+         "field": "chance_to_win",
+         "format": ".1f",
+         "title": "Chance (%)",
+         "type": "quantitative"
+        }
+       ],
+       "x": {
+        "axis": {
+         "format": "%b %d"
+        },
+        "field": "day",
+        "title": "Day",
+        "type": "temporal"
+       },
+       "y": {
+        "field": "chance_to_win",
+        "scale": {
+         "domain": [
+          0,
+          100
+         ]
+        },
+        "title": "Chance variant wins (%)",
+        "type": "quantitative"
+       }
+      }
+     }
+    ],
+    "height": 260,
+    "title": "",
+    "width": "container",
+    "$schema": "https://vega.github.io/schema/vega-lite/v6.4.1.json",
+    "datasets": {
+     "data-a60eeda9c5ac7d033a2beb95bf679f3e": [
+      {
+       "half": 50
+      }
+     ],
+     "data-09fdea2859db72ac0c1646df1dded406": [
+      {
+       "day": "2026-08-03T00:00:00",
+       "chance_to_win": 22.32,
+       "risk_variant": 0.2753375593781564,
+       "risk_control": 0.04084328006928442,
+       "difference": -0.234494279308872,
+       "ci_low": -0.008998181306799887,
+       "ci_high": 0.0037842533056291834,
+       "n_control": 943,
+       "n_variant": 1009,
+       "threshold": 0.004,
+       "low": -0.8998181306799887,
+       "high": 0.3784253305629183
+      },
+      {
+       "day": "2026-08-04T00:00:00",
+       "chance_to_win": 53.76499999999999,
+       "risk_variant": 0.08735625007154482,
+       "risk_control": 0.11232518389007304,
+       "difference": 0.024968933818528216,
+       "ci_low": -0.004695655250921985,
+       "ci_high": 0.00530694215934124,
+       "n_control": 1934,
+       "n_variant": 2019,
+       "threshold": 0.004,
+       "low": -0.46956552509219857,
+       "high": 0.530694215934124
+      },
+      {
+       "day": "2026-08-05T00:00:00",
+       "chance_to_win": 96.34,
+       "risk_variant": 0.003721799882925731,
+       "risk_control": 0.4514633937115121,
+       "difference": 0.4477415938285864,
+       "ci_low": -0.00037521433686798345,
+       "ci_high": 0.009521838691179299,
+       "n_control": 2954,
+       "n_variant": 3019,
+       "threshold": 0.004,
+       "low": -0.03752143368679835,
+       "high": 0.9521838691179298
+      },
+      {
+       "day": "2026-08-06T00:00:00",
+       "chance_to_win": 99.96000000000001,
+       "risk_variant": 1.831355856665066e-05,
+       "risk_control": 0.8920648221620509,
+       "difference": 0.892046508603484,
+       "ci_low": 0.0038685057225674294,
+       "ci_high": 0.014104565851808299,
+       "n_control": 3921,
+       "n_variant": 4033,
+       "threshold": 0.004,
+       "low": 0.38685057225674296,
+       "high": 1.41045658518083
+      },
+      {
+       "day": "2026-08-07T00:00:00",
+       "chance_to_win": 99.965,
+       "risk_variant": 2.338221781367914e-05,
+       "risk_control": 0.8651104979110209,
+       "difference": 0.8650871156932073,
+       "ci_low": 0.0034860200916866685,
+       "ci_high": 0.013856161523123106,
+       "n_control": 4905,
+       "n_variant": 5025,
+       "threshold": 0.004,
+       "low": 0.34860200916866685,
+       "high": 1.3856161523123105
+      },
+      {
+       "day": "2026-08-08T00:00:00",
+       "chance_to_win": 100.0,
+       "risk_variant": 0.0,
+       "risk_control": 1.0465772692291073,
+       "difference": 1.0465772692291073,
+       "ci_low": 0.0052566130755037944,
+       "ci_high": 0.015769893112726564,
+       "n_control": 5942,
+       "n_variant": 6086,
+       "threshold": 0.004,
+       "low": 0.5256613075503794,
+       "high": 1.5769893112726565
+      },
+      {
+       "day": "2026-08-09T00:00:00",
+       "chance_to_win": 99.995,
+       "risk_variant": 2.012187199976548e-07,
+       "risk_control": 1.0252458621327785,
+       "difference": 1.0252456609140586,
+       "ci_low": 0.004828210735596885,
+       "ci_high": 0.015794962423260058,
+       "n_control": 6959,
+       "n_variant": 7012,
+       "threshold": 0.004,
+       "low": 0.4828210735596885,
+       "high": 1.5794962423260057
+      },
+      {
+       "day": "2026-08-10T00:00:00",
+       "chance_to_win": 99.995,
+       "risk_variant": 3.510747727927463e-07,
+       "risk_control": 1.13803571298062,
+       "difference": 1.138035361905847,
+       "ci_low": 0.0058689067646400745,
+       "ci_high": 0.016787249822933822,
+       "n_control": 7915,
+       "n_variant": 7989,
+       "threshold": 0.004,
+       "low": 0.5868906764640075,
+       "high": 1.6787249822933823
+      },
+      {
+       "day": "2026-08-11T00:00:00",
+       "chance_to_win": 99.995,
+       "risk_variant": 1.161384603382068e-06,
+       "risk_control": 1.094309917287694,
+       "difference": 1.0943087559030906,
+       "ci_low": 0.005577314042806023,
+       "ci_high": 0.016190689070069063,
+       "n_control": 8854,
+       "n_variant": 8979,
+       "threshold": 0.004,
+       "low": 0.5577314042806023,
+       "high": 1.6190689070069062
+      },
+      {
+       "day": "2026-08-12T00:00:00",
+       "chance_to_win": 99.995,
+       "risk_variant": 2.1418413940873723e-06,
+       "risk_control": 1.0429453373060629,
+       "difference": 1.0429431954646688,
+       "ci_low": 0.005222408964925181,
+       "ci_high": 0.015520348545808704,
+       "n_control": 9912,
+       "n_variant": 9948,
+       "threshold": 0.004,
+       "low": 0.5222408964925181,
+       "high": 1.5520348545808704
+      },
+      {
+       "day": "2026-08-13T00:00:00",
+       "chance_to_win": 100.0,
+       "risk_variant": 0.0,
+       "risk_control": 1.1739748826275094,
+       "difference": 1.1739748826275094,
+       "ci_low": 0.006669808268045156,
+       "ci_high": 0.016684575176108236,
+       "n_control": 10966,
+       "n_variant": 10945,
+       "threshold": 0.004,
+       "low": 0.6669808268045155,
+       "high": 1.6684575176108236
+      },
+      {
+       "day": "2026-08-14T00:00:00",
+       "chance_to_win": 100.0,
+       "risk_variant": 0.0,
+       "risk_control": 1.2494412849746994,
+       "difference": 1.2494412849746994,
+       "ci_low": 0.0075604121568153765,
+       "ci_high": 0.0173173084891984,
+       "n_control": 11983,
+       "n_variant": 11941,
+       "threshold": 0.004,
+       "low": 0.7560412156815377,
+       "high": 1.73173084891984
+      },
+      {
+       "day": "2026-08-15T00:00:00",
+       "chance_to_win": 100.0,
+       "risk_variant": 0.0,
+       "risk_control": 1.4139249288806655,
+       "difference": 1.4139249288806655,
+       "ci_low": 0.009315351285318095,
+       "ci_high": 0.018846908080623354,
+       "n_control": 13016,
+       "n_variant": 12948,
+       "threshold": 0.004,
+       "low": 0.9315351285318095,
+       "high": 1.8846908080623355
+      },
+      {
+       "day": "2026-08-16T00:00:00",
+       "chance_to_win": 100.0,
+       "risk_variant": 0.0,
+       "risk_control": 1.445469259631715,
+       "difference": 1.445469259631715,
+       "ci_low": 0.00975615157222636,
+       "ci_high": 0.019096719229466385,
+       "n_control": 14046,
+       "n_variant": 13940,
+       "threshold": 0.004,
+       "low": 0.9756151572226359,
+       "high": 1.9096719229466386
+      },
+      {
+       "day": "2026-08-17T00:00:00",
+       "chance_to_win": 100.0,
+       "risk_variant": 0.0,
+       "risk_control": 1.327261333966622,
+       "difference": 1.327261333966622,
+       "ci_low": 0.008704851751403422,
+       "ci_high": 0.017784316892122655,
+       "n_control": 15074,
+       "n_variant": 14926,
+       "threshold": 0.004,
+       "low": 0.8704851751403422,
+       "high": 1.7784316892122656
+      },
+      {
+       "day": "2026-08-18T00:00:00",
+       "chance_to_win": 100.0,
+       "risk_variant": 0.0,
+       "risk_control": 1.3374627164316002,
+       "difference": 1.3374627164316002,
+       "ci_low": 0.008628390206505406,
+       "ci_high": 0.018074592832097815,
+       "n_control": 15074,
+       "n_variant": 14926,
+       "threshold": 0.004,
+       "low": 0.8628390206505406,
+       "high": 1.8074592832097816
+      },
+      {
+       "day": "2026-08-19T00:00:00",
+       "chance_to_win": 100.0,
+       "risk_variant": 0.0,
+       "risk_control": 1.3403172553545177,
+       "difference": 1.3403172553545177,
+       "ci_low": 0.008526193011981991,
+       "ci_high": 0.018254304700608976,
+       "n_control": 15074,
+       "n_variant": 14926,
+       "threshold": 0.004,
+       "low": 0.8526193011981992,
+       "high": 1.8254304700608976
+      },
+      {
+       "day": "2026-08-20T00:00:00",
+       "chance_to_win": 100.0,
+       "risk_variant": 0.0,
+       "risk_control": 1.3830987399145263,
+       "difference": 1.3830987399145263,
+       "ci_low": 0.00882421840744169,
+       "ci_high": 0.018808859883432897,
+       "n_control": 15074,
+       "n_variant": 14926,
+       "threshold": 0.004,
+       "low": 0.882421840744169,
+       "high": 1.8808859883432898
+      },
+      {
+       "day": "2026-08-21T00:00:00",
+       "chance_to_win": 100.0,
+       "risk_variant": 0.0,
+       "risk_control": 1.4518282164540441,
+       "difference": 1.4518282164540441,
+       "ci_low": 0.00941211659727263,
+       "ci_high": 0.01959288001103643,
+       "n_control": 15074,
+       "n_variant": 14926,
+       "threshold": 0.004,
+       "low": 0.9412116597272631,
+       "high": 1.9592880011036429
+      },
+      {
+       "day": "2026-08-22T00:00:00",
+       "chance_to_win": 100.0,
+       "risk_variant": 0.0,
+       "risk_control": 1.54000263509726,
+       "difference": 1.54000263509726,
+       "ci_low": 0.010219025451498876,
+       "ci_high": 0.020546226013855962,
+       "n_control": 15074,
+       "n_variant": 14926,
+       "threshold": 0.004,
+       "low": 1.0219025451498875,
+       "high": 2.054622601385596
+      },
+      {
+       "day": "2026-08-23T00:00:00",
+       "chance_to_win": 100.0,
+       "risk_variant": 0.0,
+       "risk_control": 1.5140548170841113,
+       "difference": 1.5140548170841113,
+       "ci_low": 0.009926477873464951,
+       "ci_high": 0.020318253199099964,
+       "n_control": 15074,
+       "n_variant": 14926,
+       "threshold": 0.004,
+       "low": 0.9926477873464951,
+       "high": 2.0318253199099963
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "exported_on": "2026-10-04"
+}

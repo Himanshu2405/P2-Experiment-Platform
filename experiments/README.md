@@ -30,6 +30,7 @@ Headings, in order: Overview, Problem and opportunity, Hypothesis, Evidence, Ris
 
 - `demo-banner`: a frequentist test that wins.
 - `sep-checkout-1`: a Bayesian test that is inconclusive.
+- `demo-preview`: a Bayesian test that wins, with the risk threshold set from the placebo check.
 - `exp-002`: a frequentist test that is inconclusive because it ran with far fewer users than planned.
 
 Product facts used by the EDDs are in `../products/`.

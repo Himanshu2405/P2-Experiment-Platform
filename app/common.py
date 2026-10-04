@@ -12,7 +12,7 @@ from p2.store.schema import APP_TABLES
 from p2.warehouse.sources import load_sources
 
 def _key() -> tuple[str, str]:
-    """Which store and environment: P2_STORE (bigquery or memory, memory is for tests) and P2_ENV."""
+    """Which store and environment: P2_STORE (bigquery, memory for tests, or demo for the read-only public demo) and P2_ENV."""
     return os.environ.get("P2_STORE", "bigquery"), os.environ.get("P2_ENV", "dev")
 
 
@@ -22,6 +22,9 @@ def _platform(kind: str, env: str) -> Platform:
     if kind == "memory":
         from p2.testing import FakeChecker, FakeRunner
         platform = Platform(MemoryStore(APP_TABLES), sources, checker=FakeChecker(), runner=FakeRunner(), inline_runs=True)
+    elif kind == "demo":     # a frozen copy of the app tables: no BigQuery, no credentials, nothing can be run
+        from p2.store import frozen
+        platform = Platform(frozen.load(), sources)
     else:
         from p2.catalog.checks import SqlChecker
         from p2.pipeline.runner import PipelineRunner
@@ -36,6 +39,11 @@ def _platform(kind: str, env: str) -> Platform:
     platform.bootstrap()
     platform.recover_interrupted_runs()
     return platform
+
+
+def read_only() -> bool:
+    """The public demo: everything can be looked at, nothing can be added, edited or run."""
+    return _key()[0] == "demo"
 
 
 def get_platform() -> Platform:

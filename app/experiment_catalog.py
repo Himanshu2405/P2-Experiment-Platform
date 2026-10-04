@@ -11,7 +11,7 @@ import streamlit as st
 
 import experiment_form
 import ui
-from common import get_platform, get_registry, read
+from common import get_platform, get_registry, read, read_only
 from p2.pipeline.runner import end_of
 
 ss = st.session_state
@@ -46,7 +46,7 @@ def verdict_chip(row: dict) -> str:
 
 
 def render() -> None:
-    edit_id = ss.get("catalog_edit")
+    edit_id = None if read_only() else ss.get("catalog_edit")
     if edit_id:
         c = st.columns([1, 6])
         c[0].button("Back to list", key="cat_back", on_click=lambda: ss.pop("catalog_edit", None))
@@ -99,7 +99,7 @@ def render() -> None:
             ]
             for col, cell in zip(c, cells):
                 col.markdown(cell, unsafe_allow_html=True)
-            if c[8].button("Edit", key=f"cat_edit_{eid}", type="tertiary", icon=":material/edit:"):
+            if not read_only() and c[8].button("Edit", key=f"cat_edit_{eid}", type="tertiary", icon=":material/edit:"):
                 ss["catalog_edit"] = eid
                 st.rerun()
             if c[9].button("Open results", key=f"cat_open_{eid}", type="primary"):
