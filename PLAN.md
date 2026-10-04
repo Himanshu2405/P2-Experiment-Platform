@@ -102,7 +102,7 @@ Legend: DONE = covered by a completed module. PREREQ = must learn first. GAP = s
 
 ### Demo experience (built 2026-10-04)
 
-- Built: the GIF (`docs/lifecycle-demo.gif`, the whole lifecycle: EDD, tool, results page) and the read-only demo (`app/demo_app.py` on `demo/app_tables.json.gz`). Differences from the plan below: the GIF follows the lifecycle instead of the tool alone; the demo hides Add Experiment, Edit and Run instead of showing a disabled form, and it has no BigQuery runner, so nothing can be run even by accident. Hosting on Streamlit Community Cloud is the owner's step (it needs their GitHub login); the README has the steps.
+- Built: the GIF (`docs/lifecycle-demo.gif`, the whole lifecycle: EDD, tool, results page) and the read-only demo (`app/demo_app.py` on `demo/app_tables.json.gz`). Differences from the plan below: the GIF follows the lifecycle instead of the tool alone; the demo hides Add Experiment, Edit and Run instead of showing a disabled form, and it has no BigQuery runner, so nothing can be run even by accident. Hosted by the owner on Streamlit Community Cloud: https://p2-experiment-platform.streamlit.app/ (public, redeploys on every push to main).
 
 The original plan:
 - Why: a public repo is read, not felt. Visitors should be able to see and click the app without BigQuery or credentials, and without any cost or risk to the owner.

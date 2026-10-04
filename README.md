@@ -1,5 +1,7 @@
 # P2: Experiment Platform (demo)
 
+**Try it:** [live read-only demo](https://p2-experiment-platform.streamlit.app/) of the tool on synthetic data (no sign-in). It sleeps after a while without visitors; if it says so, click the button to wake it, which takes about a minute.
+
 **An A/B testing tool that tells a product manager what won, and whether the numbers can be trusted.**
 
 Data scientists add experiments and product managers follow the results. It is a learning and demo project on synthetic data, built with Streamlit and BigQuery as the only store.
@@ -13,7 +15,7 @@ Data scientists add experiments and product managers follow the results. It is a
 - **Clean data in:** certified, versioned metrics, and data-quality gates that stop a broken build before any number is shown.
 - **Fast and cheap to run:** the heavy work stays in BigQuery and runs in the background, and the app works from summary numbers.
 
-![The whole process in 25 seconds: the EDD, the tool, then the published results page](docs/lifecycle-demo.gif)
+![The whole process in about 40 seconds: the EDD, the tool, then the published results page](docs/lifecycle-demo.gif)
 
 ## Live results pages
 
@@ -101,6 +103,7 @@ streamlit run app/demo_app.py
 
 - It runs the same app on a frozen copy of the app tables (`demo/app_tables.json.gz`, 78 KB of summary numbers on synthetic data), so it needs no BigQuery and no credentials.
 - Every page and every experiment can be browsed. Adding, editing and running experiments is turned off, and a banner says so.
+- Hosted at https://p2-experiment-platform.streamlit.app/ (Streamlit Community Cloud).
 - To host it for free on Streamlit Community Cloud: sign in at share.streamlit.io with GitHub, choose New app, pick this repo, branch `main` and main file `app/demo_app.py`, and set Python 3.12 or newer under Advanced settings. No secrets are needed. The app sleeps when idle, so the first visit takes about a minute.
 - To refresh the frozen copy after new runs: `python -m p2.store.frozen`.
 
