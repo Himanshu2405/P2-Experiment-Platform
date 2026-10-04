@@ -21,6 +21,7 @@ The EDD is Markdown with fixed headings, so a template can read it. Copy `_templ
 - The top block is `- **Label:** value` lines. Keep the labels.
 - Metric tables keep their column names.
 - Write plain, short sentences. Say "n/a" instead of deleting a section.
+- Under `## Visible changes`, keep the `**Control:**` and `**Variant:**` lines. The page shows them side by side, with the users and the primary metric of each arm under them.
 
 Headings, in order: Overview, Problem and opportunity, Hypothesis, Evidence, Risks and dependencies, Audience, Metrics (Primary, Secondary, Guardrails), Analysis plan, Decision criteria, Kill switch, Visible changes.
 
@@ -53,5 +54,6 @@ The builder stops with a clear message if a heading is missing or the decision i
 
 Markdown with fixed headings, written by the DS:
 
-- Header lines: `- **Decision:**` (Ship, Do not ship, Iterate or Inconclusive), `- **DS:**`, `- **Date of report:**`.
+- Header lines: `- **Decision:**` (Ship, Do not ship, Iterate or Inconclusive), `- **DS:**`, `- **Date of report:**`, and optionally `- **Headline:**` (a few words shown next to the decision, such as "Strong primary win, guardrail clear").
 - Sections: `## Executive summary` and `## Recommendation` (required), `## Key findings` and `## Notes on the results` (optional).
+- `## Key findings` is a list of bullets. Start each with a bold label ending in a colon, for example `- **Primary metric:** conversion rose 30%.`. The page numbers them and shows the label in bold.

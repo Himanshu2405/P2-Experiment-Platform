@@ -1,6 +1,7 @@
 # exp-002: Conclusion
 
 - **Decision:** Inconclusive
+- **Headline:** Not enough data to decide
 - **DS:** Priya (fictional)
 - **Date of report:** 2026-10-04
 

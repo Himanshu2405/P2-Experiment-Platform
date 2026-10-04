@@ -5,139 +5,240 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{ id }}: {{ name }} | Experiment results</title>
 <style>
-:root { --ink: #0f172a; --muted: #64748b; --line: #e2e8f0; --bg: #f8fafc; --card: #ffffff; --blue: #2563eb;
-        --green: #16a34a; --green-bg: #dcfce7; --red: #dc2626; --red-bg: #fee2e2; --yellow: #b7791f; --yellow-bg: #fef3c7; --grey: #64748b; --grey-bg: #e2e8f0; }
+:root { --navy: #1a1b2e; --navy-2: #26274a; --ink: #0f172a; --muted: #64748b; --line: #e2e8f0; --bg: #f8fafc; --card: #ffffff; --blue: #2563eb; --yellow: #fde047;
+        --green: #15803d; --green-bg: #dcfce7; --green-line: #86efac; --red: #b91c1c; --red-bg: #fee2e2; --red-line: #fca5a5;
+        --amber: #92400e; --amber-bg: #fef3c7; --amber-line: #fcd34d; --grey: #475569; --grey-bg: #e2e8f0; --grey-line: #cbd5e1; }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-main { max-width: 1200px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
-.eyebrow { color: var(--blue); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; font-size: .8rem; }
-h1 { font-size: 2rem; line-height: 1.2; margin: .3rem 0 .5rem; }
-h2 { font-size: 1.35rem; margin: 2.4rem 0 .8rem; padding-bottom: .4rem; border-bottom: 2px solid var(--line); }
-h3 { font-size: 1.05rem; margin: 1.3rem 0 .4rem; }
-.question { font-size: 1.1rem; color: #334155; margin: 0 0 1.4rem; }
-.meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: .7rem; }
-.meta > div, .card { background: var(--card); border: 1px solid var(--line); border-radius: .75rem; padding: .7rem .95rem; }
-.meta .k { color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; }
-.meta .v { font-weight: 600; }
-.chip { display: inline-block; padding: .08rem .7rem; border-radius: 999px; font-size: .85rem; font-weight: 700; border: 1px solid; white-space: nowrap; }
-.chip.green { color: var(--green); background: var(--green-bg); border-color: #86efac; }
-.chip.red { color: var(--red); background: var(--red-bg); border-color: #fca5a5; }
-.chip.yellow { color: var(--yellow); background: var(--yellow-bg); border-color: #fcd34d; }
-.chip.grey { color: var(--grey); background: var(--grey-bg); border-color: #cbd5e1; }
-.summary { background: var(--card); border: 1px solid var(--line); border-left: 5px solid var(--blue); border-radius: .75rem; padding: 1rem 1.3rem; }
-.summary p:last-child { margin-bottom: 0; }
-.links a { display: inline-block; margin: 0 .5rem .4rem 0; padding: .3rem .8rem; border: 1px solid var(--line); border-radius: .5rem; background: var(--card); color: var(--blue); text-decoration: none; font-weight: 600; font-size: .92rem; }
-table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--line); border-radius: .6rem; font-size: .88rem; margin: .6rem 0; }
-.table-wrap { overflow-x: auto; }
-th, td { padding: .5rem .6rem; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
-th { background: #eef2ff; font-size: .8rem; text-transform: uppercase; letter-spacing: .03em; color: #334155; }
-tr.primary td { font-weight: 600; background: #f8fafc; }
-.checks { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: .8rem; margin-top: 1rem; }
-.checks .card p { margin: .4rem 0 0; font-size: .92rem; color: #334155; }
-.checks .label { color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; }
-.verdict { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; background: var(--card); border: 1px solid var(--line); border-radius: .75rem; padding: 1rem 1.2rem; margin-bottom: 1rem; }
-.verdict .reason { font-size: 1.05rem; flex: 1 1 320px; }
-.charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(440px, 1fr)); gap: 1rem; }
-.chart-card { background: var(--card); border: 1px solid var(--line); border-radius: .75rem; padding: .8rem 1rem; min-width: 0; }
-.chart-card h3 { margin: 0 0 .4rem; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.65 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+
+/* the dark header band */
+.hero { background: linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 100%); color: #fff; padding: 2.4rem 0 2.2rem; }
+.tag { display: inline-block; background: var(--yellow); color: var(--navy); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; font-size: .78rem; padding: .35rem .8rem; border-radius: .4rem; }
+.hero h1 { font-size: 2.5rem; line-height: 1.15; margin: 1rem 0 .7rem; letter-spacing: -.01em; }
+.question { font-size: 1.15rem; color: #b6bdd6; max-width: 62rem; margin: 0 0 1.8rem; }
+.meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1.1rem 1.8rem; border-top: 1px solid rgba(255,255,255,.14); padding-top: 1.4rem; }
+.meta .k { color: #8b93b3; font-size: .72rem; letter-spacing: .09em; text-transform: uppercase; font-weight: 600; }
+.meta .v { font-size: 1.05rem; font-weight: 600; margin-top: .15rem; }
+
+main.wrap { padding-bottom: 4rem; }
+.kicker { color: var(--blue); font-weight: 800; letter-spacing: .1em; text-transform: uppercase; font-size: .78rem; margin: 3rem 0 .15rem; }
+h2 { font-size: 1.7rem; line-height: 1.25; margin: 0 0 1rem; letter-spacing: -.01em; }
+h3 { font-size: 1.05rem; margin: 1.4rem 0 .35rem; color: #1e293b; }
+p { margin: .5rem 0 .8rem; }
+a { color: var(--blue); }
+
+/* chips */
+.chip { display: inline-block; padding: .1rem .75rem; border-radius: 999px; font-size: .85rem; font-weight: 700; border: 1px solid; white-space: nowrap; line-height: 1.5; }
+.chip.green { color: var(--green); background: var(--green-bg); border-color: var(--green-line); }
+.chip.red { color: var(--red); background: var(--red-bg); border-color: var(--red-line); }
+.chip.yellow { color: var(--amber); background: var(--amber-bg); border-color: var(--amber-line); }
+.chip.grey { color: var(--grey); background: var(--grey-bg); border-color: var(--grey-line); }
+.chip.star { color: #713f12; background: #fde047; border-color: #facc15; }
+.chip.big { font-size: 1.05rem; padding: .2rem 1rem; }
+
+/* cards and callouts */
+.card, .panel { background: var(--card); border: 1px solid var(--line); border-radius: .85rem; box-shadow: 0 1px 2px rgba(15,23,42,.04); }
+.panel { padding: 1.1rem 1.4rem; }
+.callout { border-radius: .85rem; padding: 1.1rem 1.4rem; border: 1px solid var(--line); border-left: 6px solid var(--blue); background: #eff6ff; }
+.callout h3 { margin-top: 0; }
+.callout p:last-child, .panel p:last-child { margin-bottom: 0; }
+.summary { border-left-color: var(--navy); background: #fff; font-size: 1.08rem; }
+.links { margin: 1rem 0 0; display: flex; gap: .6rem; flex-wrap: wrap; }
+.links a { padding: .45rem 1rem; border: 1px solid var(--line); border-radius: .6rem; background: var(--card); text-decoration: none; font-weight: 700; font-size: .92rem; }
+.links a:hover { border-color: var(--blue); }
+
+/* the results table */
+.verdict { display: flex; gap: 1.2rem; align-items: center; flex-wrap: wrap; margin-bottom: 1rem; }
+.verdict .reason { font-size: 1.1rem; flex: 1 1 340px; }
+.verdict .what { color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; font-weight: 600; margin-bottom: .3rem; }
+.note { color: var(--muted); font-size: .9rem; }
+.table-wrap { overflow-x: auto; border-radius: .85rem; border: 1px solid var(--line); background: var(--card); box-shadow: 0 1px 2px rgba(15,23,42,.04); margin: .8rem 0; }
+table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+.edd table { margin: .6rem 0; border: 1px solid var(--line); }
+thead th { background: var(--navy); color: #fff; padding: .8rem .6rem; text-align: left; font-weight: 700; font-size: .85rem; letter-spacing: .01em; }
+td { padding: .75rem .6rem; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.table-wrap tbody tr:last-child td { border-bottom: 0; }
+th.num, td.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+td.wrap { white-space: normal; min-width: 8.5rem; }
+tr.primary td { background: #fff7ed; }
+tr.primary td:first-child { font-weight: 800; }
+td .sub2 { color: var(--muted); font-size: .78rem; font-weight: 500; }
+td .sub { color: var(--muted); font-size: .75rem; font-weight: 500; text-transform: capitalize; }
+td.pos { color: #15803d; font-weight: 700; } td.neg { color: #b91c1c; font-weight: 700; } td.flat { color: var(--muted); font-weight: 600; } td.strong { font-weight: 800; }
+td .chip { font-size: .78rem; padding: .05rem .65rem; }
+
+.compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: .4rem; }
+.arm { border-radius: .85rem; padding: 1.15rem 1.4rem 1rem; border: 1px solid var(--line); display: flex; flex-direction: column; }
+.arm.control { background: #f1f5f9; border-left: 6px solid #94a3b8; }
+.arm.variant { background: #eff6ff; border-left: 6px solid var(--blue); }
+.arm .name { font-size: 1.3rem; font-weight: 800; margin-bottom: .3rem; }
+.arm p { margin: 0 0 .9rem; font-size: 1.03rem; flex: 1; }
+.arm .stats { display: flex; gap: 2rem; flex-wrap: wrap; border-top: 1px solid rgba(15,23,42,.1); padding-top: .75rem; }
+.arm .stats .k { color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; font-weight: 700; }
+.arm .stats .v { font-weight: 800; font-size: 1.1rem; }
+.arm .stats .v .lift { font-size: .9rem; margin-left: .35rem; } .lift.pos { color: #15803d; } .lift.neg { color: #b91c1c; } .lift.flat { color: var(--muted); }
+.checks { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; margin-top: 1rem; }
+.check { padding: 1rem 1.3rem; }
+.check .label { color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; margin-bottom: .45rem; }
+.check p { margin: .55rem 0 0; font-size: .93rem; color: #334155; }
+
+.charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 1rem; }
+.chart-card { padding: .9rem 1.1rem 1rem; min-width: 0; }
+.chart-card h3 { margin: 0 0 .5rem; font-size: 1rem; }
 .chart { width: 100%; }
-.decision { display: flex; align-items: center; gap: .8rem; background: var(--card); border: 1px solid var(--line); border-radius: .75rem; padding: 1rem 1.3rem; margin: 1rem 0; }
-.decision .big { font-size: 1.2rem; font-weight: 800; }
-details { background: var(--card); border: 1px solid var(--line); border-radius: .75rem; padding: .3rem 1.1rem; margin: .6rem 0; }
-summary { cursor: pointer; font-weight: 700; padding: .5rem 0; }
-.note { color: var(--muted); font-size: .88rem; }
-footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .85rem; }
+
+details { background: var(--card); border: 1px solid var(--line); border-radius: .85rem; padding: .2rem 1.3rem; margin: .65rem 0; }
+summary { cursor: pointer; font-weight: 700; padding: .65rem 0; }
+details > *:not(summary) { margin-bottom: 1rem; }
+
+/* the conclusion */
+.findings { list-style: none; margin: 0; padding: 0; background: var(--card); border: 1px solid var(--line); border-radius: .85rem; }
+.findings li { display: flex; gap: 1rem; padding: 1rem 1.3rem; border-bottom: 1px solid var(--line); }
+.findings li:last-child { border-bottom: 0; }
+.findings .n { flex: 0 0 2rem; height: 2rem; border-radius: 50%; background: var(--navy); color: #fff; font-weight: 800; display: grid; place-items: center; font-size: .9rem; margin-top: .1rem; }
+.findings .lead { font-weight: 800; }
+.decision { margin-top: 1.4rem; padding: 1.3rem 1.6rem; border-radius: .85rem; border: 1px solid; border-left-width: 6px; }
+.decision.green { background: #f0fdf4; border-color: var(--green-line); border-left-color: #22c55e; }
+.decision.red { background: #fef2f2; border-color: var(--red-line); border-left-color: #ef4444; }
+.decision.yellow { background: #fffbeb; border-color: var(--amber-line); border-left-color: #f59e0b; }
+.decision.grey { background: #f1f5f9; border-color: var(--grey-line); border-left-color: #64748b; }
+.decision .head { display: flex; align-items: center; gap: .9rem; flex-wrap: wrap; margin-bottom: .5rem; }
+.decision .title { font-size: 1.25rem; font-weight: 800; }
+.decision p { margin: .3rem 0; font-size: 1.04rem; }
+
+footer { margin-top: 3.5rem; padding-top: 1.1rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .85rem; }
 code { background: #eef2ff; padding: .05rem .35rem; border-radius: .3rem; font-size: .9em; }
-@media (max-width: 560px) { .charts { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+@media (max-width: 700px) { .compare { grid-template-columns: 1fr; } }
+@media (max-width: 600px) { .hero h1 { font-size: 1.8rem; } .charts { grid-template-columns: 1fr; } h2 { font-size: 1.4rem; } }
+@media print { .links { display: none; } .hero { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
 </style>
 </head>
 <body>
-<main>
-  <div class="eyebrow">Experiment results</div>
-  <h1>{{ id }}: {{ name }}</h1>
-  <p class="question">{{ question }}</p>
+<header class="hero">
+  <div class="wrap">
+    <span class="tag">Experiment results</span>
+    <h1>{{ id }}: {{ name }}</h1>
+    <p class="question">{{ question }}</p>
+    <div class="meta">
+      {% for k, v in meta %}
+      <div><div class="k">{{ k }}</div><div class="v">{{ v }}</div></div>
+      {% endfor %}
+      <div><div class="k">Decision</div><div class="v"><span class="chip {{ decision_tone }}">{{ decision }}</span></div></div>
+    </div>
+  </div>
+</header>
 
-  <div class="meta">
-    {% for k, v in meta %}
-    <div><div class="k">{{ k }}</div><div class="v">{{ v }}</div></div>
-    {% endfor %}
-    <div><div class="k">Decision</div><div class="v"><span class="chip {{ decision_tone }}">{{ decision }}</span></div></div>
+<main class="wrap">
+  <div class="kicker">Summary</div>
+  <h2>Executive summary</h2>
+  <div class="callout summary">{{ summary|safe }}</div>
+  <div class="links">
+    {% for label, url in links %}<a href="{{ url }}">{{ label }}</a>{% endfor %}
   </div>
 
-  <h2>Executive summary</h2>
-  <div class="summary">{{ summary|safe }}</div>
-  <p class="links" style="margin-top:1rem">
-    {% for label, url in links %}<a href="{{ url }}">{{ label }}</a>{% endfor %}
-  </p>
+  <div class="kicker">Background</div>
+  <h2>What we tested and why</h2>
+  <div class="edd panel">
+    {% for name, body in background %}
+    <h3{% if loop.first %} style="margin-top:0"{% endif %}>{{ name }}</h3>
+    {{ body|safe }}
+    {% endfor %}
+  </div>
+  {% if compare %}
+  <h3 style="margin-top:1.6rem">Control and variant</h3>
+  <div class="compare">
+    <div class="arm control">
+      <div class="name">Control</div>
+      <p>{{ compare.control|safe }}</p>
+      <div class="stats"><div><div class="k">Users</div><div class="v">{{ compare.n_control }}</div></div><div><div class="k">{{ compare.metric }}</div><div class="v">{{ compare.v_control }}</div></div></div>
+    </div>
+    <div class="arm variant">
+      <div class="name">Variant</div>
+      <p>{{ compare.variant|safe }}</p>
+      <div class="stats"><div><div class="k">Users</div><div class="v">{{ compare.n_variant }}</div></div><div><div class="k">{{ compare.metric }}</div><div class="v">{{ compare.v_variant }}{% if compare.lift %}<span class="lift {{ compare.lift_cls }}">{{ compare.lift }}</span>{% endif %}</div></div></div>
+    </div>
+  </div>
+  {% endif %}
 
-  <h2>Background</h2>
-  {% for name, body in background %}
-  <h3>{{ name }}</h3>
-  {{ body|safe }}
-  {% endfor %}
-
-  <h2>Results</h2>
-  <div class="verdict">
+  <div class="kicker">Results</div>
+  <h2>{{ method }} analysis</h2>
+  <div class="panel verdict">
     <div>
-      <div class="note">Verdict from the tool on {{ primary_name }}{% if not is_final %} (live numbers){% endif %}</div>
-      <span class="chip {{ verdict_tone }}">{{ verdict }}</span>
+      <div class="what">Verdict from the tool on {{ primary_name }}{% if not is_final %} (live numbers){% endif %}</div>
+      <span class="chip big {{ verdict_tone }}">{{ verdict }}</span>
     </div>
     <div class="reason">{{ verdict_reason }}</div>
   </div>
-  <p class="note">{{ method }} analysis{% if is_final %} on the full runtime{% else %}, live numbers through {{ through }}{% endif %}. Rates are in percentage points (pp) and the lift is relative to control.</p>
-  <div class="table-wrap"><table>
-    <thead><tr>{% for h in table_head %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+  <p class="note">{% if is_final %}On the full runtime.{% else %}Live numbers through {{ through }}.{% endif %} Rates are in percentage points (pp) and the lift is relative to control.</p>
+  <div class="table-wrap">
+  <table>
+    <thead><tr>{% for h in table_head %}<th{% if h.num %} class="num"{% endif %}>{{ h.name }}</th>{% endfor %}</tr></thead>
     <tbody>
     {% for row in table_rows %}
       <tr{% if row.primary %} class="primary"{% endif %}>
       {% for c in row.cells %}
-        <td>{% if c.tone %}<span class="chip {{ c.tone }}">{{ c.text }}</span>{% else %}{{ c.text }}{% endif %}</td>
+        <td{% if c.num or c.cls %} class="{{ 'num ' if c.num else '' }}{{ 'wrap ' if c.wrap else '' }}{{ c.cls or '' }}"{% endif %}>{% if c.tone %}<span class="chip {{ c.tone }}">{{ c.text }}</span>{% elif c.chip %}<span class="chip {{ c.chip }}">{{ c.text }}{% if c.star %} &#9733;{% endif %}</span>{% else %}{{ c.text }}{% if c.sub %}<br><span class="sub">{{ c.sub }}</span>{% endif %}{% if c.sub2 %}<br><span class="sub2">{{ c.sub2 }}</span>{% endif %}{% endif %}</td>
       {% endfor %}
       </tr>
     {% endfor %}
     </tbody>
-  </table></div>
+  </table>
+  </div>
+  {% if legend %}<p class="note">{{ legend }}</p>{% endif %}
   {% if label_rule %}<p class="note">{{ label_rule }}</p>{% endif %}
-  {% if notes %}<h3>Notes on the results</h3>{{ notes|safe }}{% endif %}
+  {% if notes %}<div class="callout" style="margin-top:1rem"><h3>Notes on the results</h3>{{ notes|safe }}</div>{% endif %}
 
   <div class="checks">
-    <div class="card">
+    <div class="card check">
       <div class="label">Balance check</div>
-      <span class="chip {{ 'green' if balance.balanced else 'red' }}">{{ 'Balanced' if balance.balanced else 'Not balanced' }}</span>
+      <span class="chip big {{ 'green' if balance.balanced else 'red' }}">{{ 'Balanced' if balance.balanced else 'Not balanced' }}</span>
       <p>Chi-square p = {{ balance_p }}.
         {% if balance.balanced %}Users are split evenly between control and variant ({{ '{:,}'.format(balance.n_control) }} and {{ '{:,}'.format(balance.n_variant) }}).
         {% else %}The split looks wrong ({{ '{:,}'.format(balance.n_control) }} control, {{ '{:,}'.format(balance.n_variant) }} variant). Check how users were assigned before trusting these numbers.{% endif %}</p>
     </div>
-    <div class="card">
+    <div class="card check">
       <div class="label">Placebo A/A check</div>
       {% if placebo %}
-      <span class="chip {{ 'green' if placebo.passed else ('yellow' if bayesian else 'red') }}">{{ 'Passed' if placebo.passed else 'Not passed' }}</span>
+      <span class="chip big {{ 'green' if placebo.passed else ('yellow' if bayesian else 'red') }}">{{ 'Passed' if placebo.passed else 'Not passed' }}</span>
       <p>{{ placebo.text }}</p>
       {% else %}
-      <span class="chip grey">Not run</span><p>This result was saved before the placebo check existed.</p>
+      <span class="chip big grey">Not run</span><p>This result was saved before the placebo check existed.</p>
       {% endif %}
     </div>
   </div>
 
-  <h2>Charts for {{ primary_name }}</h2>
+  <div class="kicker">Charts</div>
+  <h2>{{ primary_name }} over time</h2>
   <div class="charts">
     {% for c in charts %}
-    <div class="chart-card"><h3>{{ c.title }}</h3><div class="chart" id="chart-{{ c.key }}"></div></div>
+    <div class="card chart-card"><h3>{{ c.title }}</h3><div class="chart" id="chart-{{ c.key }}"></div></div>
     {% endfor %}
   </div>
   <p class="note">Charts are drawn from the tool's own chart definitions, so they match the tool exactly.</p>
 
-  <h2>Experiment design</h2>
+  <div class="kicker">Design</div>
+  <h2>How the test was set up</h2>
   <p class="note">From the design doc written before launch.</p>
+  <div class="edd">
   {% for name, body in design %}
   <details {% if loop.index <= 2 %}open{% endif %}><summary>{{ name }}</summary>{{ body|safe }}</details>
   {% endfor %}
+  </div>
 
-  <h2>Conclusion</h2>
-  <div class="decision"><span class="big">Decision</span><span class="chip {{ decision_tone }}">{{ decision }}</span></div>
-  {% if findings %}<h3>Key findings</h3>{{ findings|safe }}{% endif %}
-  <h3>Recommendation</h3>
-  {{ recommendation|safe }}
+  <div class="kicker">Conclusion</div>
+  <h2>Summary and recommendation</h2>
+  {% if findings %}
+  <ol class="findings">
+    {% for f in findings %}
+    <li><span class="n">{{ loop.index }}</span><div>{% if f.lead %}<span class="lead">{{ f.lead }}:</span> {% endif %}{{ f.body|safe }}</div></li>
+    {% endfor %}
+  </ol>
+  {% endif %}
+  <div class="decision {{ decision_tone }}">
+    <div class="head"><span class="chip big {{ decision_tone }}">{{ decision }}</span>{% if headline %}<span class="title">{{ headline }}</span>{% endif %}</div>
+    {{ recommendation|safe }}
+  </div>
 
   <footer>Synthetic demo data. Results exported from the experiment tool on {{ exported_on }}. Part of the P2 Experiment Platform demo.</footer>
 </main>

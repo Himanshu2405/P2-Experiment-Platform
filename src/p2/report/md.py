@@ -52,6 +52,24 @@ def table(body: str) -> list[dict[str, str]]:
     return [dict(zip(head, cells(l))) for l in rows[2:]]
 
 
+def bullets(body: str) -> list[str]:
+    """The text of each '- ' bullet of a body."""
+    return [l.strip()[2:].strip() for l in body.splitlines() if l.strip().startswith("- ")]
+
+
+def lead_and_rest(item: str) -> tuple[str, str]:
+    """Split '**Lead:** the rest' into ('Lead', 'the rest'); a bullet with no bold lead comes back as ('', item)."""
+    m = re.match(r"^\*\*(.+?)\*\*\s*(.*)$", item, flags=re.S)
+    if not m:
+        return "", item
+    return m.group(1).rstrip(":").strip(), m.group(2).strip()
+
+
+def inline(text: str) -> str:
+    """One line of Markdown (bold, code, links) as escaped HTML."""
+    return _inline(text)
+
+
 def _inline(text: str) -> str:
     text = html.escape(text, quote=False)
     text = re.sub(r"`([^`]+)`", r"<code>\1</code>", text)

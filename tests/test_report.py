@@ -66,6 +66,13 @@ def test_markdown_becomes_html_and_nothing_in_a_document_can_inject_markup():
     assert "<script>" not in hostile and "&lt;script&gt;" in hostile and 'href="javascript' not in hostile
 
 
+def test_findings_are_split_into_a_bold_lead_and_the_rest():
+    assert md.bullets("- **A:** one\n- plain two\nnot a bullet\n- **B:** three") == ["**A:** one", "plain two", "**B:** three"]
+    assert md.lead_and_rest("**Primary metric:** rose 5%.") == ("Primary metric", "rose 5%.")
+    assert md.lead_and_rest("no lead here") == ("", "no lead here")
+    assert md.inline("**x** <b>") == "<strong>x</strong> &lt;b&gt;"
+
+
 # ---- the design doc format ---------------------------------------------------------------------------------------------------
 def test_every_design_doc_follows_the_template_headings():
     heads = lambda p: re.findall(r"^(#{2,3} .+)$", Path(p).read_text(), flags=re.M)
@@ -188,8 +195,11 @@ def test_the_page_combines_the_design_doc_the_results_and_the_conclusion(folder)
     assert ">10.000%<" in html and ">16.000%<" in html and "+60.0%" in html and "Significant improvement" in html          # the tool's numbers
     assert "Chi-square p = 100.00%" in html and "The test behaves correctly on your data." in html
     assert 'id="chart-time"' in html and 'id="chart-difference"' in html and "vegaEmbed" in html
-    for label in ("Audience", "Metrics", "Decision criteria", "Visible changes"):
+    for label in ("Audience", "Metrics", "Decision criteria"):
         assert f"<summary>{label}</summary>" in html
+    assert "<summary>Visible changes</summary>" not in html                                     # it is the side-by-side block instead
+    assert '<div class="arm control">' in html and '<div class="arm variant">' in html
+    assert "The cart page with no shipping message until the final step." in html and "a green \"Free shipping on orders over $50\" banner" in html
 
 
 def test_a_page_refuses_an_unfinished_design_doc_or_conclusion(folder):
@@ -247,3 +257,59 @@ def test_the_example_experiments_cover_both_methods_and_three_decisions():
         decisions[eid] = (json.loads((EXPERIMENTS / eid / "results.json").read_text())["experiment"]["method"],
                           md.parse_doc((EXPERIMENTS / eid / "conclusion.md").read_text()).header["Decision"])
     assert decisions == {"demo-banner": ("frequentist", "Ship"), "exp-002": ("frequentist", "Inconclusive"), "sep-checkout-1": ("bayesian", "Iterate")}
+
+
+# ---- how the page reads ------------------------------------------------------------------------------------------------------
+def test_the_lift_is_coloured_by_whether_the_variant_moved_the_good_way():
+    lift = lambda v, d="higher": page.lift_class({"lift": v, "good_direction": d})
+    assert [lift(0.30), lift(-0.07), lift(0.001), lift(None)] == ["pos", "neg", "flat", "flat"]
+    assert [lift(-0.30, "lower"), lift(0.07, "lower")] == ["pos", "neg"]                     # a rise in a lower-is-better metric is bad
+
+
+def test_the_results_table_has_a_type_chip_per_metric_and_one_column_set_per_method(plat):
+    analysed(plat, "exp-f", bayesian=False)
+    analysed(plat, "exp-b", bayesian=True)
+    freq_head, freq_rows = page._results_table(export.export_results(plat, "exp-f"))
+    bayes_head, bayes_rows = page._results_table(export.export_results(plat, "exp-b"))
+    assert [h["name"] for h in freq_head] == ["Metric", "Type", "Control", "Variant", "Lift", "Difference", "p-value", "95% CI", "Verdict"]
+    assert [h["name"] for h in bayes_head] == ["Metric", "Type", "Control", "Variant", "Lift", "Chance to win", "Difference (95% interval)",
+                                               "Risk if ship", "Risk if keep", "Chance of harm", "Verdict"]
+    assert all(len(r["cells"]) == len(freq_head) for r in freq_rows) and all(len(r["cells"]) == len(bayes_head) for r in bayes_rows)
+    types = [(r["cells"][1]["text"], r["cells"][1]["chip"], r["cells"][1]["star"]) for r in bayes_rows]
+    assert types == [("Primary", "star", True), ("Guardrail", "red", False), ("Secondary", "grey", False)] and bayes_rows[0]["primary"]
+    assert bayes_rows[0]["cells"][6]["sub2"].count(" to ") == 1                              # the interval sits under the expected difference
+
+
+def test_the_decision_box_carries_the_headline_and_the_findings_are_numbered(folder):
+    (folder / "conclusion.md").write_text(CONCLUSION.replace("- **DS:**", "- **Headline:** Strong primary win\n- **DS:**")
+                                          .replace("- Conversion rose.", "- **Primary metric:** conversion rose.\n- **Guardrail:** passed."))
+    html = page.render_page(folder)
+    assert '<span class="title">Strong primary win</span>' in html and 'class="decision green"' in html
+    assert '<span class="n">1</span>' in html and '<span class="n">2</span>' in html and '<span class="lead">Primary metric:</span> conversion rose.' in html
+    plain = page.render_page(folder).replace('<span class="title">Strong primary win</span>', "")
+    assert "Strong primary win" not in plain
+    (folder / "conclusion.md").write_text(CONCLUSION)                                        # the headline and the findings' leads are optional
+    assert '<span class="title">' not in page.render_page(folder)
+
+
+def test_only_a_bayesian_page_explains_chance_to_win_and_the_risks(plat, tmp_path):
+    analysed(plat, "exp-b", bayesian=True)
+    (tmp_path / "design.md").write_text((EXPERIMENTS / "sep-checkout-1" / "design.md").read_text())
+    (tmp_path / "conclusion.md").write_text(CONCLUSION)
+    export.write_results(plat, "exp-b", tmp_path)
+    assert "Risk if ship: the average loss if we ship the variant" in page.render_page(tmp_path)
+
+
+def test_control_and_variant_sit_side_by_side_with_users_and_the_primary_metric(folder):
+    html = page.render_page(folder)
+    control, variant = html.split('<div class="arm control">')[1].split('<div class="arm variant">')
+    assert "<div class=\"name\">Control</div>" in control and ">450<" in control and ">10.000%<" in control
+    assert ">450<" in variant and ">16.000%<" in variant and '<span class="lift pos">+60.0%</span>' in variant
+    assert page.build_context(folder)["compare"]["metric"] == "Conversion rate"
+
+
+def test_without_control_and_variant_lines_the_visible_changes_stay_in_the_design_details(folder):
+    edd = (folder / "design.md").read_text()
+    (folder / "design.md").write_text(edd.replace("**Control:**", "**Today:**"))
+    html = page.render_page(folder)
+    assert '<div class="arm control">' not in html and "<summary>Visible changes</summary>" in html

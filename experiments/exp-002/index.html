@@ -5,182 +5,271 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>exp-002: Free Shipping Promo | Experiment results</title>
 <style>
-:root { --ink: #0f172a; --muted: #64748b; --line: #e2e8f0; --bg: #f8fafc; --card: #ffffff; --blue: #2563eb;
-        --green: #16a34a; --green-bg: #dcfce7; --red: #dc2626; --red-bg: #fee2e2; --yellow: #b7791f; --yellow-bg: #fef3c7; --grey: #64748b; --grey-bg: #e2e8f0; }
+:root { --navy: #1a1b2e; --navy-2: #26274a; --ink: #0f172a; --muted: #64748b; --line: #e2e8f0; --bg: #f8fafc; --card: #ffffff; --blue: #2563eb; --yellow: #fde047;
+        --green: #15803d; --green-bg: #dcfce7; --green-line: #86efac; --red: #b91c1c; --red-bg: #fee2e2; --red-line: #fca5a5;
+        --amber: #92400e; --amber-bg: #fef3c7; --amber-line: #fcd34d; --grey: #475569; --grey-bg: #e2e8f0; --grey-line: #cbd5e1; }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-main { max-width: 1200px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
-.eyebrow { color: var(--blue); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; font-size: .8rem; }
-h1 { font-size: 2rem; line-height: 1.2; margin: .3rem 0 .5rem; }
-h2 { font-size: 1.35rem; margin: 2.4rem 0 .8rem; padding-bottom: .4rem; border-bottom: 2px solid var(--line); }
-h3 { font-size: 1.05rem; margin: 1.3rem 0 .4rem; }
-.question { font-size: 1.1rem; color: #334155; margin: 0 0 1.4rem; }
-.meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: .7rem; }
-.meta > div, .card { background: var(--card); border: 1px solid var(--line); border-radius: .75rem; padding: .7rem .95rem; }
-.meta .k { color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; }
-.meta .v { font-weight: 600; }
-.chip { display: inline-block; padding: .08rem .7rem; border-radius: 999px; font-size: .85rem; font-weight: 700; border: 1px solid; white-space: nowrap; }
-.chip.green { color: var(--green); background: var(--green-bg); border-color: #86efac; }
-.chip.red { color: var(--red); background: var(--red-bg); border-color: #fca5a5; }
-.chip.yellow { color: var(--yellow); background: var(--yellow-bg); border-color: #fcd34d; }
-.chip.grey { color: var(--grey); background: var(--grey-bg); border-color: #cbd5e1; }
-.summary { background: var(--card); border: 1px solid var(--line); border-left: 5px solid var(--blue); border-radius: .75rem; padding: 1rem 1.3rem; }
-.summary p:last-child { margin-bottom: 0; }
-.links a { display: inline-block; margin: 0 .5rem .4rem 0; padding: .3rem .8rem; border: 1px solid var(--line); border-radius: .5rem; background: var(--card); color: var(--blue); text-decoration: none; font-weight: 600; font-size: .92rem; }
-table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--line); border-radius: .6rem; font-size: .88rem; margin: .6rem 0; }
-.table-wrap { overflow-x: auto; }
-th, td { padding: .5rem .6rem; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
-th { background: #eef2ff; font-size: .8rem; text-transform: uppercase; letter-spacing: .03em; color: #334155; }
-tr.primary td { font-weight: 600; background: #f8fafc; }
-.checks { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: .8rem; margin-top: 1rem; }
-.checks .card p { margin: .4rem 0 0; font-size: .92rem; color: #334155; }
-.checks .label { color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; }
-.verdict { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; background: var(--card); border: 1px solid var(--line); border-radius: .75rem; padding: 1rem 1.2rem; margin-bottom: 1rem; }
-.verdict .reason { font-size: 1.05rem; flex: 1 1 320px; }
-.charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(440px, 1fr)); gap: 1rem; }
-.chart-card { background: var(--card); border: 1px solid var(--line); border-radius: .75rem; padding: .8rem 1rem; min-width: 0; }
-.chart-card h3 { margin: 0 0 .4rem; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.65 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+
+/* the dark header band */
+.hero { background: linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 100%); color: #fff; padding: 2.4rem 0 2.2rem; }
+.tag { display: inline-block; background: var(--yellow); color: var(--navy); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; font-size: .78rem; padding: .35rem .8rem; border-radius: .4rem; }
+.hero h1 { font-size: 2.5rem; line-height: 1.15; margin: 1rem 0 .7rem; letter-spacing: -.01em; }
+.question { font-size: 1.15rem; color: #b6bdd6; max-width: 62rem; margin: 0 0 1.8rem; }
+.meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1.1rem 1.8rem; border-top: 1px solid rgba(255,255,255,.14); padding-top: 1.4rem; }
+.meta .k { color: #8b93b3; font-size: .72rem; letter-spacing: .09em; text-transform: uppercase; font-weight: 600; }
+.meta .v { font-size: 1.05rem; font-weight: 600; margin-top: .15rem; }
+
+main.wrap { padding-bottom: 4rem; }
+.kicker { color: var(--blue); font-weight: 800; letter-spacing: .1em; text-transform: uppercase; font-size: .78rem; margin: 3rem 0 .15rem; }
+h2 { font-size: 1.7rem; line-height: 1.25; margin: 0 0 1rem; letter-spacing: -.01em; }
+h3 { font-size: 1.05rem; margin: 1.4rem 0 .35rem; color: #1e293b; }
+p { margin: .5rem 0 .8rem; }
+a { color: var(--blue); }
+
+/* chips */
+.chip { display: inline-block; padding: .1rem .75rem; border-radius: 999px; font-size: .85rem; font-weight: 700; border: 1px solid; white-space: nowrap; line-height: 1.5; }
+.chip.green { color: var(--green); background: var(--green-bg); border-color: var(--green-line); }
+.chip.red { color: var(--red); background: var(--red-bg); border-color: var(--red-line); }
+.chip.yellow { color: var(--amber); background: var(--amber-bg); border-color: var(--amber-line); }
+.chip.grey { color: var(--grey); background: var(--grey-bg); border-color: var(--grey-line); }
+.chip.star { color: #713f12; background: #fde047; border-color: #facc15; }
+.chip.big { font-size: 1.05rem; padding: .2rem 1rem; }
+
+/* cards and callouts */
+.card, .panel { background: var(--card); border: 1px solid var(--line); border-radius: .85rem; box-shadow: 0 1px 2px rgba(15,23,42,.04); }
+.panel { padding: 1.1rem 1.4rem; }
+.callout { border-radius: .85rem; padding: 1.1rem 1.4rem; border: 1px solid var(--line); border-left: 6px solid var(--blue); background: #eff6ff; }
+.callout h3 { margin-top: 0; }
+.callout p:last-child, .panel p:last-child { margin-bottom: 0; }
+.summary { border-left-color: var(--navy); background: #fff; font-size: 1.08rem; }
+.links { margin: 1rem 0 0; display: flex; gap: .6rem; flex-wrap: wrap; }
+.links a { padding: .45rem 1rem; border: 1px solid var(--line); border-radius: .6rem; background: var(--card); text-decoration: none; font-weight: 700; font-size: .92rem; }
+.links a:hover { border-color: var(--blue); }
+
+/* the results table */
+.verdict { display: flex; gap: 1.2rem; align-items: center; flex-wrap: wrap; margin-bottom: 1rem; }
+.verdict .reason { font-size: 1.1rem; flex: 1 1 340px; }
+.verdict .what { color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; font-weight: 600; margin-bottom: .3rem; }
+.note { color: var(--muted); font-size: .9rem; }
+.table-wrap { overflow-x: auto; border-radius: .85rem; border: 1px solid var(--line); background: var(--card); box-shadow: 0 1px 2px rgba(15,23,42,.04); margin: .8rem 0; }
+table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+.edd table { margin: .6rem 0; border: 1px solid var(--line); }
+thead th { background: var(--navy); color: #fff; padding: .8rem .6rem; text-align: left; font-weight: 700; font-size: .85rem; letter-spacing: .01em; }
+td { padding: .75rem .6rem; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.table-wrap tbody tr:last-child td { border-bottom: 0; }
+th.num, td.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+td.wrap { white-space: normal; min-width: 8.5rem; }
+tr.primary td { background: #fff7ed; }
+tr.primary td:first-child { font-weight: 800; }
+td .sub2 { color: var(--muted); font-size: .78rem; font-weight: 500; }
+td .sub { color: var(--muted); font-size: .75rem; font-weight: 500; text-transform: capitalize; }
+td.pos { color: #15803d; font-weight: 700; } td.neg { color: #b91c1c; font-weight: 700; } td.flat { color: var(--muted); font-weight: 600; } td.strong { font-weight: 800; }
+td .chip { font-size: .78rem; padding: .05rem .65rem; }
+
+.compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: .4rem; }
+.arm { border-radius: .85rem; padding: 1.15rem 1.4rem 1rem; border: 1px solid var(--line); display: flex; flex-direction: column; }
+.arm.control { background: #f1f5f9; border-left: 6px solid #94a3b8; }
+.arm.variant { background: #eff6ff; border-left: 6px solid var(--blue); }
+.arm .name { font-size: 1.3rem; font-weight: 800; margin-bottom: .3rem; }
+.arm p { margin: 0 0 .9rem; font-size: 1.03rem; flex: 1; }
+.arm .stats { display: flex; gap: 2rem; flex-wrap: wrap; border-top: 1px solid rgba(15,23,42,.1); padding-top: .75rem; }
+.arm .stats .k { color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; font-weight: 700; }
+.arm .stats .v { font-weight: 800; font-size: 1.1rem; }
+.arm .stats .v .lift { font-size: .9rem; margin-left: .35rem; } .lift.pos { color: #15803d; } .lift.neg { color: #b91c1c; } .lift.flat { color: var(--muted); }
+.checks { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; margin-top: 1rem; }
+.check { padding: 1rem 1.3rem; }
+.check .label { color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; margin-bottom: .45rem; }
+.check p { margin: .55rem 0 0; font-size: .93rem; color: #334155; }
+
+.charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 1rem; }
+.chart-card { padding: .9rem 1.1rem 1rem; min-width: 0; }
+.chart-card h3 { margin: 0 0 .5rem; font-size: 1rem; }
 .chart { width: 100%; }
-.decision { display: flex; align-items: center; gap: .8rem; background: var(--card); border: 1px solid var(--line); border-radius: .75rem; padding: 1rem 1.3rem; margin: 1rem 0; }
-.decision .big { font-size: 1.2rem; font-weight: 800; }
-details { background: var(--card); border: 1px solid var(--line); border-radius: .75rem; padding: .3rem 1.1rem; margin: .6rem 0; }
-summary { cursor: pointer; font-weight: 700; padding: .5rem 0; }
-.note { color: var(--muted); font-size: .88rem; }
-footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .85rem; }
+
+details { background: var(--card); border: 1px solid var(--line); border-radius: .85rem; padding: .2rem 1.3rem; margin: .65rem 0; }
+summary { cursor: pointer; font-weight: 700; padding: .65rem 0; }
+details > *:not(summary) { margin-bottom: 1rem; }
+
+/* the conclusion */
+.findings { list-style: none; margin: 0; padding: 0; background: var(--card); border: 1px solid var(--line); border-radius: .85rem; }
+.findings li { display: flex; gap: 1rem; padding: 1rem 1.3rem; border-bottom: 1px solid var(--line); }
+.findings li:last-child { border-bottom: 0; }
+.findings .n { flex: 0 0 2rem; height: 2rem; border-radius: 50%; background: var(--navy); color: #fff; font-weight: 800; display: grid; place-items: center; font-size: .9rem; margin-top: .1rem; }
+.findings .lead { font-weight: 800; }
+.decision { margin-top: 1.4rem; padding: 1.3rem 1.6rem; border-radius: .85rem; border: 1px solid; border-left-width: 6px; }
+.decision.green { background: #f0fdf4; border-color: var(--green-line); border-left-color: #22c55e; }
+.decision.red { background: #fef2f2; border-color: var(--red-line); border-left-color: #ef4444; }
+.decision.yellow { background: #fffbeb; border-color: var(--amber-line); border-left-color: #f59e0b; }
+.decision.grey { background: #f1f5f9; border-color: var(--grey-line); border-left-color: #64748b; }
+.decision .head { display: flex; align-items: center; gap: .9rem; flex-wrap: wrap; margin-bottom: .5rem; }
+.decision .title { font-size: 1.25rem; font-weight: 800; }
+.decision p { margin: .3rem 0; font-size: 1.04rem; }
+
+footer { margin-top: 3.5rem; padding-top: 1.1rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .85rem; }
 code { background: #eef2ff; padding: .05rem .35rem; border-radius: .3rem; font-size: .9em; }
-@media (max-width: 560px) { .charts { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+@media (max-width: 700px) { .compare { grid-template-columns: 1fr; } }
+@media (max-width: 600px) { .hero h1 { font-size: 1.8rem; } .charts { grid-template-columns: 1fr; } h2 { font-size: 1.4rem; } }
+@media print { .links { display: none; } .hero { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
 </style>
 </head>
 <body>
-<main>
-  <div class="eyebrow">Experiment results</div>
-  <h1>exp-002: Free Shipping Promo</h1>
-  <p class="question">Returning shoppers who get the promo email will be slightly more likely to buy.</p>
-
-  <div class="meta">
-    <div><div class="k">DS</div><div class="v">Priya (fictional)</div></div>
-    <div><div class="k">PM</div><div class="v">Sam Rivera (fictional)</div></div>
-    <div><div class="k">Date of report</div><div class="v">2026-10-04</div></div>
-    <div><div class="k">Experiment ID</div><div class="v">exp-002</div></div>
-    <div><div class="k">Period</div><div class="v">2026-09-01 to 2026-09-15 (15 days)</div></div>
-    <div><div class="k">Sample</div><div class="v">2,483 control / 2,517 variant</div></div>
-    <div><div class="k">Method</div><div class="v">Frequentist</div></div>
-    <div><div class="k">Decision</div><div class="v"><span class="chip yellow">Inconclusive</span></div></div>
+<header class="hero">
+  <div class="wrap">
+    <span class="tag">Experiment results</span>
+    <h1>exp-002: Free Shipping Promo</h1>
+    <p class="question">Returning shoppers who get the promo email will be slightly more likely to buy.</p>
+    <div class="meta">
+      <div><div class="k">DS</div><div class="v">Priya (fictional)</div></div>
+      <div><div class="k">PM</div><div class="v">Sam Rivera (fictional)</div></div>
+      <div><div class="k">Date of report</div><div class="v">2026-10-04</div></div>
+      <div><div class="k">Experiment ID</div><div class="v">exp-002</div></div>
+      <div><div class="k">Period</div><div class="v">2026-09-01 to 2026-09-15 (15 days)</div></div>
+      <div><div class="k">Sample</div><div class="v">2,483 control / 2,517 variant</div></div>
+      <div><div class="k">Method</div><div class="v">Frequentist</div></div>
+      <div><div class="k">Decision</div><div class="v"><span class="chip yellow">Inconclusive</span></div></div>
+    </div>
   </div>
+</header>
 
+<main class="wrap">
+  <div class="kicker">Summary</div>
   <h2>Executive summary</h2>
-  <div class="summary"><p>The promo email group converted at 5.60% against 4.55% for control (+1.05 pp, +23.1% relative), but the difference is not significant (p = 0.091). The test ran with 5,000 shoppers in total, about 2,483 per group. The plan needed about 175,000 per group to detect a 5% effect, so the test could not give a clear answer. This is "not enough data", not "no effect". We recommend rerunning with more traffic.</p></div>
-  <p class="links" style="margin-top:1rem">
-<a href="https://github.com/Himanshu2405/P2-Experiment-Platform/blob/main/experiments/exp-002/design.md">Design doc (EDD)</a><a href="results.json">Results data (JSON)</a><a href="https://github.com/Himanshu2405/P2-Experiment-Platform/blob/main/products/checkout.md">Product context</a>  </p>
+  <div class="callout summary"><p>The promo email group converted at 5.60% against 4.55% for control (+1.05 pp, +23.1% relative), but the difference is not significant (p = 0.091). The test ran with 5,000 shoppers in total, about 2,483 per group. The plan needed about 175,000 per group to detect a 5% effect, so the test could not give a clear answer. This is "not enough data", not "no effect". We recommend rerunning with more traffic.</p></div>
+  <div class="links">
+<a href="https://github.com/Himanshu2405/P2-Experiment-Platform/blob/main/experiments/exp-002/design.md">Design doc (EDD)</a><a href="results.json">Results data (JSON)</a><a href="https://github.com/Himanshu2405/P2-Experiment-Platform/blob/main/products/checkout.md">Product context</a>  </div>
 
-  <h2>Background</h2>
-  <h3>Overview</h3>
-  <p><strong>Change being tested:</strong> Send returning shoppers an email with a free-shipping promo code.</p>
+  <div class="kicker">Background</div>
+  <h2>What we tested and why</h2>
+  <div class="edd panel">
+    <h3 style="margin-top:0">Overview</h3>
+    <p><strong>Change being tested:</strong> Send returning shoppers an email with a free-shipping promo code.</p>
 <p><strong>Product hypothesis (TL;DR):</strong> Returning shoppers who get the promo email will be slightly more likely to buy.</p>
 <p><strong>Null hypothesis (TL;DR):</strong> The promo email makes no difference to the share of returning shoppers who buy.</p>
-  <h3>Problem and opportunity</h3>
-  <p><strong>Problem:</strong> Returning shoppers buy less often than we would expect from their past orders, and we do not nudge them between visits.</p>
+    <h3>Problem and opportunity</h3>
+    <p><strong>Problem:</strong> Returning shoppers buy less often than we would expect from their past orders, and we do not nudge them between visits.</p>
 <p><strong>Opportunity:</strong> A small, steady gain on a large group of returning shoppers is worth having.</p>
 <p><strong>Sizing:</strong> A 5% relative lift on a 3.5% conversion rate is about 0.18 percentage points. Across all returning shoppers in a month that is a few hundred extra orders.</p>
-  <h3>Hypothesis</h3>
-  <p><strong>Testable statement:</strong> If returning shoppers get a free-shipping promo email, then conversion will rise by at least 5% relative, because the promo gives them a reason to come back and finish a purchase.</p>
-  <h3>Evidence</h3>
-  <ul><li><strong>Related experiments:</strong> The free-shipping banner test (<code>demo-banner</code>) showed a large lift in the cart. A promo email is a much gentler nudge, so we expect a smaller effect.</li><li><strong>Other evidence:</strong> Past promo emails had steady but small effects.</li></ul>
+    <h3>Hypothesis</h3>
+    <p><strong>Testable statement:</strong> If returning shoppers get a free-shipping promo email, then conversion will rise by at least 5% relative, because the promo gives them a reason to come back and finish a purchase.</p>
+    <h3>Evidence</h3>
+    <ul><li><strong>Related experiments:</strong> The free-shipping banner test (<code>demo-banner</code>) showed a large lift in the cart. A promo email is a much gentler nudge, so we expect a smaller effect.</li><li><strong>Other evidence:</strong> Past promo emails had steady but small effects.</li></ul>
+  </div>
+  <h3 style="margin-top:1.6rem">Control and variant</h3>
+  <div class="compare">
+    <div class="arm control">
+      <div class="name">Control</div>
+      <p>No promo email.</p>
+      <div class="stats"><div><div class="k">Users</div><div class="v">2,483</div></div><div><div class="k">Conversion rate</div><div class="v">4.551%</div></div></div>
+    </div>
+    <div class="arm variant">
+      <div class="name">Variant</div>
+      <p>An email with the subject "Free shipping on your next order" and a promo code.</p>
+      <div class="stats"><div><div class="k">Users</div><div class="v">2,517</div></div><div><div class="k">Conversion rate</div><div class="v">5.602%<span class="lift pos">+23.1%</span></div></div></div>
+    </div>
+  </div>
 
-  <h2>Results</h2>
-  <div class="verdict">
+  <div class="kicker">Results</div>
+  <h2>Frequentist analysis</h2>
+  <div class="panel verdict">
     <div>
-      <div class="note">Verdict from the tool on Conversion rate</div>
-      <span class="chip grey">No significant difference</span>
+      <div class="what">Verdict from the tool on Conversion rate</div>
+      <span class="chip big grey">No significant difference</span>
     </div>
     <div class="reason">The difference could be chance (p = 0.091, above your alpha of 0.05).</div>
   </div>
-  <p class="note">Frequentist analysis on the full runtime. Rates are in percentage points (pp) and the lift is relative to control.</p>
-  <div class="table-wrap"><table>
-    <thead><tr><th>Metric</th><th>Role</th><th>Control</th><th>Variant</th><th>Lift</th><th>Difference</th><th>p-value</th><th>95% CI</th><th>Verdict</th></tr></thead>
+  <p class="note">On the full runtime. Rates are in percentage points (pp) and the lift is relative to control.</p>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Metric</th><th>Type</th><th class="num">Control</th><th class="num">Variant</th><th class="num">Lift</th><th class="num">Difference</th><th class="num">p-value</th><th class="num">95% CI</th><th>Verdict</th></tr></thead>
     <tbody>
       <tr class="primary">
-        <td>Conversion rate</td>
-        <td>Primary</td>
-        <td>4.551%</td>
-        <td>5.602%</td>
-        <td>+23.1%</td>
-        <td>+1.051 pp</td>
-        <td>0.091</td>
-        <td>-0.165 pp to +2.267 pp</td>
+        <td>Conversion rate<br><span class="sub">rate</span></td>
+        <td><span class="chip star">Primary &#9733;</span></td>
+        <td class="num ">4.551%</td>
+        <td class="num ">5.602%</td>
+        <td class="num pos">+23.1%</td>
+        <td class="num ">+1.051 pp</td>
+        <td class="num strong">0.091</td>
+        <td class="num wrap ">-0.165 pp to +2.267 pp</td>
         <td><span class="chip grey">No significant difference</span></td>
       </tr>
       <tr>
-        <td>Paid revenue per user</td>
-        <td>Guardrail</td>
-        <td>1.491</td>
-        <td>1.449</td>
-        <td>-2.8%</td>
-        <td>-0.041</td>
-        <td>0.331</td>
-        <td>-0.463 to +0.381 (90%)</td>
+        <td>Paid revenue per user<br><span class="sub">continuous</span></td>
+        <td><span class="chip red">Guardrail</span></td>
+        <td class="num ">1.491</td>
+        <td class="num ">1.449</td>
+        <td class="num neg">-2.8%</td>
+        <td class="num ">-0.041</td>
+        <td class="num strong">0.331</td>
+        <td class="num wrap ">-0.463 to +0.381 (90%)</td>
         <td><span class="chip yellow">Inconclusive</span></td>
       </tr>
       <tr>
-        <td>Activation rate</td>
-        <td>Secondary</td>
-        <td>28.232%</td>
-        <td>27.573%</td>
-        <td>-2.3%</td>
-        <td>-0.659 pp</td>
-        <td>0.603</td>
-        <td>-3.146 pp to +1.827 pp</td>
+        <td>Activation rate<br><span class="sub">rate</span></td>
+        <td><span class="chip grey">Secondary</span></td>
+        <td class="num ">28.232%</td>
+        <td class="num ">27.573%</td>
+        <td class="num neg">-2.3%</td>
+        <td class="num ">-0.659 pp</td>
+        <td class="num strong">0.603</td>
+        <td class="num wrap ">-3.146 pp to +1.827 pp</td>
         <td><span class="chip grey">Neutral</span></td>
       </tr>
       <tr>
-        <td>Bounce rate</td>
-        <td>Secondary</td>
-        <td>2.336%</td>
-        <td>2.702%</td>
-        <td>+15.7%</td>
-        <td>+0.366 pp</td>
-        <td>0.409</td>
-        <td>-0.503 pp to +1.234 pp</td>
+        <td>Bounce rate<br><span class="sub">rate</span></td>
+        <td><span class="chip grey">Secondary</span></td>
+        <td class="num ">2.336%</td>
+        <td class="num ">2.702%</td>
+        <td class="num neg">+15.7%</td>
+        <td class="num ">+0.366 pp</td>
+        <td class="num strong">0.409</td>
+        <td class="num wrap ">-0.503 pp to +1.234 pp</td>
         <td><span class="chip grey">Neutral</span></td>
       </tr>
       <tr>
-        <td>Emails per user</td>
-        <td>Secondary</td>
-        <td>2.087</td>
-        <td>2.036</td>
-        <td>-2.4%</td>
-        <td>-0.051</td>
-        <td>0.088</td>
-        <td>-0.109 to +0.008</td>
+        <td>Emails per user<br><span class="sub">continuous</span></td>
+        <td><span class="chip grey">Secondary</span></td>
+        <td class="num ">2.087</td>
+        <td class="num ">2.036</td>
+        <td class="num neg">-2.4%</td>
+        <td class="num ">-0.051</td>
+        <td class="num strong">0.088</td>
+        <td class="num wrap ">-0.109 to +0.008</td>
         <td><span class="chip grey">Neutral</span></td>
       </tr>
     </tbody>
-  </table></div>
-<h3>Notes on the results</h3><p>The observed lift (+23.1%) is much larger than the 5% we planned for, but with this few shoppers a gap this size can easily appear by chance. If the true effect were as large as what we saw, about 6,800 shoppers per group would be enough to detect it. A 5% effect would still need about 175,000 per group.</p>
+  </table>
+  </div>
+<div class="callout" style="margin-top:1rem"><h3>Notes on the results</h3><p>The observed lift (+23.1%) is much larger than the 5% we planned for, but with this few shoppers a gap this size can easily appear by chance. If the true effect were as large as what we saw, about 6,800 shoppers per group would be enough to detect it. A 5% effect would still need about 175,000 per group.</p></div>
   <div class="checks">
-    <div class="card">
+    <div class="card check">
       <div class="label">Balance check</div>
-      <span class="chip green">Balanced</span>
+      <span class="chip big green">Balanced</span>
       <p>Chi-square p = 63.06%.
 Users are split evenly between control and variant (2,483 and 2,517).
 </p>
     </div>
-    <div class="card">
+    <div class="card check">
       <div class="label">Placebo A/A check</div>
-      <span class="chip green">Passed</span>
+      <span class="chip big green">Passed</span>
       <p>The test behaves correctly on your data. In 200 random splits of your control users into two identical groups of 2,483, the test found a difference 7.0% of the time (expected about 5%, normal range 1.5% to 9.5%).</p>
     </div>
   </div>
 
-  <h2>Charts for Conversion rate</h2>
+  <div class="kicker">Charts</div>
+  <h2>Conversion rate over time</h2>
   <div class="charts">
-    <div class="chart-card"><h3>Control and variant over time</h3><div class="chart" id="chart-time"></div></div>
-    <div class="chart-card"><h3>Difference over time, with its 95% range</h3><div class="chart" id="chart-difference"></div></div>
+    <div class="card chart-card"><h3>Control and variant over time</h3><div class="chart" id="chart-time"></div></div>
+    <div class="card chart-card"><h3>Difference over time, with its 95% range</h3><div class="chart" id="chart-difference"></div></div>
   </div>
   <p class="note">Charts are drawn from the tool's own chart definitions, so they match the tool exactly.</p>
 
-  <h2>Experiment design</h2>
+  <div class="kicker">Design</div>
+  <h2>How the test was set up</h2>
   <p class="note">From the design doc written before launch.</p>
+  <div class="edd">
   <details open><summary>Audience</summary><ul><li><strong>Who is in:</strong> Returning shoppers with at least one past order.</li><li><strong>Where they enter:</strong> The day the promo email is sent or withheld.</li><li><strong>Split:</strong> 50 / 50.</li><li><strong>Sample size:</strong> About 175,000 shoppers per group (about 350,000 in total), for 80% power at a 5% two-sided significance level and a 5% relative effect. This is a large number. If traffic in the window is lower, the test will not be able to detect an effect this small.</li></ul></details>
   <details open><summary>Metrics</summary><h3>Primary</h3>
 <table><thead><tr><th>Metric</th><th>Baseline</th><th>Minimum detectable effect</th></tr></thead><tbody><tr><td>Conversion rate</td><td>3.5%</td><td>+5% relative (+0.18 percentage points)</td></tr></tbody></table>
@@ -193,14 +282,22 @@ Users are split evenly between control and variant (2,483 and 2,517).
 <p><strong>Do not ship if:</strong> The primary metric shows a significant decline, or the revenue guardrail fails.</p>
 <p><strong>Otherwise:</strong> If the result is unclear, check whether the test reached its planned sample. If it did not, the answer is "not enough data", not "no effect", and we rerun with more traffic.</p></details>
   <details ><summary>Kill switch</summary><p>Stop the test if the balance check shows a broken split.</p></details>
-  <details ><summary>Visible changes</summary><p><strong>Control:</strong> No promo email.</p>
-<p><strong>Variant:</strong> An email with the subject "Free shipping on your next order" and a promo code.</p></details>
   <details ><summary>Risks and dependencies</summary><ul><li><strong>Risks:</strong> The effect we want to detect is small, so the test needs a lot of users. If eligible traffic in the window is far below the sample size needed, the result will be unclear. The promo could also pull orders forward without adding new ones, which the revenue guardrail would show.</li><li><strong>Dependencies:</strong> The email team schedules the send on day one.</li></ul></details>
+  </div>
 
-  <h2>Conclusion</h2>
-  <div class="decision"><span class="big">Decision</span><span class="chip yellow">Inconclusive</span></div>
-<h3>Key findings</h3><ul><li><strong>Primary metric:</strong> conversion rate 4.55% to 5.60%, p = 0.091. The 95% interval for the difference runs from -0.17 pp to +2.27 pp, so it includes both no effect and a large gain.</li><li><strong>The sample was far below the plan:</strong> about 2,483 per group against about 175,000 needed for a 5% effect.</li><li><strong>Guardrail inconclusive:</strong> paid revenue per user went from $1.49 to $1.45 (-2.8%, p = 0.33). We cannot rule out a small drop.</li><li><strong>Secondary metrics:</strong> nothing moved clearly. Emails per user was the closest (p = 0.088, down 2.4%).</li><li><strong>Checks passed:</strong> the split was balanced (p = 63.1%) and the placebo A/A check found a false difference 7.0% of the time, inside the normal range.</li></ul>  <h3>Recommendation</h3>
-  <p>Do not ship or drop the promo on this evidence. Rerun the test with a larger audience and a longer window, or send the promo to a bigger group, and agree the sample size with the PM before launch. Keep the revenue guardrail.</p>
+  <div class="kicker">Conclusion</div>
+  <h2>Summary and recommendation</h2>
+  <ol class="findings">
+    <li><span class="n">1</span><div><span class="lead">Primary metric:</span> conversion rate 4.55% to 5.60%, p = 0.091. The 95% interval for the difference runs from -0.17 pp to +2.27 pp, so it includes both no effect and a large gain.</div></li>
+    <li><span class="n">2</span><div><span class="lead">The sample was far below the plan:</span> about 2,483 per group against about 175,000 needed for a 5% effect.</div></li>
+    <li><span class="n">3</span><div><span class="lead">Guardrail inconclusive:</span> paid revenue per user went from $1.49 to $1.45 (-2.8%, p = 0.33). We cannot rule out a small drop.</div></li>
+    <li><span class="n">4</span><div><span class="lead">Secondary metrics:</span> nothing moved clearly. Emails per user was the closest (p = 0.088, down 2.4%).</div></li>
+    <li><span class="n">5</span><div><span class="lead">Checks passed:</span> the split was balanced (p = 63.1%) and the placebo A/A check found a false difference 7.0% of the time, inside the normal range.</div></li>
+  </ol>
+  <div class="decision yellow">
+    <div class="head"><span class="chip big yellow">Inconclusive</span><span class="title">Not enough data to decide</span></div>
+    <p>Do not ship or drop the promo on this evidence. Rerun the test with a larger audience and a longer window, or send the promo to a bigger group, and agree the sample size with the PM before launch. Keep the revenue guardrail.</p>
+  </div>
 
   <footer>Synthetic demo data. Results exported from the experiment tool on 2026-10-04. Part of the P2 Experiment Platform demo.</footer>
 </main>

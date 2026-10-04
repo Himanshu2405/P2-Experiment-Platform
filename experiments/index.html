@@ -5,29 +5,35 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Experiment results</title>
 <style>
-:root { --ink: #0f172a; --muted: #64748b; --line: #e2e8f0; --bg: #f8fafc; --blue: #2563eb; }
-body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-main { max-width: 860px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
-.eyebrow { color: var(--blue); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; font-size: .8rem; }
-h1 { margin: .3rem 0 .4rem; }
-.lead { color: #334155; }
-a.card { display: block; background: #fff; border: 1px solid var(--line); border-radius: .75rem; padding: 1rem 1.2rem; margin: .8rem 0; color: inherit; text-decoration: none; }
-a.card:hover { border-color: var(--blue); }
+:root { --navy: #1a1b2e; --navy-2: #26274a; --ink: #0f172a; --muted: #64748b; --line: #e2e8f0; --bg: #f8fafc; --blue: #2563eb; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.65 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 980px; margin: 0 auto; padding: 0 1.5rem; }
+.hero { background: linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 100%); color: #fff; padding: 2.6rem 0 2.4rem; }
+.tag { display: inline-block; background: #fde047; color: var(--navy); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; font-size: .78rem; padding: .35rem .8rem; border-radius: .4rem; }
+.hero h1 { font-size: 2.5rem; line-height: 1.15; margin: 1rem 0 .7rem; }
+.lead { font-size: 1.12rem; color: #b6bdd6; max-width: 46rem; margin: 0; }
+main { padding: 2rem 0 4rem; }
+a.card { display: block; background: #fff; border: 1px solid var(--line); border-radius: .85rem; padding: 1.15rem 1.4rem; margin: .9rem 0; color: inherit; text-decoration: none; box-shadow: 0 1px 2px rgba(15,23,42,.04); }
+a.card:hover { border-color: var(--blue); box-shadow: 0 4px 14px rgba(37,99,235,.12); }
 .row { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
-.title { font-weight: 700; font-size: 1.1rem; }
-.sub { color: var(--muted); font-size: .9rem; }
-.chip { display: inline-block; padding: .08rem .7rem; border-radius: 999px; font-size: .85rem; font-weight: 700; border: 1px solid; white-space: nowrap; }
-.chip.green { color: #16a34a; background: #dcfce7; border-color: #86efac; }
-.chip.red { color: #dc2626; background: #fee2e2; border-color: #fca5a5; }
-.chip.yellow { color: #b7791f; background: #fef3c7; border-color: #fcd34d; }
-.chip.grey { color: #64748b; background: #e2e8f0; border-color: #cbd5e1; }
+.title { font-weight: 800; font-size: 1.15rem; }
+.sub { color: var(--muted); font-size: .95rem; margin-top: .2rem; }
+.chip { display: inline-block; padding: .1rem .85rem; border-radius: 999px; font-size: .88rem; font-weight: 700; border: 1px solid; white-space: nowrap; }
+.chip.green { color: #15803d; background: #dcfce7; border-color: #86efac; }
+.chip.red { color: #b91c1c; background: #fee2e2; border-color: #fca5a5; }
+.chip.yellow { color: #92400e; background: #fef3c7; border-color: #fcd34d; }
+.chip.grey { color: #475569; background: #e2e8f0; border-color: #cbd5e1; }
+@media (max-width: 600px) { .hero h1 { font-size: 1.8rem; } }
 </style>
 </head>
 <body>
-<main>
-  <div class="eyebrow">P2 Experiment Platform</div>
+<header class="hero"><div class="wrap">
+  <span class="tag">P2 Experiment Platform</span>
   <h1>Experiment results</h1>
   <p class="lead">One page per experiment: why we tested, what we found and what we decided. Each page combines the design doc, the numbers from the tool and the data scientist's conclusion. All data is synthetic.</p>
+</div></header>
+<main class="wrap">
   <a class="card" href="demo-banner/index.html">
     <div class="row"><span class="title">demo-banner: Free-shipping banner</span><span class="chip green">Ship</span></div>
     <div class="sub">Frequentist analysis. Shoppers who see the free-shipping banner will complete more purchases.</div>

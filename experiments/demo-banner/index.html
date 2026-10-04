@@ -5,172 +5,261 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>demo-banner: Free-shipping banner | Experiment results</title>
 <style>
-:root { --ink: #0f172a; --muted: #64748b; --line: #e2e8f0; --bg: #f8fafc; --card: #ffffff; --blue: #2563eb;
-        --green: #16a34a; --green-bg: #dcfce7; --red: #dc2626; --red-bg: #fee2e2; --yellow: #b7791f; --yellow-bg: #fef3c7; --grey: #64748b; --grey-bg: #e2e8f0; }
+:root { --navy: #1a1b2e; --navy-2: #26274a; --ink: #0f172a; --muted: #64748b; --line: #e2e8f0; --bg: #f8fafc; --card: #ffffff; --blue: #2563eb; --yellow: #fde047;
+        --green: #15803d; --green-bg: #dcfce7; --green-line: #86efac; --red: #b91c1c; --red-bg: #fee2e2; --red-line: #fca5a5;
+        --amber: #92400e; --amber-bg: #fef3c7; --amber-line: #fcd34d; --grey: #475569; --grey-bg: #e2e8f0; --grey-line: #cbd5e1; }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-main { max-width: 1200px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
-.eyebrow { color: var(--blue); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; font-size: .8rem; }
-h1 { font-size: 2rem; line-height: 1.2; margin: .3rem 0 .5rem; }
-h2 { font-size: 1.35rem; margin: 2.4rem 0 .8rem; padding-bottom: .4rem; border-bottom: 2px solid var(--line); }
-h3 { font-size: 1.05rem; margin: 1.3rem 0 .4rem; }
-.question { font-size: 1.1rem; color: #334155; margin: 0 0 1.4rem; }
-.meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: .7rem; }
-.meta > div, .card { background: var(--card); border: 1px solid var(--line); border-radius: .75rem; padding: .7rem .95rem; }
-.meta .k { color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; }
-.meta .v { font-weight: 600; }
-.chip { display: inline-block; padding: .08rem .7rem; border-radius: 999px; font-size: .85rem; font-weight: 700; border: 1px solid; white-space: nowrap; }
-.chip.green { color: var(--green); background: var(--green-bg); border-color: #86efac; }
-.chip.red { color: var(--red); background: var(--red-bg); border-color: #fca5a5; }
-.chip.yellow { color: var(--yellow); background: var(--yellow-bg); border-color: #fcd34d; }
-.chip.grey { color: var(--grey); background: var(--grey-bg); border-color: #cbd5e1; }
-.summary { background: var(--card); border: 1px solid var(--line); border-left: 5px solid var(--blue); border-radius: .75rem; padding: 1rem 1.3rem; }
-.summary p:last-child { margin-bottom: 0; }
-.links a { display: inline-block; margin: 0 .5rem .4rem 0; padding: .3rem .8rem; border: 1px solid var(--line); border-radius: .5rem; background: var(--card); color: var(--blue); text-decoration: none; font-weight: 600; font-size: .92rem; }
-table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--line); border-radius: .6rem; font-size: .88rem; margin: .6rem 0; }
-.table-wrap { overflow-x: auto; }
-th, td { padding: .5rem .6rem; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
-th { background: #eef2ff; font-size: .8rem; text-transform: uppercase; letter-spacing: .03em; color: #334155; }
-tr.primary td { font-weight: 600; background: #f8fafc; }
-.checks { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: .8rem; margin-top: 1rem; }
-.checks .card p { margin: .4rem 0 0; font-size: .92rem; color: #334155; }
-.checks .label { color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; }
-.verdict { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; background: var(--card); border: 1px solid var(--line); border-radius: .75rem; padding: 1rem 1.2rem; margin-bottom: 1rem; }
-.verdict .reason { font-size: 1.05rem; flex: 1 1 320px; }
-.charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(440px, 1fr)); gap: 1rem; }
-.chart-card { background: var(--card); border: 1px solid var(--line); border-radius: .75rem; padding: .8rem 1rem; min-width: 0; }
-.chart-card h3 { margin: 0 0 .4rem; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.65 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+
+/* the dark header band */
+.hero { background: linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 100%); color: #fff; padding: 2.4rem 0 2.2rem; }
+.tag { display: inline-block; background: var(--yellow); color: var(--navy); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; font-size: .78rem; padding: .35rem .8rem; border-radius: .4rem; }
+.hero h1 { font-size: 2.5rem; line-height: 1.15; margin: 1rem 0 .7rem; letter-spacing: -.01em; }
+.question { font-size: 1.15rem; color: #b6bdd6; max-width: 62rem; margin: 0 0 1.8rem; }
+.meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1.1rem 1.8rem; border-top: 1px solid rgba(255,255,255,.14); padding-top: 1.4rem; }
+.meta .k { color: #8b93b3; font-size: .72rem; letter-spacing: .09em; text-transform: uppercase; font-weight: 600; }
+.meta .v { font-size: 1.05rem; font-weight: 600; margin-top: .15rem; }
+
+main.wrap { padding-bottom: 4rem; }
+.kicker { color: var(--blue); font-weight: 800; letter-spacing: .1em; text-transform: uppercase; font-size: .78rem; margin: 3rem 0 .15rem; }
+h2 { font-size: 1.7rem; line-height: 1.25; margin: 0 0 1rem; letter-spacing: -.01em; }
+h3 { font-size: 1.05rem; margin: 1.4rem 0 .35rem; color: #1e293b; }
+p { margin: .5rem 0 .8rem; }
+a { color: var(--blue); }
+
+/* chips */
+.chip { display: inline-block; padding: .1rem .75rem; border-radius: 999px; font-size: .85rem; font-weight: 700; border: 1px solid; white-space: nowrap; line-height: 1.5; }
+.chip.green { color: var(--green); background: var(--green-bg); border-color: var(--green-line); }
+.chip.red { color: var(--red); background: var(--red-bg); border-color: var(--red-line); }
+.chip.yellow { color: var(--amber); background: var(--amber-bg); border-color: var(--amber-line); }
+.chip.grey { color: var(--grey); background: var(--grey-bg); border-color: var(--grey-line); }
+.chip.star { color: #713f12; background: #fde047; border-color: #facc15; }
+.chip.big { font-size: 1.05rem; padding: .2rem 1rem; }
+
+/* cards and callouts */
+.card, .panel { background: var(--card); border: 1px solid var(--line); border-radius: .85rem; box-shadow: 0 1px 2px rgba(15,23,42,.04); }
+.panel { padding: 1.1rem 1.4rem; }
+.callout { border-radius: .85rem; padding: 1.1rem 1.4rem; border: 1px solid var(--line); border-left: 6px solid var(--blue); background: #eff6ff; }
+.callout h3 { margin-top: 0; }
+.callout p:last-child, .panel p:last-child { margin-bottom: 0; }
+.summary { border-left-color: var(--navy); background: #fff; font-size: 1.08rem; }
+.links { margin: 1rem 0 0; display: flex; gap: .6rem; flex-wrap: wrap; }
+.links a { padding: .45rem 1rem; border: 1px solid var(--line); border-radius: .6rem; background: var(--card); text-decoration: none; font-weight: 700; font-size: .92rem; }
+.links a:hover { border-color: var(--blue); }
+
+/* the results table */
+.verdict { display: flex; gap: 1.2rem; align-items: center; flex-wrap: wrap; margin-bottom: 1rem; }
+.verdict .reason { font-size: 1.1rem; flex: 1 1 340px; }
+.verdict .what { color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; font-weight: 600; margin-bottom: .3rem; }
+.note { color: var(--muted); font-size: .9rem; }
+.table-wrap { overflow-x: auto; border-radius: .85rem; border: 1px solid var(--line); background: var(--card); box-shadow: 0 1px 2px rgba(15,23,42,.04); margin: .8rem 0; }
+table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+.edd table { margin: .6rem 0; border: 1px solid var(--line); }
+thead th { background: var(--navy); color: #fff; padding: .8rem .6rem; text-align: left; font-weight: 700; font-size: .85rem; letter-spacing: .01em; }
+td { padding: .75rem .6rem; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.table-wrap tbody tr:last-child td { border-bottom: 0; }
+th.num, td.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+td.wrap { white-space: normal; min-width: 8.5rem; }
+tr.primary td { background: #fff7ed; }
+tr.primary td:first-child { font-weight: 800; }
+td .sub2 { color: var(--muted); font-size: .78rem; font-weight: 500; }
+td .sub { color: var(--muted); font-size: .75rem; font-weight: 500; text-transform: capitalize; }
+td.pos { color: #15803d; font-weight: 700; } td.neg { color: #b91c1c; font-weight: 700; } td.flat { color: var(--muted); font-weight: 600; } td.strong { font-weight: 800; }
+td .chip { font-size: .78rem; padding: .05rem .65rem; }
+
+.compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: .4rem; }
+.arm { border-radius: .85rem; padding: 1.15rem 1.4rem 1rem; border: 1px solid var(--line); display: flex; flex-direction: column; }
+.arm.control { background: #f1f5f9; border-left: 6px solid #94a3b8; }
+.arm.variant { background: #eff6ff; border-left: 6px solid var(--blue); }
+.arm .name { font-size: 1.3rem; font-weight: 800; margin-bottom: .3rem; }
+.arm p { margin: 0 0 .9rem; font-size: 1.03rem; flex: 1; }
+.arm .stats { display: flex; gap: 2rem; flex-wrap: wrap; border-top: 1px solid rgba(15,23,42,.1); padding-top: .75rem; }
+.arm .stats .k { color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; font-weight: 700; }
+.arm .stats .v { font-weight: 800; font-size: 1.1rem; }
+.arm .stats .v .lift { font-size: .9rem; margin-left: .35rem; } .lift.pos { color: #15803d; } .lift.neg { color: #b91c1c; } .lift.flat { color: var(--muted); }
+.checks { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; margin-top: 1rem; }
+.check { padding: 1rem 1.3rem; }
+.check .label { color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; margin-bottom: .45rem; }
+.check p { margin: .55rem 0 0; font-size: .93rem; color: #334155; }
+
+.charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 1rem; }
+.chart-card { padding: .9rem 1.1rem 1rem; min-width: 0; }
+.chart-card h3 { margin: 0 0 .5rem; font-size: 1rem; }
 .chart { width: 100%; }
-.decision { display: flex; align-items: center; gap: .8rem; background: var(--card); border: 1px solid var(--line); border-radius: .75rem; padding: 1rem 1.3rem; margin: 1rem 0; }
-.decision .big { font-size: 1.2rem; font-weight: 800; }
-details { background: var(--card); border: 1px solid var(--line); border-radius: .75rem; padding: .3rem 1.1rem; margin: .6rem 0; }
-summary { cursor: pointer; font-weight: 700; padding: .5rem 0; }
-.note { color: var(--muted); font-size: .88rem; }
-footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .85rem; }
+
+details { background: var(--card); border: 1px solid var(--line); border-radius: .85rem; padding: .2rem 1.3rem; margin: .65rem 0; }
+summary { cursor: pointer; font-weight: 700; padding: .65rem 0; }
+details > *:not(summary) { margin-bottom: 1rem; }
+
+/* the conclusion */
+.findings { list-style: none; margin: 0; padding: 0; background: var(--card); border: 1px solid var(--line); border-radius: .85rem; }
+.findings li { display: flex; gap: 1rem; padding: 1rem 1.3rem; border-bottom: 1px solid var(--line); }
+.findings li:last-child { border-bottom: 0; }
+.findings .n { flex: 0 0 2rem; height: 2rem; border-radius: 50%; background: var(--navy); color: #fff; font-weight: 800; display: grid; place-items: center; font-size: .9rem; margin-top: .1rem; }
+.findings .lead { font-weight: 800; }
+.decision { margin-top: 1.4rem; padding: 1.3rem 1.6rem; border-radius: .85rem; border: 1px solid; border-left-width: 6px; }
+.decision.green { background: #f0fdf4; border-color: var(--green-line); border-left-color: #22c55e; }
+.decision.red { background: #fef2f2; border-color: var(--red-line); border-left-color: #ef4444; }
+.decision.yellow { background: #fffbeb; border-color: var(--amber-line); border-left-color: #f59e0b; }
+.decision.grey { background: #f1f5f9; border-color: var(--grey-line); border-left-color: #64748b; }
+.decision .head { display: flex; align-items: center; gap: .9rem; flex-wrap: wrap; margin-bottom: .5rem; }
+.decision .title { font-size: 1.25rem; font-weight: 800; }
+.decision p { margin: .3rem 0; font-size: 1.04rem; }
+
+footer { margin-top: 3.5rem; padding-top: 1.1rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .85rem; }
 code { background: #eef2ff; padding: .05rem .35rem; border-radius: .3rem; font-size: .9em; }
-@media (max-width: 560px) { .charts { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+@media (max-width: 700px) { .compare { grid-template-columns: 1fr; } }
+@media (max-width: 600px) { .hero h1 { font-size: 1.8rem; } .charts { grid-template-columns: 1fr; } h2 { font-size: 1.4rem; } }
+@media print { .links { display: none; } .hero { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
 </style>
 </head>
 <body>
-<main>
-  <div class="eyebrow">Experiment results</div>
-  <h1>demo-banner: Free-shipping banner</h1>
-  <p class="question">Shoppers who see the free-shipping banner will complete more purchases.</p>
-
-  <div class="meta">
-    <div><div class="k">DS</div><div class="v">Priya (fictional)</div></div>
-    <div><div class="k">PM</div><div class="v">Sam Rivera (fictional)</div></div>
-    <div><div class="k">Date of report</div><div class="v">2026-10-04</div></div>
-    <div><div class="k">Experiment ID</div><div class="v">demo-banner</div></div>
-    <div><div class="k">Period</div><div class="v">2026-01-01 to 2026-01-14 (14 days)</div></div>
-    <div><div class="k">Sample</div><div class="v">9,908 control / 10,092 variant</div></div>
-    <div><div class="k">Method</div><div class="v">Frequentist</div></div>
-    <div><div class="k">Decision</div><div class="v"><span class="chip green">Ship</span></div></div>
+<header class="hero">
+  <div class="wrap">
+    <span class="tag">Experiment results</span>
+    <h1>demo-banner: Free-shipping banner</h1>
+    <p class="question">Shoppers who see the free-shipping banner will complete more purchases.</p>
+    <div class="meta">
+      <div><div class="k">DS</div><div class="v">Priya (fictional)</div></div>
+      <div><div class="k">PM</div><div class="v">Sam Rivera (fictional)</div></div>
+      <div><div class="k">Date of report</div><div class="v">2026-10-04</div></div>
+      <div><div class="k">Experiment ID</div><div class="v">demo-banner</div></div>
+      <div><div class="k">Period</div><div class="v">2026-01-01 to 2026-01-14 (14 days)</div></div>
+      <div><div class="k">Sample</div><div class="v">9,908 control / 10,092 variant</div></div>
+      <div><div class="k">Method</div><div class="v">Frequentist</div></div>
+      <div><div class="k">Decision</div><div class="v"><span class="chip green">Ship</span></div></div>
+    </div>
   </div>
+</header>
 
+<main class="wrap">
+  <div class="kicker">Summary</div>
   <h2>Executive summary</h2>
-  <div class="summary"><p>The free-shipping banner raised the conversion rate from 4.30% to 5.60% (+1.30 pp, +30.2% relative), a significant improvement (p &lt; 0.001). The refund guardrail passed, the split was balanced and the placebo A/A check passed. We recommend shipping the banner to all shoppers with items in the cart.</p></div>
-  <p class="links" style="margin-top:1rem">
-<a href="https://github.com/Himanshu2405/P2-Experiment-Platform/blob/main/experiments/demo-banner/design.md">Design doc (EDD)</a><a href="results.json">Results data (JSON)</a><a href="https://github.com/Himanshu2405/P2-Experiment-Platform/blob/main/products/checkout.md">Product context</a>  </p>
+  <div class="callout summary"><p>The free-shipping banner raised the conversion rate from 4.30% to 5.60% (+1.30 pp, +30.2% relative), a significant improvement (p &lt; 0.001). The refund guardrail passed, the split was balanced and the placebo A/A check passed. We recommend shipping the banner to all shoppers with items in the cart.</p></div>
+  <div class="links">
+<a href="https://github.com/Himanshu2405/P2-Experiment-Platform/blob/main/experiments/demo-banner/design.md">Design doc (EDD)</a><a href="results.json">Results data (JSON)</a><a href="https://github.com/Himanshu2405/P2-Experiment-Platform/blob/main/products/checkout.md">Product context</a>  </div>
 
-  <h2>Background</h2>
-  <h3>Overview</h3>
-  <p><strong>Change being tested:</strong> Show a "Free shipping on orders over $50" banner above the product list for shoppers who have items in the cart.</p>
+  <div class="kicker">Background</div>
+  <h2>What we tested and why</h2>
+  <div class="edd panel">
+    <h3 style="margin-top:0">Overview</h3>
+    <p><strong>Change being tested:</strong> Show a "Free shipping on orders over $50" banner above the product list for shoppers who have items in the cart.</p>
 <p><strong>Product hypothesis (TL;DR):</strong> Shoppers who see the free-shipping banner will complete more purchases.</p>
 <p><strong>Null hypothesis (TL;DR):</strong> The banner makes no difference to the share of shoppers who complete a purchase.</p>
-  <h3>Problem and opportunity</h3>
-  <p><strong>Problem:</strong> Many shoppers add items to the cart and leave. Exit surveys say shipping cost is the most common reason, but the shipping offer is only shown at the last step.</p>
+    <h3>Problem and opportunity</h3>
+    <p><strong>Problem:</strong> Many shoppers add items to the cart and leave. Exit surveys say shipping cost is the most common reason, but the shipping offer is only shown at the last step.</p>
 <p><strong>Opportunity:</strong> Showing the offer earlier could win back some of those shoppers.</p>
 <p><strong>Sizing:</strong> About 20,000 shoppers reach the cart every two weeks. At a 3.7% conversion rate that is about 740 orders. A 30% relative lift is about 220 more orders every two weeks.</p>
-  <h3>Hypothesis</h3>
-  <p><strong>Testable statement:</strong> If shoppers see the free-shipping offer in the cart, then the conversion rate will rise by at least 30% relative, because the cost they worry about is shown before they decide to leave.</p>
-  <h3>Evidence</h3>
-  <ul><li><strong>Related experiments:</strong> None on this surface. An earlier test of a trust badge at checkout moved conversion by a small amount, so a stronger offer is worth testing.</li><li><strong>Other evidence:</strong> Exit survey: about one in three shoppers who leave the cart name shipping cost.</li></ul>
+    <h3>Hypothesis</h3>
+    <p><strong>Testable statement:</strong> If shoppers see the free-shipping offer in the cart, then the conversion rate will rise by at least 30% relative, because the cost they worry about is shown before they decide to leave.</p>
+    <h3>Evidence</h3>
+    <ul><li><strong>Related experiments:</strong> None on this surface. An earlier test of a trust badge at checkout moved conversion by a small amount, so a stronger offer is worth testing.</li><li><strong>Other evidence:</strong> Exit survey: about one in three shoppers who leave the cart name shipping cost.</li></ul>
+  </div>
+  <h3 style="margin-top:1.6rem">Control and variant</h3>
+  <div class="compare">
+    <div class="arm control">
+      <div class="name">Control</div>
+      <p>The cart page with no shipping message until the final step.</p>
+      <div class="stats"><div><div class="k">Users</div><div class="v">9,908</div></div><div><div class="k">Conversion rate</div><div class="v">4.300%</div></div></div>
+    </div>
+    <div class="arm variant">
+      <div class="name">Variant</div>
+      <p>The same cart page with a green "Free shipping on orders over $50" banner above the product list.</p>
+      <div class="stats"><div><div class="k">Users</div><div class="v">10,092</div></div><div><div class="k">Conversion rate</div><div class="v">5.598%<span class="lift pos">+30.2%</span></div></div></div>
+    </div>
+  </div>
 
-  <h2>Results</h2>
-  <div class="verdict">
+  <div class="kicker">Results</div>
+  <h2>Frequentist analysis</h2>
+  <div class="panel verdict">
     <div>
-      <div class="note">Verdict from the tool on Conversion rate</div>
-      <span class="chip green">Significant improvement</span>
+      <div class="what">Verdict from the tool on Conversion rate</div>
+      <span class="chip big green">Significant improvement</span>
     </div>
     <div class="reason">The lift is real, not chance (p &lt; 0.001, below your alpha of 0.05).</div>
   </div>
-  <p class="note">Frequentist analysis on the full runtime. Rates are in percentage points (pp) and the lift is relative to control.</p>
-  <div class="table-wrap"><table>
-    <thead><tr><th>Metric</th><th>Role</th><th>Control</th><th>Variant</th><th>Lift</th><th>Difference</th><th>p-value</th><th>95% CI</th><th>Verdict</th></tr></thead>
+  <p class="note">On the full runtime. Rates are in percentage points (pp) and the lift is relative to control.</p>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Metric</th><th>Type</th><th class="num">Control</th><th class="num">Variant</th><th class="num">Lift</th><th class="num">Difference</th><th class="num">p-value</th><th class="num">95% CI</th><th>Verdict</th></tr></thead>
     <tbody>
       <tr class="primary">
-        <td>Conversion rate</td>
-        <td>Primary</td>
-        <td>4.300%</td>
-        <td>5.598%</td>
-        <td>+30.2%</td>
-        <td>+1.299 pp</td>
-        <td>&lt;0.001</td>
-        <td>+0.698 pp to +1.900 pp</td>
+        <td>Conversion rate<br><span class="sub">rate</span></td>
+        <td><span class="chip star">Primary &#9733;</span></td>
+        <td class="num ">4.300%</td>
+        <td class="num ">5.598%</td>
+        <td class="num pos">+30.2%</td>
+        <td class="num ">+1.299 pp</td>
+        <td class="num strong">&lt;0.001</td>
+        <td class="num wrap ">+0.698 pp to +1.900 pp</td>
         <td><span class="chip green">Significant improvement</span></td>
       </tr>
       <tr>
-        <td>Refund rate</td>
-        <td>Guardrail</td>
-        <td>0.606%</td>
-        <td>0.664%</td>
-        <td>+9.6%</td>
-        <td>+0.058 pp</td>
-        <td>&lt;0.001</td>
-        <td>-0.126 pp to +0.243 pp (90%)</td>
+        <td>Refund rate<br><span class="sub">rate</span></td>
+        <td><span class="chip red">Guardrail</span></td>
+        <td class="num ">0.606%</td>
+        <td class="num ">0.664%</td>
+        <td class="num neg">+9.6%</td>
+        <td class="num ">+0.058 pp</td>
+        <td class="num strong">&lt;0.001</td>
+        <td class="num wrap ">-0.126 pp to +0.243 pp (90%)</td>
         <td><span class="chip green">Passed</span></td>
       </tr>
       <tr>
-        <td>Add-to-cart rate</td>
-        <td>Secondary</td>
-        <td>12.465%</td>
-        <td>11.613%</td>
-        <td>-6.8%</td>
-        <td>-0.852 pp</td>
-        <td>0.064</td>
-        <td>-1.754 pp to +0.051 pp</td>
+        <td>Add-to-cart rate<br><span class="sub">rate</span></td>
+        <td><span class="chip grey">Secondary</span></td>
+        <td class="num ">12.465%</td>
+        <td class="num ">11.613%</td>
+        <td class="num neg">-6.8%</td>
+        <td class="num ">-0.852 pp</td>
+        <td class="num strong">0.064</td>
+        <td class="num wrap ">-1.754 pp to +0.051 pp</td>
         <td><span class="chip grey">Neutral</span></td>
       </tr>
       <tr>
-        <td>Orders per user</td>
-        <td>Secondary</td>
-        <td>0.050</td>
-        <td>0.065</td>
-        <td>+28.6%</td>
-        <td>+0.014</td>
-        <td>&lt;0.001</td>
-        <td>+0.007 to +0.022</td>
+        <td>Orders per user<br><span class="sub">continuous</span></td>
+        <td><span class="chip grey">Secondary</span></td>
+        <td class="num ">0.050</td>
+        <td class="num ">0.065</td>
+        <td class="num pos">+28.6%</td>
+        <td class="num ">+0.014</td>
+        <td class="num strong">&lt;0.001</td>
+        <td class="num wrap ">+0.007 to +0.022</td>
         <td><span class="chip green">Win</span></td>
       </tr>
     </tbody>
-  </table></div>
-<h3>Notes on the results</h3><p>Add-to-cart rate moved down from 12.46% to 11.61% (-6.8%), which is not significant (p = 0.064). The banner only appears once an item is in the cart, so we do not expect it to change add-to-cart, and we treat this as noise. We will keep watching it after launch.</p>
-<p>The refund allowance in the plan (up to double the baseline) was generous. The observed rise is small, so it does not change the decision, but a tighter allowance would be better for future tests.</p>
+  </table>
+  </div>
+<div class="callout" style="margin-top:1rem"><h3>Notes on the results</h3><p>Add-to-cart rate moved down from 12.46% to 11.61% (-6.8%), which is not significant (p = 0.064). The banner only appears once an item is in the cart, so we do not expect it to change add-to-cart, and we treat this as noise. We will keep watching it after launch.</p>
+<p>The refund allowance in the plan (up to double the baseline) was generous. The observed rise is small, so it does not change the decision, but a tighter allowance would be better for future tests.</p></div>
   <div class="checks">
-    <div class="card">
+    <div class="card check">
       <div class="label">Balance check</div>
-      <span class="chip green">Balanced</span>
+      <span class="chip big green">Balanced</span>
       <p>Chi-square p = 19.32%.
 Users are split evenly between control and variant (9,908 and 10,092).
 </p>
     </div>
-    <div class="card">
+    <div class="card check">
       <div class="label">Placebo A/A check</div>
-      <span class="chip green">Passed</span>
+      <span class="chip big green">Passed</span>
       <p>The test behaves correctly on your data. In 200 random splits of your control users into two identical groups of 9,908, the test found a difference 6.5% of the time (expected about 5%, normal range 1.5% to 9.5%).</p>
     </div>
   </div>
 
-  <h2>Charts for Conversion rate</h2>
+  <div class="kicker">Charts</div>
+  <h2>Conversion rate over time</h2>
   <div class="charts">
-    <div class="chart-card"><h3>Control and variant over time</h3><div class="chart" id="chart-time"></div></div>
-    <div class="chart-card"><h3>Difference over time, with its 95% range</h3><div class="chart" id="chart-difference"></div></div>
+    <div class="card chart-card"><h3>Control and variant over time</h3><div class="chart" id="chart-time"></div></div>
+    <div class="card chart-card"><h3>Difference over time, with its 95% range</h3><div class="chart" id="chart-difference"></div></div>
   </div>
   <p class="note">Charts are drawn from the tool's own chart definitions, so they match the tool exactly.</p>
 
-  <h2>Experiment design</h2>
+  <div class="kicker">Design</div>
+  <h2>How the test was set up</h2>
   <p class="note">From the design doc written before launch.</p>
+  <div class="edd">
   <details open><summary>Audience</summary><ul><li><strong>Who is in:</strong> All shoppers with at least one item in the cart, in all countries where the store ships.</li><li><strong>Where they enter:</strong> The first time the cart page is shown during the test.</li><li><strong>Split:</strong> 50 / 50.</li><li><strong>Sample size:</strong> About 5,200 shoppers per group (about 10,400 in total), for 80% power at a 5% two-sided significance level. Expected traffic is about 20,000 shoppers, so the test is not short of users.</li></ul></details>
   <details open><summary>Metrics</summary><h3>Primary</h3>
 <table><thead><tr><th>Metric</th><th>Baseline</th><th>Minimum detectable effect</th></tr></thead><tbody><tr><td>Conversion rate</td><td>3.7%</td><td>+30% relative (+1.1 percentage points)</td></tr></tbody></table>
@@ -183,14 +272,21 @@ Users are split evenly between control and variant (9,908 and 10,092).
 <p><strong>Do not ship if:</strong> The primary metric shows a significant decline, or the refund guardrail fails.</p>
 <p><strong>Otherwise:</strong> Extend the test if the result is unclear and traffic allows. If it is still unclear, do not ship and redesign the offer.</p></details>
   <details ><summary>Kill switch</summary><p>Stop the test if the balance check shows a broken split, or if refunds rise to more than double the baseline.</p></details>
-  <details ><summary>Visible changes</summary><p><strong>Control:</strong> The cart page with no shipping message until the final step.</p>
-<p><strong>Variant:</strong> The same cart page with a green "Free shipping on orders over $50" banner above the product list.</p></details>
   <details ><summary>Risks and dependencies</summary><ul><li><strong>Risks:</strong> Fewer shoppers might add to the cart if the offer feels like a catch (watched through add-to-cart rate). Free shipping may attract smaller orders (watched through orders per user). Refunds could rise if the offer brings in less certain buyers (guardrail).</li><li><strong>Dependencies:</strong> The shipping team confirms the offer can be shown at the cart for the whole test.</li></ul></details>
+  </div>
 
-  <h2>Conclusion</h2>
-  <div class="decision"><span class="big">Decision</span><span class="chip green">Ship</span></div>
-<h3>Key findings</h3><ul><li><strong>Primary metric:</strong> conversion rate rose 30.2%, from 4.30% to 5.60%. The 95% interval for the difference is +0.70 pp to +1.90 pp, so even the low end is a real gain. The lift matches the 30% we planned for.</li><li><strong>More orders per shopper:</strong> orders per user rose 28.6% (p &lt; 0.001), so the extra conversions did not come from smaller, more frequent baskets.</li><li><strong>Guardrail passed:</strong> the refund rate moved from 0.61% to 0.66%, well inside the allowance of up to double the baseline.</li><li><strong>Checks passed:</strong> the split was balanced (p = 19.3%) and the placebo A/A check found a false difference 6.5% of the time, inside the normal range for a 5% test.</li></ul>  <h3>Recommendation</h3>
-  <p>Ship the banner to 100% of shoppers with items in the cart. Watch add-to-cart rate and refund rate for two weeks after launch. For the next free-shipping test, set a tighter refund guardrail.</p>
+  <div class="kicker">Conclusion</div>
+  <h2>Summary and recommendation</h2>
+  <ol class="findings">
+    <li><span class="n">1</span><div><span class="lead">Primary metric:</span> conversion rate rose 30.2%, from 4.30% to 5.60%. The 95% interval for the difference is +0.70 pp to +1.90 pp, so even the low end is a real gain. The lift matches the 30% we planned for.</div></li>
+    <li><span class="n">2</span><div><span class="lead">More orders per shopper:</span> orders per user rose 28.6% (p &lt; 0.001), so the extra conversions did not come from smaller, more frequent baskets.</div></li>
+    <li><span class="n">3</span><div><span class="lead">Guardrail passed:</span> the refund rate moved from 0.61% to 0.66%, well inside the allowance of up to double the baseline.</div></li>
+    <li><span class="n">4</span><div><span class="lead">Checks passed:</span> the split was balanced (p = 19.3%) and the placebo A/A check found a false difference 6.5% of the time, inside the normal range for a 5% test.</div></li>
+  </ol>
+  <div class="decision green">
+    <div class="head"><span class="chip big green">Ship</span><span class="title">Strong primary win, guardrail clear</span></div>
+    <p>Ship the banner to 100% of shoppers with items in the cart. Watch add-to-cart rate and refund rate for two weeks after launch. For the next free-shipping test, set a tighter refund guardrail.</p>
+  </div>
 
   <footer>Synthetic demo data. Results exported from the experiment tool on 2026-10-04. Part of the P2 Experiment Platform demo.</footer>
 </main>

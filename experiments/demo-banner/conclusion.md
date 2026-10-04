@@ -1,6 +1,7 @@
 # demo-banner: Conclusion
 
 - **Decision:** Ship
+- **Headline:** Strong primary win, guardrail clear
 - **DS:** Priya (fictional)
 - **Date of report:** 2026-10-04
 

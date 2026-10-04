@@ -56,34 +56,47 @@ def fmt_p(p) -> str:
     return "" if p is None else ("<0.001" if p < 0.001 else f"{p:.3f}")
 
 
-def _results_table(data: dict) -> tuple[list[str], list[dict]]:
-    """(column names, rows) of the results table; each row is a list of cells {text, tone?}."""
+ROLE_TONE = {"primary": "star", "secondary": "grey", "guardrail": "red"}
+
+
+def lift_class(m: dict) -> str:
+    """pos when the variant moved the good way, neg when it moved the bad way, flat when it barely moved (a lower-is-better metric flips)."""
+    lift = m["lift"]
+    if lift is None or abs(lift) < 0.005:
+        return "flat"
+    return "pos" if (lift > 0) == (m["good_direction"] == "higher") else "neg"
+
+
+def _results_table(data: dict) -> tuple[list[dict], list[dict]]:
+    """(columns, rows) of the results table. A column is {name, num} (num: right-aligned numbers); a cell is {text, num?, cls?, tone?, sub?, star?}."""
     bayes = data["experiment"]["method"] == "bayesian"
-    head = ["Metric", "Role", "Control", "Variant", "Lift"]
-    head += (["Chance variant wins", "Expected difference", "95% credible interval", "Risk: ship variant", "Risk: keep control", "Chance of harm"]
-             if bayes else ["Difference", "p-value", "95% CI"])
-    head += ["Verdict"]
+    head = [("Metric", False), ("Type", False), ("Control", True), ("Variant", True), ("Lift", True)]
+    head += ([("Chance to win", True), ("Difference (95% interval)", True), ("Risk if ship", True), ("Risk if keep", True),
+              ("Chance of harm", True)] if bayes else [("Difference", True), ("p-value", True), ("95% CI", True)])
+    head += [("Verdict", False)]
     rows = []
     for m in data["metrics"]:
         kind = m["type"]
-        cells = [{"text": m["name"]}, {"text": m["role"].capitalize()}, {"text": fmt_value(kind, m["control"])},
-                 {"text": fmt_value(kind, m["variant"])}, {"text": "" if m["lift"] is None else f"{m['lift'] * 100:+.1f}%"}]
+        num = lambda text, **kw: {"text": text, "num": True, **kw}
+        cells = [{"text": m["name"], "sub": kind}, {"text": m["role"].capitalize(), "chip": ROLE_TONE[m["role"]], "star": m["role"] == "primary"},
+                 num(fmt_value(kind, m["control"])), num(fmt_value(kind, m["variant"])),
+                 num("" if m["lift"] is None else f"{m['lift'] * 100:+.1f}%", cls=lift_class(m))]
         guard = m["role"] == "guardrail"
         if bayes:
             has = m.get("chance_to_win") is not None
-            cells += [{"text": f"{m['chance_to_win'] * 100:.1f}%" if has else ""},
-                      {"text": fmt_value(kind, m.get("expected_difference"), True) if has else ""},
-                      {"text": f"{fmt_value(kind, m['ci_low'], True)} to {fmt_value(kind, m['ci_high'], True)}" if has else ""},
-                      {"text": "" if guard or not has else fmt_loss(kind, m["risk_variant"])},
-                      {"text": "" if guard or not has else fmt_loss(kind, m["risk_control"])},
-                      {"text": f"{m['chance_of_harm'] * 100:.1f}%" if guard and m.get("chance_of_harm") is not None else ""}]
+            cells += [num(f"{m['chance_to_win'] * 100:.1f}%" if has else "", cls="strong"),
+                      num(fmt_value(kind, m.get("expected_difference"), True) if has else "",
+                          sub2=f"{fmt_value(kind, m['ci_low'], True)} to {fmt_value(kind, m['ci_high'], True)}" if has else ""),
+                      num("" if guard or not has else fmt_loss(kind, m["risk_variant"])),
+                      num("" if guard or not has else fmt_loss(kind, m["risk_control"])),
+                      num(f"{m['chance_of_harm'] * 100:.1f}%" if guard and m.get("chance_of_harm") is not None else "")]
         else:
             level = "" if m.get("ci_level") in (None, 0.95) else f" ({m['ci_level'] * 100:.0f}%)"
-            cells += [{"text": fmt_value(kind, m["difference"], True)}, {"text": fmt_p(m.get("p_value"))},
-                      {"text": (f"{fmt_value(kind, m['ci_low'], True)} to {fmt_value(kind, m['ci_high'], True)}{level}") if m.get("ci_low") is not None else ""}]
+            cells += [num(fmt_value(kind, m["difference"], True)), num(fmt_p(m.get("p_value")), cls="strong"),
+                      num((f"{fmt_value(kind, m['ci_low'], True)} to {fmt_value(kind, m['ci_high'], True)}{level}") if m.get("ci_low") is not None else "", wrap=True)]
         cells.append({"text": m["label"], "tone": tone(m["label"])})
         rows.append({"cells": cells, "primary": m["role"] == "primary"})
-    return head, rows
+    return [{"name": n, "num": k} for n, k in head], rows
 
 
 def _read_doc(path: Path, required: list[str], what: str) -> md.Doc:
@@ -108,6 +121,14 @@ def build_context(folder: Path) -> dict:
     sample = data["sample"]
     period = f"{exp['launch_date']} to {exp['end_date']} ({(date.fromisoformat(exp['end_date']) - date.fromisoformat(exp['launch_date'])).days + 1} days)"
     secondary = [m for m in data["metrics"] if m["role"] == "secondary"]
+    changes = md.fields(edd.sections["Visible changes"])
+    compare = None
+    if changes.get("Control") and changes.get("Variant"):             # shown side by side; otherwise the section stays in the design details
+        pm_row = next(m for m in data["metrics"] if m["role"] == "primary")
+        compare = {"control": md.inline(changes["Control"]), "variant": md.inline(changes["Variant"]), "metric": pm_row["name"],
+                   "n_control": f"{sample['n_control']:,}", "n_variant": f"{sample['n_variant']:,}",
+                   "v_control": fmt_value(pm_row["type"], pm_row["control"]), "v_variant": fmt_value(pm_row["type"], pm_row["variant"]),
+                   "lift": "" if pm_row["lift"] is None else f"{pm_row['lift'] * 100:+.1f}%", "lift_cls": lift_class(pm_row)}
     return {
         "id": exp["id"], "name": exp["name"], "method": exp["method"].capitalize(), "bayesian": exp["method"] == "bayesian",
         "question": overview.get("Product hypothesis (TL;DR)", ""),
@@ -121,11 +142,16 @@ def build_context(folder: Path) -> dict:
                   ("Product context", f"{REPO}/blob/main/products/{exp['product']}.md")],
         "background": [(name, md.to_html(edd.sections[name])) for name in ("Overview", "Problem and opportunity", "Hypothesis", "Evidence")],
         "design": [(name, md.to_html(edd.sections[name])) for name in ("Audience", "Metrics", "Analysis plan", "Decision criteria", "Kill switch",
-                                                                      "Visible changes", "Risks and dependencies")],
+                                                                      "Visible changes", "Risks and dependencies") if not (compare and name == "Visible changes")],
+        "compare": compare,
         "table_head": head, "table_rows": rows, "label_rule": data["label_rule"] if secondary else "",
+        "legend": ("Chance to win: the chance the variant is better. Risk if ship: the average loss if we ship the variant and it is actually worse. "
+                   "Risk if keep: the average loss if we keep control and the variant was actually better. Chance of harm (guardrails): the chance the "
+                   "metric got worse by more than the margin.") if exp["method"] == "bayesian" else "",
         "balance": balance, "balance_p": f"{balance['p_value'] * 100:.2f}%", "placebo": placebo,
         "charts": data["charts"], "charts_json": json.dumps({c["key"]: c["spec"] for c in data["charts"]}).replace("</", "<\\/"),
-        "findings": md.to_html(concl.sections["Key findings"]) if concl.sections.get("Key findings") else "",
+        "findings": [{"lead": lead, "body": md.inline(rest)} for lead, rest in (md.lead_and_rest(b) for b in md.bullets(concl.sections.get("Key findings", "")))],
+        "headline": concl.header.get("Headline", ""),
         "notes": md.to_html(concl.sections["Notes on the results"]) if concl.sections.get("Notes on the results") else "",
         "recommendation": md.to_html(concl.sections["Recommendation"]), "exported_on": data["exported_on"],
         "through": data["through_date"],
